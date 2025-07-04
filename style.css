@@ -39,3 +39,27 @@ h1 {
     border-left: 4px solid #ff9800;
     padding: 10px;
 }
+
+#leftPanel {
+    float: left;
+    width: 250px;
+    padding-right: 20px;
+}
+#mainPanel {
+    margin-left: 270px;
+}
+.statBlock, .skillBlock {
+    margin-bottom: 10px;
+}
+.barContainer {
+    background: #ddd;
+    border-radius: 4px;
+    height: 10px;
+    width: 100%;
+    margin-top: 2px;
+}
+.barFill {
+    background: #4caf50;
+    height: 100%;
+    border-radius: 4px;
+}

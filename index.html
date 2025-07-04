@@ -7,14 +7,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game">
-        <h1>Dragon Ball Loops</h1>
-        <div id="loopDisplay">Loop: 0</div>
-        <div id="zoneDisplay" style="margin-top: 10px;"></div>
-        <div id="actionPanel" style="margin-top: 20px;"></div>
-        <div id="queueBox" style="margin-top:20px;"></div>
-        <div id="storyBox" style="margin-top: 20px;"></div>
-        <button onclick="nextLoop()" style="margin-top: 20px;">Next Loop</button>
+    <div id="leftPanel">
+        <h3>Stats</h3>
+        <div class="statBlock">Strength: <div class="barContainer"><div id="strBar" class="barFill" style="width:0%"></div></div></div>
+        <div class="statBlock">Speed: <div class="barContainer"><div id="spdBar" class="barFill" style="width:0%"></div></div></div>
+        <div class="statBlock">Intelligence: <div class="barContainer"><div id="intBar" class="barFill" style="width:0%"></div></div></div>
+        <h3>Skills</h3>
+        <div class="skillBlock">Martial Arts: <div class="barContainer"><div id="martialBar" class="barFill" style="width:0%"></div></div></div>
+        <div class="skillBlock">Ki Control: <div class="barContainer"><div id="kiBar" class="barFill" style="width:0%"></div></div></div>
+    </div>
+    <div id="mainPanel">
+        <div id="game">
+            <h1>Dragon Ball Loops</h1>
+            <div id="loopDisplay">Loop: 0</div>
+            <div id="zoneDisplay" style="margin-top: 10px;"></div>
+            <div id="actionPanel" style="margin-top: 20px;"></div>
+            <div id="queueControls" style="margin-top: 20px;">
+                <button onclick="clearQueue()">Clear Queue</button>
+                <button onclick="repeatLast()">Repeat Last</button>
+            </div>
+            <div id="queueBox" style="margin-top:20px;"></div>
+            <div id="storyBox" style="margin-top: 20px;"></div>
+            <button onclick="nextLoop()" style="margin-top: 20px;">Next Loop</button>
+        </div>
     </div>
     <script src="game.js"></script>
     <script src="zones.js"></script>

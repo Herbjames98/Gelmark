@@ -6,6 +6,18 @@ let currentStory = [];
 let power = 0;
 let queue = [];
 let queueInterval = null;
+let lastAction = null;
+
+// Stats and skills
+let stats = {
+    strength: 0,
+    speed: 0,
+    intelligence: 0
+};
+let skills = {
+    martialArts: 0,
+    kiControl: 0
+};
 
 function updateDisplay() {
     document.getElementById('loopDisplay').textContent = "Loop: " + loop + " | Power: " + power;
@@ -14,11 +26,20 @@ function updateDisplay() {
         "<button onclick='queueAction(" + i + ")'>" + a.name + "</button>").join("");
     updateStoryBox();
     updateQueueBox();
+    updateStatsUI();
+}
+
+function updateStatsUI() {
+    document.getElementById('strBar').style.width = stats.strength + "%";
+    document.getElementById('spdBar').style.width = stats.speed + "%";
+    document.getElementById('intBar').style.width = stats.intelligence + "%";
+    document.getElementById('martialBar').style.width = skills.martialArts + "%";
+    document.getElementById('kiBar').style.width = skills.kiControl + "%";
 }
 
 function nextLoop() {
     loop++;
-    power += 5; // base power growth
+    power += 5;
     if (loop in storyTriggers) {
         const storyKey = storyTriggers[loop];
         unlockStory(storyKey);
@@ -40,9 +61,25 @@ function updateStoryBox() {
 function queueAction(index) {
     const action = actions[index];
     queue.push({...action});
+    lastAction = {...action};
     updateQueueBox();
     if (!queueInterval) {
         processQueue();
+    }
+}
+
+function clearQueue() {
+    queue = [];
+    updateQueueBox();
+}
+
+function repeatLast() {
+    if (lastAction) {
+        queue.push({...lastAction});
+        updateQueueBox();
+        if (!queueInterval) {
+            processQueue();
+        }
     }
 }
 
@@ -65,6 +102,15 @@ function processQueue() {
     setTimeout(() => {
         unlockStory(action.storyKey);
         power += action.powerGain || 0;
+
+        // Apply stat/skill growth
+        if (action.effects) {
+            for (let stat in action.effects) {
+                if (stats[stat] !== undefined) stats[stat] += action.effects[stat];
+                if (skills[stat] !== undefined) skills[stat] += action.effects[stat];
+            }
+        }
+
         queue.shift();
         updateDisplay();
         processQueue();
