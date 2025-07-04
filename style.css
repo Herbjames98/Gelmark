@@ -1,20 +1,41 @@
 
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f0f0f0;
-    color: #222;
-    padding: 20px;
+    background-color: #e4ece5;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    color: black;
 }
 #game {
-    max-width: 800px;
-    margin: auto;
-    background: #fff;
+    margin: 40px auto;
+    max-width: 900px;
+    background: #ffffff;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#zoneDisplay div, #actionPanel button {
+    display: inline-block;
+    margin: 4px;
+    padding: 8px 12px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background: #ddd;
+    cursor: pointer;
+}
+#actionPanel button:hover {
+    background: #ccc;
 }
 #storyBox {
     margin-top: 20px;
-    background: #eee;
-    padding: 10px;
+    background: #ffffdd;
     border-left: 4px solid #ff9800;
+    padding: 10px;
 }
