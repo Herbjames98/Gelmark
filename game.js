@@ -1,57 +1,37 @@
 
-let loop = 0;
-let power = 0;
-let currentStory = [];
-let queue = [];
-let lastAction = null;
+let focusAvailable = 100;
+let stats = { str: 0, spd: 0, ki: 0 };
+let assigned = { str: 0, spd: 0, ki: 0 };
 
 function updateDisplay() {
-    document.getElementById('loopDisplay').textContent = "Loop: " + loop + " | Power: " + power;
-    document.getElementById('zoneDisplay').innerHTML = zones.map(z => "<div>" + z.name + "</div>").join("");
-    document.getElementById('actionPanel').innerHTML = actions.map((a, i) =>
-        "<button onclick='queueAction(" + i + ")'>" + a.name + "</button>").join("");
-    document.getElementById('queueBox').innerHTML = queue.map(a => "<div>" + a.name + "</div>").join("");
-    document.getElementById('storyBox').innerHTML = currentStory.map(s => "<p>" + s + "</p>").join("");
+    document.getElementById("focusCount").textContent = focusAvailable;
+    document.getElementById("strStat").textContent = stats.str;
+    document.getElementById("spdStat").textContent = stats.spd;
+    document.getElementById("kiStat").textContent = stats.ki;
 }
 
-function nextLoop() {
-    loop++;
-    if (loop in storyTriggers) {
-        currentStory.push(storyDatabase[storyTriggers[loop]]);
+function assignProjections() {
+    let strVal = parseInt(document.getElementById("strInput").value) || 0;
+    let spdVal = parseInt(document.getElementById("spdInput").value) || 0;
+    let kiVal = parseInt(document.getElementById("kiInput").value) || 0;
+    let total = strVal + spdVal + kiVal;
+
+    if (total > focusAvailable) {
+        alert("Not enough focus!");
+        return;
     }
+
+    assigned = { str: strVal, spd: spdVal, ki: kiVal };
+    focusAvailable -= total;
     updateDisplay();
 }
 
-function queueAction(i) {
-    const action = actions[i];
-    queue.push({...action});
-    lastAction = {...action};
-    processQueue();
+function trainingTick() {
+    stats.str += assigned.str;
+    stats.spd += assigned.spd;
+    stats.ki += assigned.ki;
     updateDisplay();
 }
 
-function repeatLast() {
-    if (lastAction) {
-        queue.push({...lastAction});
-        processQueue();
-        updateDisplay();
-    }
-}
-
-function clearQueue() {
-    queue = [];
-    updateDisplay();
-}
-
-function processQueue() {
-    if (queue.length === 0) return;
-    const action = queue.shift();
-    setTimeout(() => {
-        power += action.powerGain || 0;
-        currentStory.push(storyDatabase[action.storyKey]);
-        updateDisplay();
-        processQueue();
-    }, action.duration);
-}
-
+setInterval(trainingTick, 1000);
 window.onload = updateDisplay;

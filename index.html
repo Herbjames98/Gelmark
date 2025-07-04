@@ -3,40 +3,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dragon Ball Loops: Mount Paozu</title>
+    <title>Mind Training - Mount Paozu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="topBar">
-        <div id="loopDisplay">Loop: 0</div>
-        <div id="powerDisplay">Power: 0</div>
+    <h1>Mount Paozu: Mental Image Training</h1>
+    <div id="focusBar">Focus Available: <span id="focusCount">100</span></div>
+
+    <div class="statPanel">
+        <div>Strength: <span id="strStat">0</span></div>
+        <div>Speed: <span id="spdStat">0</span></div>
+        <div>Ki: <span id="kiStat">0</span></div>
     </div>
 
-    <div id="mainContainer">
-        <div id="leftPanel">
-            <h2>Training Actions</h2>
-            <div id="actionList"></div>
+    <h2>Assign Mental Projections</h2>
+    <div class="assignments">
+        <div>
+            <span>Visualize Pushups (STR)</span>
+            <input type="number" id="strInput" value="0" min="0">
         </div>
-
-        <div id="centerPanel">
-            <h2>Queue</h2>
-            <div id="queueBox"></div>
-            <div id="controls">
-                <button onclick="clearQueue()">Clear</button>
-                <button onclick="repeatLast()">Repeat</button>
-                <button onclick="nextLoop()">Loop</button>
-            </div>
+        <div>
+            <span>Visualize Sprinting (SPD)</span>
+            <input type="number" id="spdInput" value="0" min="0">
         </div>
-
-        <div id="rightPanel">
-            <h2>Story</h2>
-            <div id="storyBox"></div>
+        <div>
+            <span>Ki Charge Meditation (KI)</span>
+            <input type="number" id="kiInput" value="0" min="0">
         </div>
     </div>
 
-    <script src="zones.js"></script>
-    <script src="actions.js"></script>
-    <script src="story.js"></script>
+    <button onclick="assignProjections()">Assign Focus</button>
+
     <script src="game.js"></script>
 </body>
 </html>
