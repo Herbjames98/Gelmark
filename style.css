@@ -1,82 +1,45 @@
 
 body {
+    font-family: Arial, sans-serif;
     background-color: #e4ece5;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
     margin: 0;
     padding: 0;
-    user-select: none;
-    color: black;
 }
-#game {
-    margin: 40px auto;
-    max-width: 900px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-h1 {
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 20px;
-}
-#zoneDisplay div, #actionPanel button {
-    display: inline-block;
-    margin: 4px;
-    padding: 8px 12px;
-    border: 1px solid #999;
-    border-radius: 4px;
-    background: #ddd;
-    cursor: pointer;
-}
-#actionPanel button:hover {
-    background: #ccc;
-}
-#storyBox {
-    margin-top: 20px;
-    background: #ffffdd;
-    border-left: 4px solid #ff9800;
+
+#topBar {
+    background-color: #2c3e50;
+    color: white;
     padding: 10px;
-}
-
-#leftPanel {
-    float: left;
-    width: 250px;
-    padding-right: 20px;
-}
-#mainPanel {
-    margin-left: 270px;
-}
-.statBlock, .skillBlock {
-    margin-bottom: 10px;
-}
-.barContainer {
-    background: #ddd;
-    border-radius: 4px;
-    height: 10px;
-    width: 100%;
-    margin-top: 2px;
-}
-.barFill {
-    background: #4caf50;
-    height: 100%;
-    border-radius: 4px;
-}
-
-.statLabel {
-    display: flex;
-    justify-content: space-between;
+    text-align: center;
     font-weight: bold;
 }
-.actionIcons img {
-    height: 24px;
-    vertical-align: middle;
-    margin-right: 5px;
+
+#mainContainer {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
 }
-.controlGroup {
-    margin-top: 10px;
+
+#leftPanel, #centerPanel, #rightPanel {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+    min-height: 400px;
+    overflow-y: auto;
 }
-input[type="number"] {
-    width: 40px;
+
+button {
+    padding: 8px 12px;
+    margin: 5px;
+    background-color: #3498db;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2980b9;
 }

@@ -1,7 +1,7 @@
 
 zones = [
-    { name: "Mount Paozu" },
-    { name: "Kame House" },
-    { name: "Red Ribbon HQ" },
-    { name: "Kami's Lookout" }
+    {
+        name: "Mount Paozu",
+        actions: [0, 1, 2]
+    }
 ];

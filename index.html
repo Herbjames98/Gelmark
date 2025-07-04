@@ -3,55 +3,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dragon Ball Loops</title>
+    <title>Dragon Ball Loops: Mount Paozu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="leftPanel">
-        <h3>Stats</h3>
-        <div class="statBlock">Strength: <div class="barContainer"><div id="strBar" class="barFill" style="width:0%"></div></div></div>
-        <div class="statBlock">Speed: <div class="barContainer"><div id="spdBar" class="barFill" style="width:0%"></div></div></div>
-        <div class="statBlock">Intelligence: <div class="barContainer"><div id="intBar" class="barFill" style="width:0%"></div></div></div>
-        <h3>Skills</h3>
-        <div class="skillBlock">Martial Arts: <div class="barContainer"><div id="martialBar" class="barFill" style="width:0%"></div></div></div>
-        <div class="skillBlock">Ki Control: <div class="barContainer"><div id="kiBar" class="barFill" style="width:0%"></div></div></div>
+    <div id="topBar">
+        <div id="loopDisplay">Loop: 0</div>
+        <div id="powerDisplay">Power: 0</div>
     </div>
-    <div id="mainPanel">
-        <div id="game">
-<div id="infoBar" style="text-align: right; font-size: 0.9em;">
-    Mana: <span id="mana">0</span> | Gold: <span id="gold">0</span>
-    <label><input type="checkbox" id="pauseBeforeRestart"> Pause before restart</label>
-</div>
 
-            <h1>Dragon Ball Loops</h1>
-            <div id="loopDisplay">Loop: 0</div>
-            <div id="zoneDisplay" style="margin-top: 10px;"></div>
-            <div id="actionPanel" style="margin-top: 20px;"></div>
-            
-    <div class="controlGroup">
-        Amount: <button onclick="setAmount(1)">1</button>
-        <button onclick="setAmount(5)">5</button>
-        <button onclick="setAmount(10)">10</button>
-        <input type="number" id="customAmount" value="1" onchange="updateAmount()">
-    </div>
-    <div class="controlGroup">
-        <label><input type="checkbox" id="keepActive"> Keep active</label>
-        <label><input type="checkbox" id="repeatLast"> Repeat last</label>
-        <label><input type="checkbox" id="addToTop"> Add to top</label>
-    </div>
-    <div class="controlGroup">
- style="margin-top: 20px;">
-                <button onclick="clearQueue()">Clear Queue</button>
-                <button onclick="repeatLast()">Repeat Last</button>
+    <div id="mainContainer">
+        <div id="leftPanel">
+            <h2>Training Actions</h2>
+            <div id="actionList"></div>
+        </div>
+
+        <div id="centerPanel">
+            <h2>Queue</h2>
+            <div id="queueBox"></div>
+            <div id="controls">
+                <button onclick="clearQueue()">Clear</button>
+                <button onclick="repeatLast()">Repeat</button>
+                <button onclick="nextLoop()">Loop</button>
             </div>
-            <div id="queueBox" style="margin-top:20px;"></div>
-            <div id="storyBox" style="margin-top: 20px;"></div>
-            <button onclick="nextLoop()" style="margin-top: 20px;">Next Loop</button>
+        </div>
+
+        <div id="rightPanel">
+            <h2>Story</h2>
+            <div id="storyBox"></div>
         </div>
     </div>
-    <script src="game.js"></script>
+
     <script src="zones.js"></script>
     <script src="actions.js"></script>
     <script src="story.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
