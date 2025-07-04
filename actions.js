@@ -2,14 +2,20 @@
 actions = [
     {
         name: "Nimbus Trial",
-        onClick: "unlockStory('flyingNimbus')"
+        storyKey: "flyingNimbus",
+        duration: 3000,
+        powerGain: 10
     },
     {
         name: "Train with Roshi",
-        onClick: "unlockStory('kameTraining')"
+        storyKey: "kameTraining",
+        duration: 5000,
+        powerGain: 15
     },
     {
         name: "Explore Red Ribbon HQ",
-        onClick: "unlockStory('redRibbon')"
+        storyKey: "redRibbon",
+        duration: 4000,
+        powerGain: 12
     }
 ];
