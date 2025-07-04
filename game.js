@@ -120,3 +120,62 @@ function processQueue() {
 window.onload = () => {
     updateDisplay();
 }
+
+
+
+let actionQueue = [];
+let mana = 0;
+let gold = 0;
+let amount = 1;
+
+function setAmount(val) {
+    amount = val;
+    document.getElementById("customAmount").value = val;
+}
+
+function updateAmount() {
+    amount = parseInt(document.getElementById("customAmount").value) || 1;
+}
+
+function updateStats() {
+    document.getElementById("mana").textContent = mana;
+    document.getElementById("gold").textContent = gold;
+}
+
+function queueAction(action) {
+    for (let i = 0; i < amount; i++) {
+        if (document.getElementById("addToTop").checked) {
+            actionQueue.unshift(action);
+        } else {
+            actionQueue.push(action);
+        }
+    }
+    renderQueue();
+}
+
+function renderQueue() {
+    const queueDiv = document.getElementById("queue");
+    queueDiv.innerHTML = "";
+    for (let act of actionQueue) {
+        const div = document.createElement("div");
+        div.textContent = act;
+        queueDiv.appendChild(div);
+    }
+}
+
+document.getElementById("customAmount").addEventListener("change", updateAmount);
+document.getElementById("repeatLast").addEventListener("change", () => {});
+document.getElementById("keepActive").addEventListener("change", () => {});
+document.getElementById("addToTop").addEventListener("change", () => {});
+
+function clearQueue() {
+    actionQueue = [];
+    renderQueue();
+}
+
+function nextLoop() {
+    // Placeholder loop logic
+    gold += 1;
+    mana += 2;
+    updateStats();
+}

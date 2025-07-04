@@ -18,11 +18,29 @@
     </div>
     <div id="mainPanel">
         <div id="game">
+<div id="infoBar" style="text-align: right; font-size: 0.9em;">
+    Mana: <span id="mana">0</span> | Gold: <span id="gold">0</span>
+    <label><input type="checkbox" id="pauseBeforeRestart"> Pause before restart</label>
+</div>
+
             <h1>Dragon Ball Loops</h1>
             <div id="loopDisplay">Loop: 0</div>
             <div id="zoneDisplay" style="margin-top: 10px;"></div>
             <div id="actionPanel" style="margin-top: 20px;"></div>
-            <div id="queueControls" style="margin-top: 20px;">
+            
+    <div class="controlGroup">
+        Amount: <button onclick="setAmount(1)">1</button>
+        <button onclick="setAmount(5)">5</button>
+        <button onclick="setAmount(10)">10</button>
+        <input type="number" id="customAmount" value="1" onchange="updateAmount()">
+    </div>
+    <div class="controlGroup">
+        <label><input type="checkbox" id="keepActive"> Keep active</label>
+        <label><input type="checkbox" id="repeatLast"> Repeat last</label>
+        <label><input type="checkbox" id="addToTop"> Add to top</label>
+    </div>
+    <div class="controlGroup">
+ style="margin-top: 20px;">
                 <button onclick="clearQueue()">Clear Queue</button>
                 <button onclick="repeatLast()">Repeat Last</button>
             </div>
