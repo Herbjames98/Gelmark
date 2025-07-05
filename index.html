@@ -1,42 +1,42 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Dragon Ball Loops: Mount Paozu</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>DragonLoops V1.1</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="topBar">
-        <div id="loopDisplay">Loop: 0</div>
-        <div id="powerDisplay">Power: 0</div>
+  <div class="container">
+    <div id="character-tab" class="panel character-panel">
+      <header>
+        <h2>
+          Character
+          <span id="focus-display">Focus: 0 / 100</span>
+        </h2>
+      </header>
+      <div class="character-menu">
+        <button class="character-tab-btn" data-target="stats">Stats</button>
+        <button class="character-tab-btn" data-target="skills">Skills</button>
+      </div>
     </div>
 
-    <div id="mainContainer">
-        <div id="leftPanel">
-            <h2>Training Actions</h2>
-            <div id="actionList"></div>
-        </div>
-
-        <div id="centerPanel">
-            <h2>Queue</h2>
-            <div id="queueBox"></div>
-            <div id="controls">
-                <button onclick="clearQueue()">Clear</button>
-                <button onclick="repeatLast()">Repeat</button>
-                <button onclick="nextLoop()">Loop</button>
-            </div>
-        </div>
-
-        <div id="rightPanel">
-            <h2>Story</h2>
-            <div id="storyBox"></div>
-        </div>
+    <div id="adventure-tab" class="panel adventure-panel">
+      <header><h2>Adventure</h2></header>
+      <div class="adventure-menu">
+        <button class="adventure-tab-btn" data-target="locations">Locations</button>
+      </div>
     </div>
 
-    <script src="zones.js"></script>
-    <script src="actions.js"></script>
-    <script src="story.js"></script>
-    <script src="game.js"></script>
+    <div id="action-panel" class="panel action-panel">
+      <header><h2>Character Info</h2></header>
+      <div id="character-content"></div>
+    </div>
+
+    <div id="upgrades-panel" class="panel upgrades-panel">
+      <header><h2>Adventure Info</h2></header>
+      <div id="adventure-content"></div>
+    </div>
+  </div>
+  <script src="game.js"></script>
 </body>
 </html>
