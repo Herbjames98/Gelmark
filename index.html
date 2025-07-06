@@ -56,6 +56,31 @@
       font-weight: bold;
       color: #ffcc00;
     }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 220px;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -70,23 +95,33 @@
   <div class="section">
     <h2>Tasks & Training</h2>
     <div>
-      <button id="cart">Push Cart</button>
+      <button id="cart" class="tooltip">Push Cart
+        <span class="tooltiptext">Manual labor boosts base stamina. “Once, carts were a rite of passage.”</span>
+      </button>
       <div class="xp-bar"><div class="xp-fill" id="xp-cart"></div></div>
     </div>
     <div>
-      <button id="rock">Break Rocks</button>
+      <button id="rock" class="tooltip">Break Rocks
+        <span class="tooltiptext">Increases raw power. “Every crack echoes the will of resistance.”</span>
+      </button>
       <div class="xp-bar"><div class="xp-fill" id="xp-rock"></div></div>
     </div>
     <div>
-      <button id="tunnel">Tunnel Duty</button>
+      <button id="tunnel" class="tooltip">Tunnel Duty
+        <span class="tooltiptext">Improves endurance. “Darkness teaches the value of light.”</span>
+      </button>
       <div class="xp-bar"><div class="xp-fill" id="xp-tunnel"></div></div>
     </div>
     <div>
-      <button id="shift">Night Shift</button>
+      <button id="shift" class="tooltip">Night Shift
+        <span class="tooltiptext">Trains resilience under stress. “Only those awake in the silence hear the truth.”</span>
+      </button>
       <div class="xp-bar"><div class="xp-fill" id="xp-shift"></div></div>
     </div>
     <div>
-      <button id="focus">Echo Meditation</button>
+      <button id="focus" class="tooltip">Echo Meditation
+        <span class="tooltiptext">Raises inner focus and crafting skill. “The stiller the mind, the louder the echoes.”</span>
+      </button>
       <div class="xp-bar"><div class="xp-fill" id="xp-focus"></div></div>
     </div>
   </div>
