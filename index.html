@@ -3,58 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DragonLoops: Echoform Training</title>
+  <title>DragonLoops: Echo Rebirth</title>
   <style>
-    body { font-family: sans-serif; background-color: #121212; color: #eee; padding: 20px; }
-    h2 { margin-top: 2em; }
-    .task, .stat { margin: 5px 0; }
-    .button { padding: 6px 12px; margin: 5px; background-color: #444; color: #fff; border: none; cursor: pointer; }
-    .button:hover { background-color: #666; }
-    .bar-container { background: #333; border: 1px solid #666; width: 300px; height: 20px; position: relative; }
-    .bar-fill { background: #76d7c4; height: 100%; width: 0%; }
-    .bar-label { position: absolute; top: 0; left: 5px; font-size: 0.8em; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0f0f0f;
+      color: #f0f0f0;
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 24px;
+      padding: 16px;
+      border: 1px solid #555;
+      border-radius: 12px;
+      background-color: #1a1a1a;
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #00ffff;
+    }
+    .stat-line {
+      margin: 8px 0;
+    }
+    .xp-bar {
+      background-color: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 14px;
+      margin-top: 4px;
+    }
+    .xp-fill {
+      background-color: #00ffaa;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease-in-out;
+    }
+    button {
+      padding: 10px 14px;
+      margin: 6px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00aaff;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #008fcc;
+    }
+    .stat-label {
+      font-weight: bold;
+      color: #ffcc00;
+    }
   </style>
 </head>
 <body>
-  <h1>DragonLoops: Mount Paozu Sector</h1>
 
-  <div id="stats">
-    <h2>Echoform Stats</h2>
-    <div class="stat">Sill: <span id="sill">100</span>/100</div>
-    <div class="stat">Gel-Essence: <span id="gel">50</span></div>
-    <div class="stat">Focus: <span id="focus">0</span></div>
+  <div class="section">
+    <h2>Core Stats</h2>
+    <div class="stat-line">Sill: <span id="sill">0</span></div>
+    <div class="stat-line">Gel-Essence: <span id="gel">0</span></div>
+    <div class="stat-line">Focus: <span id="focus">0</span></div>
   </div>
 
-  <h2>Training Tasks</h2>
-  <div id="tasks">
-    <button id="cart" class="button">Push Cart</button>
-    <button id="rock" class="button">Crack Rocks</button>
-    <button id="tunnel" class="button">Dig Tunnel</button>
-    <button id="shift" class="button">Lift Shift Totem</button>
-    <button id="focus" class="button">Channel Focus</button>
+  <div class="section">
+    <h2>Tasks & Training</h2>
+    <div>
+      <button id="cart">Push Cart</button>
+      <div class="xp-bar"><div class="xp-fill" id="xp-cart"></div></div>
+    </div>
+    <div>
+      <button id="rock">Break Rocks</button>
+      <div class="xp-bar"><div class="xp-fill" id="xp-rock"></div></div>
+    </div>
+    <div>
+      <button id="tunnel">Tunnel Duty</button>
+      <div class="xp-bar"><div class="xp-fill" id="xp-tunnel"></div></div>
+    </div>
+    <div>
+      <button id="shift">Night Shift</button>
+      <div class="xp-bar"><div class="xp-fill" id="xp-shift"></div></div>
+    </div>
+    <div>
+      <button id="focus">Echo Meditation</button>
+      <div class="xp-bar"><div class="xp-fill" id="xp-focus"></div></div>
+    </div>
   </div>
 
-  <h2>Hunts</h2>
-  <div id="hunts">
-    <button id="boar" class="button">Hunt Boar</button>
-    <button id="elk" class="button">Track Elk</button>
-    <button id="wolf" class="button">Fight Wolf</button>
-    <button id="lynx" class="button">Snare Lynx</button>
-    <button id="bear" class="button">Duel Bear</button>
+  <div class="section">
+    <h2>Progress Events</h2>
+    <button id="complete-ch7">Complete Chapter 7</button>
+    <button id="fight-boss">Fight Valking Captain</button>
   </div>
-
-  <h2>Progress</h2>
-  <div id="xp-bars">
-    <div class="bar-container"><div class="bar-fill" id="xp-cart"></div><span class="bar-label">Cart XP</span></div>
-    <div class="bar-container"><div class="bar-fill" id="xp-rock"></div><span class="bar-label">Rock XP</span></div>
-    <div class="bar-container"><div class="bar-fill" id="xp-tunnel"></div><span class="bar-label">Tunnel XP</span></div>
-    <div class="bar-container"><div class="bar-fill" id="xp-shift"></div><span class="bar-label">Shift XP</span></div>
-    <div class="bar-container"><div class="bar-fill" id="xp-focus"></div><span class="bar-label">Focus XP</span></div>
-  </div>
-
-  <h2>Story Events</h2>
-  <button id="complete-ch7" class="button">Complete Chapter 7</button>
-  <button id="fight-boss" class="button">Duel Valking Captain</button>
 
   <script src="game.js"></script>
   <script src="actions.js"></script>
