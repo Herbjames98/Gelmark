@@ -87,9 +87,21 @@
 
   <div class="section">
     <h2>Core Stats</h2>
-    <div class="stat-line">Sill: <span id="sill">0</span></div>
-    <div class="stat-line">Gel-Essence: <span id="gel">0</span></div>
-    <div class="stat-line">Focus: <span id="focus">0</span></div>
+    <div class="stat-line">
+      <span class="tooltip stat-label">Sill
+        <span class="tooltiptext">Astral energy of the Echoform. “Sill hums only for those marked by the Gel.”</span>
+      </span>: <span id="sill">0</span>
+    </div>
+    <div class="stat-line">
+      <span class="tooltip stat-label">Gel-Essence
+        <span class="tooltiptext">Fuel for actions. “Harvested from a forgotten future, its glow remembers.”</span>
+      </span>: <span id="gel">0</span>
+    </div>
+    <div class="stat-line">
+      <span class="tooltip stat-label">Focus
+        <span class="tooltiptext">Mental clarity for upgrades. “In stillness, G.R.A.C.E. awakens.”</span>
+      </span>: <span id="focus">0</span>
+    </div>
   </div>
 
   <div class="section">
@@ -128,8 +140,12 @@
 
   <div class="section">
     <h2>Progress Events</h2>
-    <button id="complete-ch7">Complete Chapter 7</button>
-    <button id="fight-boss">Fight Valking Captain</button>
+    <button id="complete-ch7" class="tooltip">Complete Chapter 7
+      <span class="tooltiptext">Your mining journey nears its end. “Whispers speak of a captain’s gaze.”</span>
+    </button>
+    <button id="fight-boss" class="tooltip">Fight Valking Captain
+      <span class="tooltiptext">Challenge your fate. “Only one shall walk forward from the snow.”</span>
+    </button>
   </div>
 
   <script src="game.js"></script>
