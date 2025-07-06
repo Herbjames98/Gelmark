@@ -1,3 +1,10 @@
 // actions.js
-export const TASKS = ["cart", "rock", "tunnel", "shift", "focus"];
-// You can add richer action metadata later if needed.
+
+// List of task IDs used throughout the game logic
+export const TASKS = [
+  "cart",
+  "rock",
+  "tunnel",
+  "shift",
+  "focus"
+];
