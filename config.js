@@ -1,5 +1,4 @@
 // config.js
-
 export const CONFIG = {
   XP_PER_TASK: 5,
   XP_TO_LEVEL: 100,

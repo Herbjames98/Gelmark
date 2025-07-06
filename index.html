@@ -1,168 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DragonLoops: Echo Rebirth</title>
-  <meta name="description" content="DragonLoops - A legacy-driven idle rebirth game with sci-fi roots and Viking echoes.">
-  <link rel="icon" href="favicon.ico">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DragonLoops</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0f0f0f;
-      color: #f0f0f0;
-      padding: 20px;
-    }
-    .section {
-      margin-bottom: 24px;
-      padding: 16px;
-      border: 1px solid #555;
-      border-radius: 12px;
-      background-color: #1a1a1a;
-      box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
-    }
-    .section h2 {
-      margin-top: 0;
-      color: #00ffff;
-    }
-    .stat-line {
-      margin: 8px 0;
-    }
-    .xp-bar {
-      background-color: #333;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 14px;
-      margin-top: 4px;
-      position: relative;
-    }
-    .xp-fill {
-      background-color: #00ffaa;
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease-in-out;
-    }
-    .xp-text {
-      font-size: 12px;
-      color: #ccc;
-      position: absolute;
-      right: 8px;
-      top: -18px;
-    }
-    button {
-      padding: 10px 14px;
-      margin: 6px;
-      border: none;
-      border-radius: 8px;
-      background-color: #00aaff;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #008fcc;
-    }
-    .stat-label {
-      font-weight: bold;
-      color: #ffcc00;
-    }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: help;
-    }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 220px;
-      background-color: #333;
-      color: #fff;
-      text-align: left;
-      border-radius: 6px;
-      padding: 8px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -110px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #111; color: #eee; }
+    .stat-bar { background: #333; width: 100%; height: 20px; margin: 4px 0; border-radius: 3px; overflow: hidden; }
+    .stat-fill { background: #8e44ad; height: 100%; width: 0; transition: width 0.3s ease; }
+    .task { margin-bottom: 10px; }
+    .tooltip { font-size: 0.85em; color: #aaa; margin-bottom: 4px; }
+    #event-log { margin-top: 20px; max-height: 200px; overflow-y: auto; border-top: 1px solid #555; padding-top: 10px; }
+    button { margin: 3px; padding: 6px 10px; background: #222; color: #eee; border: 1px solid #444; cursor: pointer; }
+    button:hover { background: #333; }
   </style>
 </head>
 <body>
-  <div class="section">
-    <h2>Core Stats</h2>
-    <div class="stat-line">
-      <span class="tooltip stat-label">Sill
-        <span class="tooltiptext">Astral energy of the Echoform. “Sill hums only for those marked by the Gel.”</span>
-      </span>: <span id="sill">0</span>
-    </div>
-    <div class="stat-line">
-      <span class="tooltip stat-label">Gel-Essence
-        <span class="tooltiptext">Fuel for actions. “Harvested from a forgotten future, its glow remembers.”</span>
-      </span>: <span id="gel">0</span>
-    </div>
-    <div class="stat-line">
-      <span class="tooltip stat-label">Focus
-        <span class="tooltiptext">Mental clarity for upgrades. “In stillness, G.R.A.C.E. awakens.”</span>
-      </span>: <span id="focus">0</span>
-    </div>
+
+  <h1>DragonLoops: Training Grounds</h1>
+
+  <div><strong>Sill:</strong> <span id="sill">0</span></div>
+  <div><strong>Gel-Essence:</strong> <span id="gel">0</span></div>
+  <div><strong>Focus:</strong> <span id="focus">0</span></div>
+
+  <hr>
+
+  <div class="task">
+    <div class="tooltip">Push weighted carts to grow strength. Echoes whisper of old wheels.</div>
+    <button id="task-cart">Cart Hauling</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-cart"></div></div>
+    <div id="xp-cart-text">0 XP</div>
   </div>
 
-  <div class="section">
-    <h2>Tasks & Training</h2>
-    <div>
-      <button id="task-cart" class="tooltip">Push Cart
-        <span class="tooltiptext">Manual labor boosts base stamina. “Once, carts were a rite of passage.”</span>
-      </button>
-      <div class="xp-bar"><div class="xp-fill" id="xp-cart"></div><span class="xp-text" id="xp-cart-text">0 XP</span></div>
-    </div>
-    <div>
-      <button id="task-rock" class="tooltip">Break Rocks
-        <span class="tooltiptext">Increases raw power. “Every crack echoes the will of resistance.”</span>
-      </button>
-      <div class="xp-bar"><div class="xp-fill" id="xp-rock"></div><span class="xp-text" id="xp-rock-text">0 XP</span></div>
-    </div>
-    <div>
-      <button id="task-tunnel" class="tooltip">Tunnel Duty
-        <span class="tooltiptext">Improves endurance. “Darkness teaches the value of light.”</span>
-      </button>
-      <div class="xp-bar"><div class="xp-fill" id="xp-tunnel"></div><span class="xp-text" id="xp-tunnel-text">0 XP</span></div>
-    </div>
-    <div>
-      <button id="task-shift" class="tooltip">Night Shift
-        <span class="tooltiptext">Trains resilience under stress. “Only those awake in the silence hear the truth.”</span>
-      </button>
-      <div class="xp-bar"><div class="xp-fill" id="xp-shift"></div><span class="xp-text" id="xp-shift-text">0 XP</span></div>
-    </div>
-    <div>
-      <button id="task-focus" class="tooltip">Echo Meditation
-        <span class="tooltiptext">Raises inner focus and crafting skill. “The stiller the mind, the louder the echoes.”</span>
-      </button>
-      <div class="xp-bar"><div class="xp-fill" id="xp-focus"></div><span class="xp-text" id="xp-focus-text">0 XP</span></div>
-    </div>
+  <div class="task">
+    <div class="tooltip">Dodge cave-ins and falling rock. Endurance forged in panic.</div>
+    <button id="task-rock">Rockfall Evasion</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-rock"></div></div>
+    <div id="xp-rock-text">0 XP</div>
   </div>
 
-  <div class="section">
-    <h2>Progress Events</h2>
-    <button id="complete-ch7" class="tooltip">Complete Chapter 7
-      <span class="tooltiptext">Your mining journey nears its end. “Whispers speak of a captain’s gaze.”</span>
-    </button>
-    <button id="fight-boss" class="tooltip">Fight Valking Captain
-      <span class="tooltiptext">Challenge your fate. “Only one shall walk forward from the snow.”</span>
-    </button>
+  <div class="task">
+    <div class="tooltip">Shore up tunnel walls. Every strike echoes with ancient intent.</div>
+    <button id="task-tunnel">Tunnel Reinforcement</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-tunnel"></div></div>
+    <div id="xp-tunnel-text">0 XP</div>
   </div>
 
-  <div class="section">
-    <h2>Echo Feed</h2>
-    <div id="event-log" style="min-height: 60px;"></div>
+  <div class="task">
+    <div class="tooltip">Shift until muscle burns. Cold air turns breath to blade.</div>
+    <button id="task-shift">Endurance Shifts</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-shift"></div></div>
+    <div id="xp-shift-text">0 XP</div>
   </div>
 
-  <script src="game.js"></script>
-  <script src="actions.js"></script>
+  <div class="task">
+    <div class="tooltip">Focus sharpens. A distant hum from within the gel.</div>
+    <button id="task-focus">Focus Precision</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-focus"></div></div>
+    <div id="xp-focus-text">0 XP</div>
+  </div>
+
+  <hr>
+
+  <button id="complete-ch7">Complete Chapter 7</button>
+  <button id="fight-boss">Fight the Valking Captain</button>
+
+  <div id="event-log"></div>
+
+  <!-- Load Game Logic as ES6 Module -->
+  <script type="module" src="game.js"></script>
 </body>
 </html>

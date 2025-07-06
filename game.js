@@ -1,6 +1,6 @@
 // game.js
-
 import { CONFIG } from './config.js';
+import { TASKS } from './actions.js'; // previously constants.js
 
 let playerStats = {
   sill: 0,
@@ -22,7 +22,6 @@ function gainXP(taskId) {
     console.warn(`Invalid task: '${taskId}'`);
     return;
   }
-
   updateResources(taskId);
   logTaskGain(taskId);
   updateUI();
@@ -95,8 +94,7 @@ function logEvent(message) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  const taskButtons = ["cart", "rock", "tunnel", "shift", "focus"];
-  taskButtons.forEach(task => {
+  TASKS.forEach(task => {
     const el = document.getElementById(`task-${task}`);
     if (el) {
       el.addEventListener("click", () => gainXP(task));
