@@ -1,67 +1,41 @@
 // actions.js
 
-export const tasks = {
-  cart: {
-    name: "Push Ore Cart",
-    sillCost: 5,
-    duration: 3,
-    stat: "Strength"
-  },
-  rock: {
-    name: "Break Rocks",
-    sillCost: 8,
-    duration: 4,
-    stat: "Defense"
-  },
-  tunnel: {
-    name: "Dig Tunnel",
-    sillCost: 10,
-    duration: 6,
-    stat: "Endurance"
-  },
-  shift: {
-    name: "End Shift",
-    sillCost: 4,
-    duration: 2,
-    stat: "Focus"
-  },
-  focus: {
-    name: "Mindful Mining",
-    sillCost: 6,
-    duration: 5,
-    stat: "Focus"
+window.addEventListener('DOMContentLoaded', function () {
+  const fightBossBtn = document.getElementById("fight-boss");
+  if (!fightBossBtn) {
+    console.warn("Missing element with ID 'fight-boss'. Please ensure it exists in index.html.");
+  } else {
+    fightBossBtn.addEventListener("click", fightBoss);
   }
-};
 
-export const monsters = {
-  boar: {
-    name: "Wild Boar",
-    sillCost: 10,
-    duration: 4,
-    reward: { stat: "Attack", gel: 5 }
-  },
-  elk: {
-    name: "Mountain Elk",
-    sillCost: 12,
-    duration: 6,
-    reward: { stat: "Endurance", gel: 8 }
-  },
-  wolf: {
-    name: "Lone Wolf",
-    sillCost: 14,
-    duration: 7,
-    reward: { stat: "Defense", gel: 10 }
-  },
-  lynx: {
-    name: "Silent Lynx",
-    sillCost: 16,
-    duration: 8,
-    reward: { stat: "Focus", gel: 12 }
-  },
-  bear: {
-    name: "Giant Bear",
-    sillCost: 20,
-    duration: 10,
-    reward: { stat: "Attack", gel: 15 }
+  const ch7Btn = document.getElementById("complete-ch7");
+  if (!ch7Btn) {
+    console.warn("Missing element with ID 'complete-ch7'. Please ensure it exists in index.html.");
+  } else {
+    ch7Btn.addEventListener("click", completeChapter7);
   }
-};
+
+  if (typeof gainXP !== 'function') {
+    console.error("Function 'gainXP' is not defined. Ensure it exists in the global scope or in game.js.");
+  }
+
+  if (typeof tooltips !== 'object') {
+    console.error("Object 'tooltips' is not defined. Ensure it exists and is properly populated before assigning tooltips.");
+  }
+
+  ['cart','rock','tunnel','shift','focus','boar','elk','wolf','lynx','bear'].forEach(task => {
+    const el = document.getElementById(task);
+    if (el) {
+      el.addEventListener("click", () => gainXP(task, 10));
+      el.title = tooltips && tooltips[task] ? tooltips[task] : "";
+    } else {
+      console.warn(`Missing element with ID '${task}'. Please ensure it exists in index.html.`);
+    }
+  });
+
+  if (typeof updateUI !== 'function') {
+    console.error("Function 'updateUI' is not defined. Ensure it exists in the global scope or in game.js.");
+  } else {
+    updateUI();
+  }
+});
