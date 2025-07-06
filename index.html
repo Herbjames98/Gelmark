@@ -1,58 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Echoform Idle</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DragonLoops</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #111; color: #eee; }
-    #stats, #tasks, #monsters, #log { margin-bottom: 20px; }
-    button { margin: 4px; padding: 8px 12px; background: #444; color: #fff; border: none; border-radius: 4px; }
-    .stat-line { margin: 2px 0; }
-    .xp-line { font-size: 0.85em; color: #aaa; }
+    .bar-container { width: 100px; height: 10px; background: #333; margin: 2px 0; }
+    .bar-fill { height: 100%; background: #0f0; width: 0; transition: width 0.2s; }
+    .xp-section, .stat-section { margin: 10px 0; }
+    button { margin: 5px; }
   </style>
 </head>
 <body>
-  <h1>Echoform: Astral Awakening</h1>
+  <h1>DragonLoops: Echo of the First Flame</h1>
 
-  <div id="stats">
-    <h2>Stats</h2>
-    <div class="stat-line">Sill: <span id="sill">0</span></div>
-    <div class="stat-line">Gel-Essence: <span id="gel">0</span></div>
-    <div class="stat-line">Strength: <span id="stat-strength">0</span></div>
-    <div class="stat-line">Defense: <span id="stat-defense">0</span></div>
-    <div class="stat-line">Endurance: <span id="stat-endurance">0</span></div>
-    <div class="stat-line">Focus: <span id="stat-focus">0</span></div>
-    <div class="stat-line">Attack: <span id="stat-attack">0</span></div>
-    <div class="stat-line">Traits: <span id="traits">None</span></div>
+  <div class="stat-section">
+    <div>Strength: <span id="stat-strength"></span></div>
+    <div class="bar-container"><div id="bar-strength" class="bar-fill"></div></div>
+    <div>Defense: <span id="stat-defense"></span></div>
+    <div class="bar-container"><div id="bar-defense" class="bar-fill"></div></div>
+    <div>Endurance: <span id="stat-endurance"></span></div>
+    <div class="bar-container"><div id="bar-endurance" class="bar-fill"></div></div>
+    <div>Focus: <span id="stat-focus"></span></div>
+    <div class="bar-container"><div id="bar-focus" class="bar-fill"></div></div>
+    <div>Attack: <span id="stat-attack"></span></div>
+    <div class="bar-container"><div id="bar-attack" class="bar-fill"></div></div>
+    <div>Sill: <span id="sill"></span></div>
+    <div class="bar-container"><div id="bar-sill" class="bar-fill"></div></div>
+    <div>Gel-Essence: <span id="gel"></span></div>
+    <div class="bar-container"><div id="bar-gel" class="bar-fill"></div></div>
   </div>
 
-  <div id="tasks">
-    <h2>Mining Tasks</h2>
-    <button id="cart">Push Ore Cart</button><span class="xp-line" id="xp-cart"> XP: 0</span><br />
-    <button id="rock">Break Rocks</button><span class="xp-line" id="xp-rock"> XP: 0</span><br />
-    <button id="tunnel">Dig Tunnel</button><span class="xp-line" id="xp-tunnel"> XP: 0</span><br />
-    <button id="shift">End Shift</button><span class="xp-line" id="xp-shift"> XP: 0</span><br />
-    <button id="focus">Mindful Mining</button><span class="xp-line" id="xp-focus"> XP: 0</span>
+  <div class="xp-section">
+    <button id="cart">Cart</button>
+    <div id="xp-cart"></div>
+    <div class="bar-container"><div id="bar-xp-cart" class="bar-fill"></div></div>
+
+    <button id="rock">Rock</button>
+    <div id="xp-rock"></div>
+    <div class="bar-container"><div id="bar-xp-rock" class="bar-fill"></div></div>
+
+    <button id="tunnel">Tunnel</button>
+    <div id="xp-tunnel"></div>
+    <div class="bar-container"><div id="bar-xp-tunnel" class="bar-fill"></div></div>
+
+    <button id="shift">Shift</button>
+    <div id="xp-shift"></div>
+    <div class="bar-container"><div id="bar-xp-shift" class="bar-fill"></div></div>
+
+    <button id="focus">Focus</button>
+    <div id="xp-focus"></div>
+    <div class="bar-container"><div id="bar-xp-focus" class="bar-fill"></div></div>
+
+    <button id="boar">Boar</button>
+    <div id="xp-boar"></div>
+    <div class="bar-container"><div id="bar-xp-boar" class="bar-fill"></div></div>
+
+    <button id="elk">Elk</button>
+    <div id="xp-elk"></div>
+    <div class="bar-container"><div id="bar-xp-elk" class="bar-fill"></div></div>
+
+    <button id="wolf">Wolf</button>
+    <div id="xp-wolf"></div>
+    <div class="bar-container"><div id="bar-xp-wolf" class="bar-fill"></div></div>
+
+    <button id="lynx">Lynx</button>
+    <div id="xp-lynx"></div>
+    <div class="bar-container"><div id="bar-xp-lynx" class="bar-fill"></div></div>
+
+    <button id="bear">Bear</button>
+    <div id="xp-bear"></div>
+    <div class="bar-container"><div id="bar-xp-bear" class="bar-fill"></div></div>
   </div>
 
-  <div id="monsters">
-    <h2>Monster Hunts</h2>
-    <button id="boar">Wild Boar</button><span class="xp-line" id="xp-boar"> XP: 0</span><br />
-    <button id="elk">Mountain Elk</button><span class="xp-line" id="xp-elk"> XP: 0</span><br />
-    <button id="wolf">Lone Wolf</button><span class="xp-line" id="xp-wolf"> XP: 0</span><br />
-    <button id="lynx">Silent Lynx</button><span class="xp-line" id="xp-lynx"> XP: 0</span><br />
-    <button id="bear">Giant Bear</button><span class="xp-line" id="xp-bear"> XP: 0</span>
+  <div>
+    <button id="fight-boss" style="display:none">Fight Valking Captain</button>
+    <button id="complete-ch7">Complete Chapter 7</button>
   </div>
 
-  <button id="fight-boss" style="display:none">Fight Valking Captain</button>
-  <button id="complete-ch7">Complete Chapter 7</button>
+  <div id="combat-log" style="border: 1px solid black; height: 100px; overflow-y: auto; margin-top: 10px;"></div>
 
-  <div id="log">
-    <h2>Combat Log</h2>
-    <div id="combat-log" style="height:150px; overflow-y:auto; border:1px solid #555; padding:10px;"></div>
-  </div>
-
-  <script type="module" src="game.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>

@@ -1,71 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Echoform Idle</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #111; color: #eee; }
-    #stats, #tasks, #monsters, #log { margin-bottom: 20px; }
-    button { margin: 4px; padding: 8px 12px; background: #444; color: #fff; border: none; border-radius: 4px; }
-    .stat-line { margin: 2px 0; }
-    .xp-line { font-size: 0.85em; color: #aaa; }
-    button[title] { position: relative; }
-    button[title]:hover::after {
-      content: attr(title);
-      position: absolute;
-      background: #222;
-      color: #eee;
-      padding: 6px;
-      border-radius: 4px;
-      top: 100%;
-      left: 0;
-      white-space: pre-wrap;
-      z-index: 10;
-    }
-  </style>
-</head>
-<body>
-  <h1>Echoform: Astral Awakening</h1>
+// game.js
 
-  <div id="stats">
-    <h2>Stats</h2>
-    <div class="stat-line">Sill: <span id="sill">0</span></div>
-    <div class="stat-line">Gel-Essence: <span id="gel">0</span></div>
-    <div class="stat-line">Strength: <span id="stat-strength">0</span></div>
-    <div class="stat-line">Defense: <span id="stat-defense">0</span></div>
-    <div class="stat-line">Endurance: <span id="stat-endurance">0</span></div>
-    <div class="stat-line">Focus: <span id="stat-focus">0</span></div>
-    <div class="stat-line">Attack: <span id="stat-attack">0</span></div>
-    <div class="stat-line">Traits: <span id="traits">None</span></div>
-  </div>
+const stats = {
+  sill: 50,
+  gel: 0,
+  strength: 0,
+  defense: 0,
+  endurance: 0,
+  focus: 0,
+  attack: 0
+};
 
-  <div id="tasks">
-    <h2>Mining Tasks</h2>
-    <button id="cart" title="Strength + Gel: Move heavy ore carts from shaft to stockpile\nEchoes whisper that these carts once bore relics of the Forgotten War.">Push Ore Cart</button><span class="xp-line" id="xp-cart"> XP: 0</span><br />
-    <button id="rock" title="Strength: Break smaller rocks into gravel using hand tools\nSome say the shattered stones still remember ancient footsteps.">Break Rocks</button><span class="xp-line" id="xp-rock"> XP: 0</span><br />
-    <button id="tunnel" title="Endurance: Dig longer tunnels through compact earth\nMiners speak of voices buried deep beneath the roots of the world.">Dig Tunnel</button><span class="xp-line" id="xp-tunnel"> XP: 0</span><br />
-    <button id="shift" title="Endurance + Strength: Simulate prolonged labor under pressure\nEvery swing echoes the toil of ancestors bound by Gel-touched chains.">End Shift</button><span class="xp-line" id="xp-shift"> XP: 0</span><br />
-    <button id="focus" title="Focus: Channel clarity to detect rare materials more easily\nIt is said only those attuned to Gel Essence can see the shimmer of frost ore.">Mindful Mining</button><span class="xp-line" id="xp-focus"> XP: 0</span>
-  </div>
+const xp = {
+  cart: 0,
+  rock: 0,
+  tunnel: 0,
+  shift: 0,
+  focus: 0,
+  boar: 0,
+  elk: 0,
+  wolf: 0,
+  lynx: 0,
+  bear: 0
+};
 
-  <div id="monsters">
-    <h2>Monster Hunts</h2>
-    <button id="boar" title="Strength + Attack: Charge and clash with wild boars\nOnce guardians of the hills, these beasts now roam untamed by Viking hand.">Wild Boar</button><span class="xp-line" id="xp-boar"> XP: 0</span><br />
-    <button id="elk" title="Endurance: Outlast a powerful mountain elk in the wild\nElk antlers were once carved into focus charms for Gel-born seers.">Mountain Elk</button><span class="xp-line" id="xp-elk"> XP: 0</span><br />
-    <button id="wolf" title="Defense + Strength: Survive coordinated attacks from wolves\nLone wolves are feared, for some carry the gleam of ancient intelligence.">Lone Wolf</button><span class="xp-line" id="xp-wolf"> XP: 0</span><br />
-    <button id="lynx" title="Focus + Defense: React to sudden strikes in tight terrain\nLegends say Silent Lynxes were once familiars of the frozen mystics.">Silent Lynx</button><span class="xp-line" id="xp-lynx"> XP: 0</span><br />
-    <button id="bear" title="All Stats: Survive and slay a giant bear\nGiant Bears sleep on relics buried beneath ancient roots — few return from their dens.">Giant Bear</button><span class="xp-line" id="xp-bear"> XP: 0</span>
-  </div>
+const tooltips = {
+  cart: "Push mining carts to build strength. 🛒 These were once used by the first miners to haul sacred ore.",
+  rock: "Break rocks to develop brute strength. 🪨 Some say these stones remember the first war cry.",
+  tunnel: "Dig tunnels to increase endurance. ⛏️ The echo of your strikes awakens the past.",
+  shift: "Haul shifts underground to build resilience. 💪 The shifts blur into ritual over time.",
+  focus: "Train stillness and concentration. 🧘 Only those who master silence hear G.R.A.C.E. whisper.",
+  boar: "Hunt boars to hone your instincts. 🐗 Their tusks once crowned the clan's champions.",
+  elk: "Track elk to improve endurance. 🦌 The chase teaches patience and breath.",
+  wolf: "Confront wolves to sharpen your defense. 🐺 Steel your body as they test your perimeter.",
+  lynx: "Face lynx to enhance precision. 🐈 Their gaze unnerves the untrained.",
+  bear: "Challenge bears to prove your might. 🐻 Ancient spirits smile on those who endure.",
+  strength: "Your raw physical force. 💪 Strength lets Echoforms carry heavier burdens and strike harder in combat.",
+  defense: "The ability to withstand blows. 🛡️ Defense determines how much damage your Echoform can absorb before breaking.",
+  endurance: "Your lasting power. 🏃‍♂️ Endurance governs your stamina in prolonged tasks and monster fights.",
+  focus: "Clarity of mind. 🧠 Focus unlocks G.R.A.C.E. upgrades and hastens crafting insights.",
+  attack: "Battle effectiveness. ⚔️ A higher attack stat increases your damage in fights, especially against elite foes.",
+  sill: "Sill is your inner astral force. 🌌 It's the energy your Echoforms draw from the Essence Gel.",
+  gel: "Gel-Essence is your active resource. 💧 It's spent when Echoforms act and recharges slowly over time."
+};
 
-  <button id="fight-boss" style="display:none">Fight Valking Captain</button>
-  <button id="complete-ch7">Complete Chapter 7</button>
+function updateUI() {
+  for (let key in stats) {
+    const val = stats[key];
+    document.getElementById(key === 'gel' ? 'gel' : key === 'sill' ? 'sill' : `stat-${key}`).textContent = val;
+    document.getElementById(`bar-${key}`).style.width = `${Math.min(val / 100 * 100, 100)}%`;
+    const statElement = document.getElementById(`stat-${key}`);
+    if (statElement) statElement.title = tooltips[key];
+  }
+  for (let key in xp) {
+    const val = xp[key];
+    document.getElementById(`xp-${key}`).textContent = `XP: ${val}`;
+    document.getElementById(`bar-xp-${key}`).style.width = `${Math.min(val / 100 * 100, 100)}%`;
+  }
+}
 
-  <div id="log">
-    <h2>Combat Log</h2>
-    <div id="combat-log" style="height:150px; overflow-y:auto; border:1px solid #555; padding:10px;"></div>
-  </div>
+function gainXP(task, amount) {
+  xp[task] += amount;
+  switch(task) {
+    case 'cart':
+      stats.strength += 1;
+      stats.gel += 1;
+      break;
+    case 'rock':
+      stats.strength += 2;
+      break;
+    case 'tunnel':
+      stats.endurance += 2;
+      break;
+    case 'shift':
+      stats.endurance += 1;
+      stats.strength += 1;
+      break;
+    case 'focus':
+      stats.focus += 2;
+      break;
+    case 'boar':
+      stats.strength += 1;
+      stats.attack += 1;
+      break;
+    case 'elk':
+      stats.endurance += 2;
+      break;
+    case 'wolf':
+      stats.defense += 2;
+      stats.strength += 1;
+      break;
+    case 'lynx':
+      stats.defense += 1;
+      stats.focus += 2;
+      break;
+    case 'bear':
+      stats.strength += 1;
+      stats.endurance += 1;
+      stats.defense += 1;
+      stats.focus += 1;
+      stats.attack += 1;
+      break;
+  }
+  updateUI(); // Re-render UI to reflect new XP, stats, and tooltips.
+  checkUnlocks();
+}
 
-  <script type="module" src="game.js"></script>
-</body>
-</html>
+function checkUnlocks() {
+  const totalPower = stats.strength + stats.defense + stats.endurance + stats.focus + stats.attack;
+  if (totalPower >= 100) {
+    const bossBtn = document.getElementById('fight-boss');
+    if (bossBtn) bossBtn.style.display = 'inline-block';
+  }
+}
+
+function logCombat(text) {
+  const log = document.getElementById("combat-log");
+  log.innerHTML += `<div>${text}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function fightBoss() {
+  const success = stats.attack >= 20 && stats.endurance >= 15 && stats.defense >= 15;
+  logCombat(success ? "You have defeated the Valking Captain." : "You were not strong enough.");
+}
+
+function completeChapter7() {
+  logCombat("You feel a tension rising... a powerful figure is coming.");
+}
+
+const fightBossBtn = document.getElementById("fight-boss");
+if (fightBossBtn) fightBossBtn.addEventListener("click", fightBoss);
+
+const ch7Btn = document.getElementById("complete-ch7");
+if (ch7Btn) ch7Btn.addEventListener("click", completeChapter7);
+
+['cart','rock','tunnel','shift','focus','boar','elk','wolf','lynx','bear'].forEach(task => {
+  const el = document.getElementById(task);
+  if (el) {
+    el.addEventListener("click", () => gainXP(task, 10));
+    el.title = tooltips[task];
+  }
+});
+
+updateUI();
