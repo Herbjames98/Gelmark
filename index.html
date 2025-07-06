@@ -3,83 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DragonLoops</title>
+  <title>DragonLoops: Echoform Training</title>
   <style>
-    .bar-container { width: 100px; height: 10px; background: #333; margin: 2px 0; }
-    .bar-fill { height: 100%; background: #0f0; width: 0; transition: width 0.2s; }
-    .xp-section, .stat-section { margin: 10px 0; }
-    button { margin: 5px; }
+    body { font-family: sans-serif; background-color: #121212; color: #eee; padding: 20px; }
+    h2 { margin-top: 2em; }
+    .task, .stat { margin: 5px 0; }
+    .button { padding: 6px 12px; margin: 5px; background-color: #444; color: #fff; border: none; cursor: pointer; }
+    .button:hover { background-color: #666; }
+    .bar-container { background: #333; border: 1px solid #666; width: 300px; height: 20px; position: relative; }
+    .bar-fill { background: #76d7c4; height: 100%; width: 0%; }
+    .bar-label { position: absolute; top: 0; left: 5px; font-size: 0.8em; }
   </style>
 </head>
 <body>
-  <h1>DragonLoops: Echo of the First Flame</h1>
+  <h1>DragonLoops: Mount Paozu Sector</h1>
 
-  <div class="stat-section">
-    <div>Strength: <span id="stat-strength"></span></div>
-    <div class="bar-container"><div id="bar-strength" class="bar-fill"></div></div>
-    <div>Defense: <span id="stat-defense"></span></div>
-    <div class="bar-container"><div id="bar-defense" class="bar-fill"></div></div>
-    <div>Endurance: <span id="stat-endurance"></span></div>
-    <div class="bar-container"><div id="bar-endurance" class="bar-fill"></div></div>
-    <div>Focus: <span id="stat-focus"></span></div>
-    <div class="bar-container"><div id="bar-focus" class="bar-fill"></div></div>
-    <div>Attack: <span id="stat-attack"></span></div>
-    <div class="bar-container"><div id="bar-attack" class="bar-fill"></div></div>
-    <div>Sill: <span id="sill"></span></div>
-    <div class="bar-container"><div id="bar-sill" class="bar-fill"></div></div>
-    <div>Gel-Essence: <span id="gel"></span></div>
-    <div class="bar-container"><div id="bar-gel" class="bar-fill"></div></div>
+  <div id="stats">
+    <h2>Echoform Stats</h2>
+    <div class="stat">Sill: <span id="sill">100</span>/100</div>
+    <div class="stat">Gel-Essence: <span id="gel">50</span></div>
+    <div class="stat">Focus: <span id="focus">0</span></div>
   </div>
 
-  <div class="xp-section">
-    <button id="cart">Cart</button>
-    <div id="xp-cart"></div>
-    <div class="bar-container"><div id="bar-xp-cart" class="bar-fill"></div></div>
-
-    <button id="rock">Rock</button>
-    <div id="xp-rock"></div>
-    <div class="bar-container"><div id="bar-xp-rock" class="bar-fill"></div></div>
-
-    <button id="tunnel">Tunnel</button>
-    <div id="xp-tunnel"></div>
-    <div class="bar-container"><div id="bar-xp-tunnel" class="bar-fill"></div></div>
-
-    <button id="shift">Shift</button>
-    <div id="xp-shift"></div>
-    <div class="bar-container"><div id="bar-xp-shift" class="bar-fill"></div></div>
-
-    <button id="focus">Focus</button>
-    <div id="xp-focus"></div>
-    <div class="bar-container"><div id="bar-xp-focus" class="bar-fill"></div></div>
-
-    <button id="boar">Boar</button>
-    <div id="xp-boar"></div>
-    <div class="bar-container"><div id="bar-xp-boar" class="bar-fill"></div></div>
-
-    <button id="elk">Elk</button>
-    <div id="xp-elk"></div>
-    <div class="bar-container"><div id="bar-xp-elk" class="bar-fill"></div></div>
-
-    <button id="wolf">Wolf</button>
-    <div id="xp-wolf"></div>
-    <div class="bar-container"><div id="bar-xp-wolf" class="bar-fill"></div></div>
-
-    <button id="lynx">Lynx</button>
-    <div id="xp-lynx"></div>
-    <div class="bar-container"><div id="bar-xp-lynx" class="bar-fill"></div></div>
-
-    <button id="bear">Bear</button>
-    <div id="xp-bear"></div>
-    <div class="bar-container"><div id="bar-xp-bear" class="bar-fill"></div></div>
+  <h2>Training Tasks</h2>
+  <div id="tasks">
+    <button id="cart" class="button">Push Cart</button>
+    <button id="rock" class="button">Crack Rocks</button>
+    <button id="tunnel" class="button">Dig Tunnel</button>
+    <button id="shift" class="button">Lift Shift Totem</button>
+    <button id="focus" class="button">Channel Focus</button>
   </div>
 
-  <div>
-    <button id="fight-boss" style="display:none">Fight Valking Captain</button>
-    <button id="complete-ch7">Complete Chapter 7</button>
+  <h2>Hunts</h2>
+  <div id="hunts">
+    <button id="boar" class="button">Hunt Boar</button>
+    <button id="elk" class="button">Track Elk</button>
+    <button id="wolf" class="button">Fight Wolf</button>
+    <button id="lynx" class="button">Snare Lynx</button>
+    <button id="bear" class="button">Duel Bear</button>
   </div>
 
-  <div id="combat-log" style="border: 1px solid black; height: 100px; overflow-y: auto; margin-top: 10px;"></div>
+  <h2>Progress</h2>
+  <div id="xp-bars">
+    <div class="bar-container"><div class="bar-fill" id="xp-cart"></div><span class="bar-label">Cart XP</span></div>
+    <div class="bar-container"><div class="bar-fill" id="xp-rock"></div><span class="bar-label">Rock XP</span></div>
+    <div class="bar-container"><div class="bar-fill" id="xp-tunnel"></div><span class="bar-label">Tunnel XP</span></div>
+    <div class="bar-container"><div class="bar-fill" id="xp-shift"></div><span class="bar-label">Shift XP</span></div>
+    <div class="bar-container"><div class="bar-fill" id="xp-focus"></div><span class="bar-label">Focus XP</span></div>
+  </div>
+
+  <h2>Story Events</h2>
+  <button id="complete-ch7" class="button">Complete Chapter 7</button>
+  <button id="fight-boss" class="button">Duel Valking Captain</button>
 
   <script src="game.js"></script>
+  <script src="actions.js"></script>
 </body>
 </html>
