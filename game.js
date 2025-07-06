@@ -1,137 +1,114 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const panels = {
-    stats: `
-      <div class="gauge-box">
-        <label>Health</label>
-        <div class="gauge health">
-          <div class="fill" id="health-bar"></div>
-          <span class="gauge-label" id="health-text">0</span>
-        </div>
-      </div>
-      <div class="gauge-box">
-        <label>Defense</label>
-        <div class="gauge defense">
-          <div class="fill" id="defense-bar"></div>
-          <span class="gauge-label" id="defense-text">0</span>
-        </div>
-      </div>
-      <div class="gauge-box">
-        <label>Energy</label>
-        <div class="gauge energy">
-          <div class="fill" id="energy-bar"></div>
-          <span class="gauge-label" id="energy-text">0</span>
-        </div>
-      </div>
-    `,
-    skills: `
-      <div class="skill-box"><strong>Heal</strong><button onclick="alert('You used Heal!')">Use</button></div>
-    `
-  };
+import { tasks, monsters } from './actions.js';
 
-  const buttons = document.querySelectorAll(".character-tab-btn");
-  const contentArea = document.getElementById("character-content");
+let sill = 100;
+let gel = 0;
+let traits = new Set();
+let activeTask = null;
+let taskTimer = 0;
+let lastActionTime = Date.now();
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      contentArea.innerHTML = panels[target] || "<p>Coming soon...</p>";
-      updateBars();
-    });
-  });
+let chapterProgress = {
+  ch7: false,
+  bossDefeated: false
+};
 
-  document.querySelector(".character-tab-btn[data-target='stats']")?.click();
+const sillDisplay = document.getElementById("sill");
+const gelDisplay = document.getElementById("gel");
+const traitsDisplay = document.getElementById("traits");
+const log = document.getElementById("combat-log");
+const bossButton = document.getElementById("fight-boss");
+const completeCh7Button = document.getElementById("complete-ch7");
 
-  const focusDisplay = document.getElementById("focus-display");
-  let focus = 0;
-  const maxFocus = 100;
+function logMessage(msg) {
+  const p = document.createElement("div");
+  p.textContent = msg;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
 
-  setInterval(() => {
-    if (focus < maxFocus) {
-      focus++;
-      focusDisplay.textContent = `Focus: ${focus} / ${maxFocus}`;
+function updateUI() {
+  sillDisplay.textContent = Math.floor(sill);
+  gelDisplay.textContent = gel;
+  traitsDisplay.textContent = [...traits].join(", ") || "None";
+  bossButton.style.display = chapterProgress.ch7 && !chapterProgress.bossDefeated ? "block" : "none";
+}
+
+function regenSill() {
+  const now = Date.now();
+  const delta = (now - lastActionTime) / 1000;
+  lastActionTime = now;
+  const missing = 100 - sill;
+  if (missing > 0) {
+    sill += Math.min(missing, 0.5 * delta);
+  }
+}
+
+function completeTask(task) {
+  if (task.reward) {
+    gel += task.reward.gel;
+    logMessage(`Defeated ${task.name}, gained ${task.reward.stat} and +${task.reward.gel} Gel.`);
+    traits.add("Iron Pulse");
+  } else {
+    logMessage(`Completed ${task.name}, gained ${task.stat}.`);
+  }
+  updateUI();
+}
+
+function startTask(task) {
+  if (sill < task.sillCost || activeTask) return;
+  sill -= task.sillCost;
+  activeTask = task;
+  taskTimer = task.duration;
+  logMessage(`Started ${task.name}...`);
+  updateUI();
+}
+
+function gameLoop() {
+  regenSill();
+  if (activeTask) {
+    taskTimer -= 1;
+    if (taskTimer <= 0) {
+      completeTask(activeTask);
+      activeTask = null;
     }
-  }, 2000);
+  }
+  updateUI();
+}
 
-  // Bars
-  let health = 1, defense = 1, energy = 1;
-  const maxStat = 100;
-
-  const updateBars = () => {
-    const h = document.getElementById("health-bar");
-    const d = document.getElementById("defense-bar");
-    const e = document.getElementById("energy-bar");
-    const ht = document.getElementById("health-text");
-    const dt = document.getElementById("defense-text");
-    const et = document.getElementById("energy-text");
-
-    if (h) h.style.width = `${(health / maxStat) * 100}%`;
-    if (d) d.style.width = `${(defense / maxStat) * 100}%`;
-    if (e) e.style.width = `${(energy / maxStat) * 100}%`;
-
-    if (ht) ht.textContent = health;
-    if (dt) dt.textContent = defense;
-    if (et) et.textContent = energy;
-  };
-
-  setInterval(() => {
-    if (health < maxStat) health += 10;
-    if (defense < maxStat) defense += 10;
-    if (energy < maxStat) energy += 10;
-
-    if (health > maxStat) health = maxStat;
-    if (defense > maxStat) defense = maxStat;
-    if (energy > maxStat) energy = maxStat;
-
-    updateBars();
-  }, 1000);
-
-  // Locations
-  const adventureButtons = document.querySelectorAll(".adventure-tab-btn");
-  const adventureContent = document.getElementById("adventure-content");
-
-  const fetchLocations = async () => {
-    const allLocations = [
-      { name: "Gælheim (Home of Gel)", unlocked: true },
-      { name: "Nova Terra", unlocked: false },
-      { name: "Zenthar", unlocked: false },
-      { name: "Abyssal Gate", unlocked: false },
-      { name: "Chronos Core", unlocked: false }
-    ];
-
-    let menu = `<div class="worlds-wrapper"><div class="worlds-scroll">`;
-
-    allLocations.forEach((loc, index) => {
-      const displayName = loc.unlocked ? loc.name : "???";
-      const lockClass = loc.unlocked ? "" : "locked";
-      menu += `<button class="world-button ${lockClass}" data-world-index="${index}">${displayName}</button>`;
-    });
-
-    menu += `</div><div id="world-detail" class="world-detail">Select a location to explore.</div></div>`;
-    return menu;
-  };
-
-  adventureButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if (btn.dataset.target === "locations") {
-        const html = await fetchLocations();
-        adventureContent.innerHTML = html;
-
-        const worldBtns = document.querySelectorAll(".world-button:not(.locked)");
-        const worldDetail = document.getElementById("world-detail");
-
-        worldBtns.forEach(btn => {
-          btn.addEventListener("click", () => {
-            const worldName = btn.textContent;
-            if (worldName.includes("Gælheim")) {
-              worldDetail.innerHTML = `
-                <h3>🌍 ${worldName}</h3>
-                <p>Welcome to ${worldName}, where your journey begins.</p>
-                <button onclick="alert('Gælheim action: tester')">tester</button>
-              `;
-            }
-          });
-        });
-      }
-    });
-  });
+["cart", "rock", "tunnel", "shift", "focus"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.onclick = () => startTask(tasks[id]);
 });
+
+["boar", "elk", "wolf", "lynx", "bear"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.onclick = () => startTask(monsters[id]);
+});
+
+if (bossButton) {
+  bossButton.onclick = () => {
+    if (sill < 30 || gel < 50) {
+      logMessage("You're not ready to face the Valking Captain.");
+      return;
+    }
+    sill -= 30;
+    logMessage("Engaged in the duel with the Valking Captain...");
+    setTimeout(() => {
+      traits.add("Loopborn");
+      chapterProgress.bossDefeated = true;
+      logMessage("Victory! G.R.A.C.E. fully reawakens. Act 3 unlocked.");
+      updateUI();
+    }, 2000);
+  };
+}
+
+if (completeCh7Button) {
+  completeCh7Button.onclick = () => {
+    chapterProgress.ch7 = true;
+    logMessage("Chapter 7 completed. The Valking Captain senses your growth...");
+    updateUI();
+  };
+}
+
+setInterval(gameLoop, 1000);
+updateUI();

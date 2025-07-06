@@ -1,156 +1,36 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #6fb3d2 0%, #a2cfd5 50%, #e0f7fa 100%);
-  color: #2c3e50;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 0.3fr 0.7fr;
-  grid-template-rows: 0.125fr 0.875fr;
-  gap: 10px;
-  padding: 20px;
-  height: 100vh;
-  box-sizing: border-box;
-}
-
-.panel {
-  background: #ffffff;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  overflow: auto;
-}
-
-.panel header h2 {
-  font-size: 1.2em;
-  color: #31708e;
-  margin: 0 0 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.character-tab-btn,
-.adventure-tab-btn {
-  background: #4fa4bf;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.character-tab-btn:hover,
-.adventure-tab-btn:hover {
-  background: #8ed1e5;
-  color: #1a1a1a;
-}
-
-#focus-display {
-  background: linear-gradient(to right, #a855f7, #7c3aed);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.9em;
-  font-weight: bold;
-  box-shadow: 0 0 4px rgba(124, 58, 237, 0.3);
-}
-
-/* Gauges */
-.gauge-box {
-  margin-top: 10px;
-}
-
-.gauge-box label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.gauge {
-  position: relative;
-  width: 100%;
-  height: 18px;
-  background: #eee;
-  border-radius: 9px;
-  overflow: hidden;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
-}
-
-.gauge .fill {
-  height: 100%;
-  width: 0%;
-  transition: width 0.4s ease-in-out;
-}
-
-.gauge-label {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  font-size: 0.85em;
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-}
-
-.gauge.health .fill {
-  background: linear-gradient(to right, #ff6b6b, #d33c3c);
-}
-.gauge.defense .fill {
-  background: linear-gradient(to right, #66cfff, #3366cc);
-}
-.gauge.energy .fill {
-  background: linear-gradient(to right, #b466ff, #7e3fbc);
-}
-
-/* Locations */
-.worlds-wrapper {
+  background: #f3f3f5;
+  color: #333;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  align-items: center;
+  gap: 1rem;
 }
-
-.worlds-scroll {
-  max-height: 70px;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 10px 0;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  border-bottom: 2px solid #a0cfd5;
-}
-
-.world-button {
-  background: #4fa4bf;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  font-size: 1em;
-  border-radius: 6px;
+header { display: flex; gap: 2rem; font-weight: bold; }
+button {
+  padding: .5rem 1rem;
+  border: 1px solid #999;
+  background: #fff;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background .2s;
 }
-
-.world-button.locked {
-  background: #cccccc;
-  color: #666;
-  cursor: not-allowed;
-  pointer-events: none;
+button:hover { background: #eee; }
+#task-queue { width: 100%; max-width: 400px; }
+.task {
+  padding: .5rem;
+  background: #fff;
+  margin: .5rem 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  position: relative;
 }
-
-.world-detail {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
-  font-size: 1.2em;
-  background: #ffffffcc;
-  border-radius: 10px;
-  margin: 15px auto;
-  max-width: 90%;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.progress-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 4px; background: #4caf50;
+  width: 0%;
+  transition: width 0.2s linear;
 }

@@ -115,5 +115,148 @@ Main Themes: Hidden Legacy · Time Travel · Corporate Secrets · Ancient Roots
 
     They have no idea they are woven into the foundation of GelCap Guild's ancient origin… or what secrets the past will force them to uncover.
 
+📘 Act 2 – Chains of the Forgotten (Final Storyboard)
+
+The protagonist, now stranded in the Viking past, must survive forced labor, earn trust through strength and craft, and uncover ancient secrets while alien invaders threaten a dark future.
+✅ Chapter 1: Ash of Arrival
+
+Unlocked by Default
+
+    Protagonist wakes up in the snow near a Viking base camp.
+
+    G.R.A.C.E. is active only in translation mode and struggles at first, glitching in and out.
+
+    Vikings find the protagonist — suspicious but curious due to his strange armor.
+
+    He is taken in as a potential threat and enslaved, sent to the Gæl Mines.
+
+✅ Chapter 2: Below the Iron Roots
+
+Unlocked by Default
+
+    The protagonist is assigned to grueling labor in the mines.
+
+    This chapter introduces the five core tasks, each tied to stat training:
+
+        Cart Hauling (Strength)
+
+        Rockfall Evasion (Speed)
+
+        Tunnel Reinforcement (Defense)
+
+        Endurance Shifts (Endurance)
+
+        Focus Precision (Focus)
+
+    Completing these builds raw physical power and trust among a few Viking guards.
+
+🔓 Chapter 3: Sparks from the Cold
+
+Unlock Key: Craft the Makeshift Charger
+
+    The protagonist builds a crude gel-powered charger to awaken G.R.A.C.E.
+
+    The janky construction barely works but allows G.R.A.C.E. to whisper short instructions.
+
+    [Guard Captain] begins to take serious interest in the protagonist.
+
+    Rumors circulate about “how fast the outsider grows in the dark.”
+
+🔓 Chapter 4: Before the Fire Falls
+
+Unlock Key: Complete all five core mining tasks at least once
+
+    The protagonist nears formal acceptance into the Viking military.
+
+    Before the initiation, the Pakariin arrive.
+
+    They demand to meet the Viking leader but are told none exists — only a sealed king known by few elders.
+
+    Intrigued, the Pakariin leave the mining site to meet the king’s keepers, taking select Viking guards with them.
+
+    The player is left behind, and new training opportunities open in the power vacuum.
+
+🔓 Chapter 5: Submission
+
+Unlock Key: Complete the Chasm Trial (Ultimate Task)
+
+    The Chasm Trial is a deadly physical feat combining all five stats.
+
+    Once completed, the protagonist becomes eligible for true independence.
+
+    However, the Pakariin return to enforce total submission.
+
+    They destroy key Viking defenders with impossible tech and enslave the entire camp.
+
+    The protagonist and others are conscripted into enforced labor and training.
+
+🔓 Chapter 6: The Hunt of the Valking
+
+Unlock Key: Forge your first Viking-crafted Gel weapon
+
+    The protagonist earns his place among the Valking — Viking bounty hunters who hunt for resources.
+
+    Hunting is introduced as a new mechanic for earning gold and reputation.
+
+    Five animals to hunt (progressive difficulty):
+
+        Stone Boar – tough hide, slow.
+
+        Frost Elk – fast and elusive.
+
+        Duskwolf – agile in packs.
+
+        Horned Lynx – lethal solo predator.
+
+        Gelback Bear – strange purple crystal on its spine.
+
+    Each creature builds toward crafting and reputation with the Valking order.
+
+🔓 Chapter 7: The Whisper of Kings
+
+Unlock Key: G.R.A.C.E. reaches 50% Power
+
+    G.R.A.C.E. reactivates with full memory.
+
+    She informs the protagonist of ancient records: the Pakariin have been here before.
+
+    She suspects their presence in the past is tied to the destruction of the future.
+
+    Elders mention that the only one who ever drove them off was the Frozen King.
+
+    The protagonist sets out to uncover this king's true location and awaken him.
+
+    Chapter ends with a vision or whisper from the sealed king — as if he senses your arrival.
+
+🧩 Updated Late Act 2 Sequence
+✅ Chapter 7: The Whisper of Kings
+
+    🔓 Unlock: G.R.A.C.E. reaches 50% power
+
+    📖 Story:
+
+        The protagonist learns of the Frozen King
+
+        G.R.A.C.E. recalls that the Pakariin failed once before
+
+        Elders hint the king was the key to stopping them
+
+        Ends with a whisper… "One who is not yet king must fall first."
+
+    The final lines fade in slowly:
+
+    "Your presence is no longer ignored.
+    The Captain watches."
+    "He prepares your reckoning."
+
+🛑 Chapter 6 (Reordered): The Hunt of the Valking
+
+Now becomes the final chapter of Act 2, unlocked after Chapter 7
+
+    Boss fight: The Valking Captain
+
+    Defeat unlocks Act 3, Echo Chamber, full G.R.A.C.E., rebirth
+
+
 
 

@@ -1,42 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>DragonLoops V1.1</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>DragonLoops: Mount Paozu</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0c0f14;
+      color: #dce3ea;
+      padding: 20px;
+    }
+    button {
+      margin: 4px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2e394d;
+      color: #fff;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    #combat-log {
+      max-height: 200px;
+      overflow-y: scroll;
+      background: #1b212c;
+      border: 1px solid #555;
+      padding: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div id="character-tab" class="panel character-panel">
-      <header>
-        <h2>
-          Character
-          <span id="focus-display">Focus: 0 / 100</span>
-        </h2>
-      </header>
-      <div class="character-menu">
-        <button class="character-tab-btn" data-target="stats">Stats</button>
-        <button class="character-tab-btn" data-target="skills">Skills</button>
-      </div>
-    </div>
+  <h1>DragonLoops: Mount Paozu</h1>
 
-    <div id="adventure-tab" class="panel adventure-panel">
-      <header><h2>Adventure</h2></header>
-      <div class="adventure-menu">
-        <button class="adventure-tab-btn" data-target="locations">Locations</button>
-      </div>
-    </div>
+  <div class="section">
+    <h2>Stats</h2>
+    <p>Sill (Stamina): <span id="sill">100</span></p>
+    <p>Gel-Essence: <span id="gel">0</span></p>
+    <p>Traits: <span id="traits">None</span></p>
+  </div>
 
-    <div id="action-panel" class="panel action-panel">
-      <header><h2>Character Info</h2></header>
-      <div id="character-content"></div>
-    </div>
+  <div class="section">
+    <h2>Mining</h2>
+    <button id="cart">Push Ore Cart</button>
+    <button id="rock">Break Rocks</button>
+    <button id="tunnel">Dig Tunnel</button>
+    <button id="shift">End Shift</button>
+    <button id="focus">Mindful Mining</button>
+  </div>
 
-    <div id="upgrades-panel" class="panel upgrades-panel">
-      <header><h2>Adventure Info</h2></header>
-      <div id="adventure-content"></div>
+  <div class="section">
+    <h2>Hunting</h2>
+    <button id="boar">Wild Boar</button>
+    <button id="elk">Mountain Elk</button>
+    <button id="wolf">Lone Wolf</button>
+    <button id="lynx">Silent Lynx</button>
+    <button id="bear">Giant Bear</button>
+  </div>
+
+  <div class="section">
+    <h2>Progress</h2>
+    <button id="complete-ch7">Complete Chapter 7</button>
+    <button id="fight-boss" style="display:none;">Fight the Valking Captain</button>
+  </div>
+
+  <div class="section">
+    <h2>Combat Log</h2>
+    <div id="combat-log">
+      <div>Game log will appear here...</div>
     </div>
   </div>
-  <script src="game.js"></script>
+
+  <script type="module" src="game.js"></script>
 </body>
 </html>
