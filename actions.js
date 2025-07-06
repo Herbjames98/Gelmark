@@ -1,41 +1,41 @@
 // actions.js
+import { TASKS } from './constants.js'; // Externalized task names
 
-window.addEventListener('DOMContentLoaded', function () {
-  const fightBossBtn = document.getElementById("fight-boss");
-  if (!fightBossBtn) {
-    console.warn("Missing element with ID 'fight-boss'. Please ensure it exists in index.html.");
-  } else {
-    fightBossBtn.addEventListener("click", fightBoss);
+// Generalized handler to debounce task clicks
+function handleTaskClick(task, btn) {
+  btn.disabled = true;
+  gainXP(task);
+  setTimeout(() => {
+    btn.disabled = false;
+  }, 300);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof gainXP !== "function" || typeof completeChapter7 !== "function" || typeof fightBoss !== "function") {
+    console.error("Required game logic functions are not defined. Check game.js loading.");
+    return;
   }
 
-  const ch7Btn = document.getElementById("complete-ch7");
-  if (!ch7Btn) {
-    console.warn("Missing element with ID 'complete-ch7'. Please ensure it exists in index.html.");
-  } else {
-    ch7Btn.addEventListener("click", completeChapter7);
-  }
-
-  if (typeof gainXP !== 'function') {
-    console.error("Function 'gainXP' is not defined. Ensure it exists in the global scope or in game.js.");
-  }
-
-  if (typeof tooltips !== 'object') {
-    console.error("Object 'tooltips' is not defined. Ensure it exists and is properly populated before assigning tooltips.");
-  }
-
-  ['cart','rock','tunnel','shift','focus','boar','elk','wolf','lynx','bear'].forEach(task => {
-    const el = document.getElementById(task);
-    if (el) {
-      el.addEventListener("click", () => gainXP(task, 10));
-      el.title = tooltips && tooltips[task] ? tooltips[task] : "";
+  TASKS.forEach(task => {
+    const btn = document.getElementById(`task-${task}`);
+    if (btn) {
+      btn.addEventListener("click", () => handleTaskClick(task, btn));
     } else {
-      console.warn(`Missing element with ID '${task}'. Please ensure it exists in index.html.`);
+      console.warn(`Button for task '${task}' not found.`);
     }
   });
 
-  if (typeof updateUI !== 'function') {
-    console.error("Function 'updateUI' is not defined. Ensure it exists in the global scope or in game.js.");
+  const ch7 = document.getElementById("complete-ch7");
+  if (ch7) {
+    ch7.addEventListener("click", completeChapter7);
   } else {
-    updateUI();
+    console.warn("Chapter 7 completion button not found.");
+  }
+
+  const bossBtn = document.getElementById("fight-boss");
+  if (bossBtn) {
+    bossBtn.addEventListener("click", fightBoss);
+  } else {
+    console.warn("Boss fight button not found.");
   }
 });
