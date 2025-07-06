@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DragonLoops</title>
+  <title>DragonLoops: Training Grounds</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background-color: #111; color: #eee; }
     .stat-bar { background: #333; width: 100%; height: 20px; margin: 4px 0; border-radius: 3px; overflow: hidden; }
@@ -11,12 +11,12 @@
     .task { margin-bottom: 10px; }
     .tooltip { font-size: 0.85em; color: #aaa; margin-bottom: 4px; }
     #event-log { margin-top: 20px; max-height: 200px; overflow-y: auto; border-top: 1px solid #555; padding-top: 10px; }
-    button { margin: 3px; padding: 6px 10px; background: #222; color: #eee; border: 1px solid #444; cursor: pointer; }
+    button { margin: 3px; padding: 6px 10px; background: #222; color: #eee; border: 1px solid #444; cursor: pointer; border-radius: 4px; }
     button:hover { background: #333; }
+    .controls { margin-top: 20px; }
   </style>
 </head>
 <body>
-
   <h1>DragonLoops: Training Grounds</h1>
 
   <div><strong>Sill:</strong> <span id="sill">0</span></div>
@@ -65,9 +65,14 @@
   <button id="complete-ch7">Complete Chapter 7</button>
   <button id="fight-boss">Fight the Valking Captain</button>
 
+  <div class="controls">
+    <button id="toggle-auto-update">Enable Auto-Update</button>
+    <button id="refresh-ui">Refresh UI</button>
+  </div>
+
   <div id="event-log"></div>
 
   <!-- Load Game Logic as ES6 Module -->
   <script type="module" src="game.js"></script>
 </body>
-</html>
+</html>   
