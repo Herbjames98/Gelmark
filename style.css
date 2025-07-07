@@ -1,21 +1,36 @@
-
 body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f1f1f1;
+  font-family: Arial, sans-serif;
+  background: #f3f3f5;
+  color: #333;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
-
-h1 {
-    color: #333;
+header { display: flex; gap: 2rem; font-weight: bold; }
+button {
+  padding: .5rem 1rem;
+  border: 1px solid #999;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .2s;
 }
-
-.statPanel, .assignments {
-    margin-top: 20px;
-    padding: 10px;
-    background: #fff;
-    border-radius: 8px;
+button:hover { background: #eee; }
+#task-queue { width: 100%; max-width: 400px; }
+.task {
+  padding: .5rem;
+  background: #fff;
+  margin: .5rem 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  position: relative;
 }
-
-.statPanel div, .assignments div {
-    margin: 5px 0;
+.progress-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 4px; background: #4caf50;
+  width: 0%;
+  transition: width 0.2s linear;
 }

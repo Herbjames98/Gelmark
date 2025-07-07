@@ -1,39 +1,78 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Mind Training - Mount Paozu</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DragonLoops: Training Grounds</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #111; color: #eee; }
+    .stat-bar { background: #333; width: 100%; height: 20px; margin: 4px 0; border-radius: 3px; overflow: hidden; }
+    .stat-fill { background: #8e44ad; height: 100%; width: 0; transition: width 0.3s ease; }
+    .task { margin-bottom: 10px; }
+    .tooltip { font-size: 0.85em; color: #aaa; margin-bottom: 4px; }
+    #event-log { margin-top: 20px; max-height: 200px; overflow-y: auto; border-top: 1px solid #555; padding-top: 10px; }
+    button { margin: 3px; padding: 6px 10px; background: #222; color: #eee; border: 1px solid #444; cursor: pointer; border-radius: 4px; }
+    button:hover { background: #333; }
+    .controls { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Mount Paozu: Mental Image Training</h1>
-    <div id="focusBar">Focus Available: <span id="focusCount">100</span></div>
+  <h1>DragonLoops: Training Grounds</h1>
 
-    <div class="statPanel">
-        <div>Strength: <span id="strStat">0</span></div>
-        <div>Speed: <span id="spdStat">0</span></div>
-        <div>Ki: <span id="kiStat">0</span></div>
-    </div>
+  <div><strong>Sill:</strong> <span id="sill">0</span></div>
+  <div><strong>Gel-Essence:</strong> <span id="gel">0</span></div>
+  <div><strong>Focus:</strong> <span id="focus">0</span></div>
 
-    <h2>Assign Mental Projections</h2>
-    <div class="assignments">
-        <div>
-            <span>Visualize Pushups (STR)</span>
-            <input type="number" id="strInput" value="0" min="0">
-        </div>
-        <div>
-            <span>Visualize Sprinting (SPD)</span>
-            <input type="number" id="spdInput" value="0" min="0">
-        </div>
-        <div>
-            <span>Ki Charge Meditation (KI)</span>
-            <input type="number" id="kiInput" value="0" min="0">
-        </div>
-    </div>
+  <hr>
 
-    <button onclick="assignProjections()">Assign Focus</button>
+  <div class="task">
+    <div class="tooltip">Push weighted carts to grow strength. Echoes whisper of old wheels.</div>
+    <button id="task-cart">Cart Hauling</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-cart"></div></div>
+    <div id="xp-cart-text">0 XP</div>
+  </div>
 
-    <script src="game.js"></script>
+  <div class="task">
+    <div class="tooltip">Dodge cave-ins and falling rock. Endurance forged in panic.</div>
+    <button id="task-rock">Rockfall Evasion</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-rock"></div></div>
+    <div id="xp-rock-text">0 XP</div>
+  </div>
+
+  <div class="task">
+    <div class="tooltip">Shore up tunnel walls. Every strike echoes with ancient intent.</div>
+    <button id="task-tunnel">Tunnel Reinforcement</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-tunnel"></div></div>
+    <div id="xp-tunnel-text">0 XP</div>
+  </div>
+
+  <div class="task">
+    <div class="tooltip">Shift until muscle burns. Cold air turns breath to blade.</div>
+    <button id="task-shift">Endurance Shifts</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-shift"></div></div>
+    <div id="xp-shift-text">0 XP</div>
+  </div>
+
+  <div class="task">
+    <div class="tooltip">Focus sharpens. A distant hum from within the gel.</div>
+    <button id="task-focus">Focus Precision</button>
+    <div class="stat-bar"><div class="stat-fill" id="xp-focus"></div></div>
+    <div id="xp-focus-text">0 XP</div>
+  </div>
+
+  <hr>
+
+  <button id="complete-ch7">Complete Chapter 7</button>
+  <button id="fight-boss">Fight the Valking Captain</button>
+
+  <div class="controls">
+    <button id="toggle-auto-update">Enable Auto-Update</button>
+    <button id="refresh-ui">Refresh UI</button>
+  </div>
+
+  <div id="event-log"></div>
+
+  <!-- Load Game Logic as ES6 Module -->
+  <script type="module" src="game.js"></script>
 </body>
-</html>
+</html>   
