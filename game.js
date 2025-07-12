@@ -1,9 +1,9 @@
-// game.js
-import { CONFIG } from './config.js';
-import { TASKS } from './actions.js'; // previously constants.js
 
-let playerStats = {
-  sill: 0,
+import { TASKS } from './constants.js';
+import { BASE_XP_GAIN, MAX_XP, SILL_REGEN_RATE, GEL_GAIN_RATE } from './config.js';
+
+let stats = {
+  sill: 100,
   gel: 0,
   focus: 0,
   xp: {
@@ -11,101 +11,138 @@ let playerStats = {
     rock: 0,
     tunnel: 0,
     shift: 0,
-    focus: 0
+    focus: 0,
   },
-  chapter: 6,
-  bossDefeated: false
 };
 
-function gainXP(taskId) {
-  if (!playerStats.xp.hasOwnProperty(taskId)) {
-    console.warn(`Invalid task: '${taskId}'`);
-    return;
-  }
-  updateResources(taskId);
-  logTaskGain(taskId);
-  updateUI();
-}
+let autoUpdate = true;
 
-function updateResources(taskId) {
-  playerStats.xp[taskId] += CONFIG.XP_PER_TASK;
-  playerStats.sill += CONFIG.SILL_GAIN_PER_XP;
-  playerStats.gel = Math.max(0, playerStats.gel - CONFIG.GEL_DRAIN_PER_ACTION);
-  if (taskId === 'focus') playerStats.focus += 1;
-}
-
-function logTaskGain(taskId) {
-  logEvent(`You feel echoes stir as you train '${taskId}'.`);
+function gainXP(task) {
+  if (stats.sill <= 0) return;
+  stats.xp[task] += BASE_XP_GAIN;
+  if (stats.xp[task] > MAX_XP) stats.xp[task] = MAX_XP;
+  stats.sill -= 1;
+  stats.gel += GEL_GAIN_RATE;
+  stats.focus += task === 'focus' ? 1 : 0;
+  if (autoUpdate) updateUI();
 }
 
 function updateUI() {
-  const statMap = ["sill", "gel", "focus"];
-  statMap.forEach(stat => {
-    const el = document.getElementById(stat);
-    if (el) el.innerText = Math.floor(playerStats[stat]);
-  });
+  document.getElementById('sill').textContent = stats.sill;
+  document.getElementById('gel').textContent = stats.gel;
+  document.getElementById('focus').textContent = stats.focus;
 
-  for (let task in playerStats.xp) {
-    const xpVal = playerStats.xp[task];
-    const fillPercent = Math.min(100, (xpVal / CONFIG.XP_TO_LEVEL) * 100);
-    const fillElem = document.getElementById(`xp-${task}`);
-    const textElem = document.getElementById(`xp-${task}-text`);
-    if (fillElem) fillElem.style.width = `${fillPercent}%`;
-    if (textElem) textElem.innerText = `${xpVal} XP`;
-  }
+  TASKS.forEach(task => {
+    const value = stats.xp[task];
+    const fill = document.getElementById(`xp-${task}`);
+    const text = document.getElementById(`xp-${task}-text`);
+    if (fill) fill.style.width = (value / MAX_XP) * 100 + '%';
+    if (text) text.textContent = `${value} XP`;
+  });
 }
 
 function completeChapter7() {
-  if (playerStats.chapter < 7) {
-    playerStats.chapter = 7;
-    logEvent("Chapter 7 completed. The air thickens with anticipation...");
-  } else {
-    logEvent("Chapter 7 is already complete.");
-  }
-  updateUI();
+  logEvent("Chapter 7 completed.");
+  if (autoUpdate) updateUI();
+}
+
+
+function getPlayerStats(playerXP) {
+  const strengthXP = playerXP.cart;
+  const speedXP = playerXP.rock;
+  const defenseXP = playerXP.tunnel;
+  const enduranceXP = playerXP.shift;
+  const focusXP = playerXP.focus;
+
+  return {
+    atk: Math.floor(strengthXP / 10 + speedXP / 20),
+    def: Math.floor(defenseXP / 15),
+    hp: Math.floor(enduranceXP / 10),
+    critChance: Math.min(100, Math.floor(focusXP / 25)),
+    dodgeChance: Math.min(50, Math.floor(speedXP / 20)),
+  };
 }
 
 function fightBoss() {
-  if (playerStats.chapter < 7) {
-    logEvent("You must complete Chapter 7 first!");
-    return;
-  }
-  if (playerStats.bossDefeated) {
-    logEvent("You've already defeated the Valking Captain.");
-    return;
-  }
-  if (playerStats.sill >= 100 && playerStats.focus >= 50) {
-    playerStats.bossDefeated = true;
-    logEvent("Victory! You have defeated the Valking Captain and entered Act 3.");
-  } else {
-    logEvent("You're not strong enough yet. Focus and Sill must rise.");
-  }
-  updateUI();
+  logEvent("You challenged the Valking Captain...");
+  if (autoUpdate) updateUI();
 }
 
-function logEvent(message) {
-  const log = document.getElementById("event-log");
-  if (log) {
-    const entry = document.createElement("div");
-    entry.textContent = message;
-    log.appendChild(entry);
-    log.scrollTop = log.scrollHeight;
-  }
+function logEvent(text) {
+  const log = document.getElementById('event-log');
+  const entry = document.createElement('div');
+  entry.textContent = `[Event] ${text}`;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  TASKS.forEach(task => {
-    const el = document.getElementById(`task-${task}`);
-    if (el) {
-      el.addEventListener("click", () => gainXP(task));
-    }
-  });
+  const toggle = document.getElementById("toggle-auto-update");
+  if (toggle) {
+    toggle.textContent = autoUpdate ? "Disable Auto-Update" : "Enable Auto-Update";
+    toggle.addEventListener("click", () => {
+      autoUpdate = !autoUpdate;
+      toggle.textContent = autoUpdate ? "Disable Auto-Update" : "Enable Auto-Update";
+    });
+  }
 
-  const ch7 = document.getElementById("complete-ch7");
-  if (ch7) ch7.addEventListener("click", completeChapter7);
+  const refresh = document.getElementById("refresh-ui");
+  if (refresh) {
+    refresh.addEventListener("click", updateUI);
+  }
 
-  const boss = document.getElementById("fight-boss");
-  if (boss) boss.addEventListener("click", fightBoss);
+  updateUI(); // Initial load
+});
 
+// Export to actions.js
+export { gainXP, completeChapter7, fightBoss };
+
+
+
+// === IDLE LOOP ===
+// Passive XP gain and stamina regen
+
+function idleTick() {
+  if (!idleEnabled) return;
+
+  const passiveXP = 1;
+  const regenRate = 1;
+
+  for (let task in playerXP) {
+    playerXP[task] += passiveXP;
+    animateXPGain(task); // Highlight bar
+  }
+
+  sill = Math.min(100, sill + regenRate);
   updateUI();
 });
+
+
+
+function animateXPGain(task) {
+  const bar = document.getElementById(`xp-${task}`);
+  if (!bar) return;
+
+  bar.style.transition = 'none';
+  bar.style.backgroundColor = '#00ff99';
+
+  setTimeout(() => {
+    bar.style.transition = 'background-color 0.5s ease';
+    bar.style.backgroundColor = '#8e44ad';
+  }, 100);
+}
+
+
+
+function animateSillRegen() {
+  const sillElem = document.getElementById("sill");
+  if (!sillElem) return;
+
+  sillElem.style.transition = 'color 0s';
+  sillElem.style.color = '#00ffcc';
+
+  setTimeout(() => {
+    sillElem.style.transition = 'color 0.5s ease';
+    sillElem.style.color = '#eee';
+  }, 100);
+}
