@@ -3,7 +3,54 @@
 <head>
     <meta charset="UTF-8" />
     <title>Gelmark: Echo of Power</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #111;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        #game {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.7);
+        }
+        h1 {
+            text-align: center;
+            color: #00ffd0;
+        }
+        #stats p {
+            margin: 5px 0;
+        }
+        #actions button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #00ffd0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #actions button:hover {
+            background: #333;
+        }
+        #story {
+            margin-top: 20px;
+            padding: 10px;
+            background: #191919;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+        #story h2 {
+            margin-top: 0;
+            color: #00ffd0;
+        }
+    </style>
 </head>
 <body>
     <div id="game">
@@ -29,11 +76,51 @@
         <div id="story">
             <h2>Story</h2>
             <div id="storyLog">
-                <p>You awaken beneath the frozen mountain, alone and cold. G.R.A.C.E. is offline...</p>
+    <p>You awaken beneath the frozen mountain, alone and cold. G.R.A.C.E. is offline...</p>
+    <p>Your breath fogs the air. The chamber is dim, faintly lit by a pulsing crystal embedded in the wall. You remember nothing of how you arrived.</p>
+    <p>There is a terminal nearby, unpowered. A dented steel door blocks the only exit.</p>
+    <p>You feel weak. Perhaps if you push your limits, your body will remember its strength.</p>
+    <p><em>(Tip: Train your stats to trigger new events.)</em></p>
             </div>
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <script>
+        // Initialize stats
+        const stats = {
+            strength: 0,
+            speed: 0,
+            defense: 0,
+            endurance: 0,
+            focus: 0,
+            gel: 0
+        };
+
+        // Update UI
+        function updateUI() {
+            for (let stat in stats) {
+                document.getElementById(stat).textContent = stats[stat];
+            }
+        }
+
+        // Train a stat manually
+        function train(stat) {
+            if (stats.hasOwnProperty(stat)) {
+                stats[stat]++;
+                updateUI();
+            }
+        }
+
+        // Passive gel generation every 5 seconds
+        setInterval(() => {
+            if (stats.focus >= 5) {
+                stats.gel += 1;
+                updateUI();
+            }
+        }, 5000);
+
+        // Initial draw
+        updateUI();
+    </script>
 </body>
 </html>
