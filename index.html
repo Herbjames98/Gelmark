@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Gelmark: Echo of Power</title>
+    <title>index</title>
     <style>
         body {
             background: #111;
@@ -54,7 +54,7 @@
 </head>
 <body>
     <div id="game">
-        <h1>Gelmark: Echo of Power</h1>
+        <h1>index</h1>
 
         <div id="stats">
             <p><strong>Strength:</strong> <span id="strength">0</span></p>
@@ -76,11 +76,12 @@
         <div id="story">
             <h2>Story</h2>
             <div id="storyLog">
-    <p>You awaken beneath the frozen mountain, alone and cold. G.R.A.C.E. is offline...</p>
-    <p>Your breath fogs the air. The chamber is dim, faintly lit by a pulsing crystal embedded in the wall. You remember nothing of how you arrived.</p>
-    <p>There is a terminal nearby, unpowered. A dented steel door blocks the only exit.</p>
-    <p>You feel weak. Perhaps if you push your limits, your body will remember its strength.</p>
-    <p><em>(Tip: Train your stats to trigger new events.)</em></p>
+                <p id="scene-0">You awaken beneath the frozen mountain, alone and cold. G.R.A.C.E. is offline...</p>
+                <p id="scene-1" style="display:none;">Your breath fogs the air. The chamber is dim, faintly lit by a pulsing crystal embedded in the wall. You remember nothing of how you arrived.</p>
+                <p id="scene-2" style="display:none;">There is a terminal nearby, unpowered. A dented steel door blocks the only exit.</p>
+                <p id="scene-3" style="display:none;">You feel weak. Perhaps if you push your limits, your body will remember its strength.</p>
+                <p id="scene-4" style="display:none;"><em>(Tip: Train your stats to trigger new events.)</em></p>
+                <p id="scene-5" style="display:none;">As you focus your training, the crystal hums faintly. Something ancient stirs within the chamber walls...</p>
             </div>
         </div>
     </div>
@@ -96,22 +97,33 @@
             gel: 0
         };
 
-        // Update UI
         function updateUI() {
             for (let stat in stats) {
                 document.getElementById(stat).textContent = stats[stat];
             }
         }
 
-        // Train a stat manually
+        function revealScene(id) {
+            const scene = document.getElementById(id);
+            if (scene) scene.style.display = 'block';
+        }
+
         function train(stat) {
             if (stats.hasOwnProperty(stat)) {
                 stats[stat]++;
                 updateUI();
+                checkStoryProgress();
             }
         }
 
-        // Passive gel generation every 5 seconds
+        function checkStoryProgress() {
+            if (stats.strength >= 1) revealScene('scene-1');
+            if (stats.speed >= 1) revealScene('scene-2');
+            if (stats.defense >= 1) revealScene('scene-3');
+            if (stats.endurance >= 1) revealScene('scene-4');
+            if (stats.focus >= 3) revealScene('scene-5');
+        }
+
         setInterval(() => {
             if (stats.focus >= 5) {
                 stats.gel += 1;
@@ -119,7 +131,6 @@
             }
         }, 5000);
 
-        // Initial draw
         updateUI();
     </script>
 </body>
