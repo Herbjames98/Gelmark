@@ -1,1 +1,0 @@
-export const TASKS = ["cart", "rock", "tunnel", "shift", "focus"];
