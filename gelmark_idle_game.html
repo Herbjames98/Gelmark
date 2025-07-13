@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gelmark: Echo of Power</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game">
+        <h1>Gelmark: Echo of Power</h1>
+
+        <div id="stats">
+            <p><strong>Strength:</strong> <span id="strength">0</span></p>
+            <p><strong>Speed:</strong> <span id="speed">0</span></p>
+            <p><strong>Defense:</strong> <span id="defense">0</span></p>
+            <p><strong>Endurance:</strong> <span id="endurance">0</span></p>
+            <p><strong>Focus:</strong> <span id="focus">0</span></p>
+            <p><strong>Gel:</strong> <span id="gel">0</span></p>
+        </div>
+
+        <div id="actions">
+            <button onclick="train('strength')">Train Strength</button>
+            <button onclick="train('speed')">Train Speed</button>
+            <button onclick="train('defense')">Train Defense</button>
+            <button onclick="train('endurance')">Train Endurance</button>
+            <button onclick="train('focus')">Train Focus</button>
+        </div>
+
+        <div id="story">
+            <h2>Story</h2>
+            <div id="storyLog">
+                <p>You awaken beneath the frozen mountain, alone and cold. G.R.A.C.E. is offline...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
