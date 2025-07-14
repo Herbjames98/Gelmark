@@ -56,7 +56,7 @@ if lore_data:
             st.subheader("🧍 Companions")
             for c in section["companions"]:
                     if isinstance(c, dict):
-                st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
+                        st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
         else:
                     st.markdown(str(c))
                     st.markdown(f"- Bond: {c['bond']}")
