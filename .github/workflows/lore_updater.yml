@@ -1,39 +1,27 @@
-name: Lore Updater Bot
+name: Lore Updater Bot - DIAGNOSTIC MODE
 
 on:
-  schedule:
-    - cron: '*/5 * * * *' # Runs every 5 minutes
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+  workflow_dispatch: # Run this manually only
 
 jobs:
-  update-lore:
+  diagnose-the-problem:
     runs-on: ubuntu-latest
-    
-    # This removes any default working directory that might be set
-    defaults:
-      run:
-        working-directory: ./
 
     steps:
-      # Step 1: Download your repository code
-      - name: Checkout repository
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      # Step 2: Set up the correct version of Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      # Step 3: Install the Python libraries your script needs
-      - name: Install dependencies
+      - name: Run Diagnostics
         run: |
-          python -m pip install --upgrade pip
-          pip install google-generativeai gitpython
-
-      # Step 4: Run the main pipeline script
-      # It runs in the root directory, which is what your Python script expects.
-      - name: Run Lore Update Pipeline
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python update_lore_pipeline.py
+          echo "--- 1. WHERE AM I? ---"
+          pwd
+          
+          echo "--- 2. WHAT IS IN MY WORKFLOWS FOLDER? ---"
+          ls -l .github/workflows
+          
+          echo "--- 3. WHAT IS THE CONTENT OF THE WORKFLOW FILE I AM RUNNING? ---"
+          # Replace 'lore-updater-bot.yml' with the actual filename if it's different.
+          cat .github/workflows/lore-updater-bot.yml
+          
+          echo "--- 4. WHAT IS THE ENTIRE FILE STRUCTURE? ---"
+          ls -R
