@@ -57,11 +57,12 @@ if lore_data:
             for c in section["companions"]:
                 if isinstance(c, dict):
                     st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
-            else:
                     st.markdown(str(c))
                     st.markdown(f"- Bond: {c['bond']}")
                     st.markdown(f"- Sync: {c['sync']}")
                     st.markdown(f"- Traits: {', '.join(c['trait_alignment'])}")
+                else:
+                    st.markdown(str(c))
 
         if "codex_expansions" in section:
             st.subheader("📖 Codex Expansions")
