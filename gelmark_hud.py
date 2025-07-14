@@ -1,160 +1,118 @@
+# Gelmark Synced Core (Page-Based System)
 
-import streamlit as st
-import json
-from typing import List, Dict
+"""
+This unified module uses a page-based structure to manage narrative progression, stat tracking, Echoform evolution, companion arcs, shrine interactions, and systemic branching across acts.
+"""
 
-st.set_page_config(layout="wide")
-
-# --- TRAITS ---
-class Trait:
-    def __init__(self, name: str, type_: str, description: str):
-        self.name = name
-        self.type = type_
-        self.description = description
-
-    def __repr__(self):
-        return f"{self.name} ({self.type})"
-
-# --- COMPANIONS ---
-class Companion:
-    def __init__(self, name: str):
-        self.name = name
-        self.sync_rate = 0
-        self.traits: List[Trait] = []
-
-    def add_trait(self, trait: Trait):
-        self.traits.append(trait)
-
-    def get_bonuses(self):
-        return [f"{trait.name}: {trait.description}" for trait in self.traits]
-
-# --- TRAIT REGISTRY ---
-TRAIT_REGISTRY = {
-    "Commandless Grace": Trait("Commandless Grace", "Permanent", "An origin-bound resilience from a fractured future."),
-    "Blessing of Askr": Trait("Blessing of Askr", "Permanent", "A relic-born boon tied to the world roots."),
-    "Grace of the Verdant Fracture": Trait("Grace of the Verdant Fracture", "Hybrid", "A synthesis of Grace and Askr, echo-bound."),
-    "Echo Resilience": Trait("Echo Resilience", "Echoform", "Boosts vision clarity when sync exceeds 50% with AI companions."),
+# === 📖 Page Index ===
+pages = {
+    "Prologue": "page_prologue",
+    "Act 1": "page_act1",
+    "Act 2": "page_act2",
+    "Shrine Threads": "page_shrines",
+    "Echoform & Traits": "page_echoform",
+    "Companions": "page_companions",
+    "Codex Lore": "page_codex",
+    "Stats": "page_stats",
+    "System Controls": "page_system"
 }
 
-FUSION_MAP = {
-    ("Commandless Grace", "Blessing of Askr"): {
-        "result": TRAIT_REGISTRY["Grace of the Verdant Fracture"],
-        "shrine": "Memoryfire Crucible",
-        "companion_sync": {"G.R.A.C.E.": 25}
-    },
-}
+# === 📜 Page: Prologue ===
+def page_prologue():
+    return {
+        "summary": "The protagonist, unnamed at first, arrives through a time fracture caused by the Pulse Engine, crashing in the Age of Blades near a Norse-like village. Mistaken as a fated omen, they uncover fragments of Grace, a broken AI from a collapsed future spiral.",
+        "arrival_event": "Meteoric descent into the Viking hinterlands; Grace’s core discovered." 
+    }
 
-# --- PLAYER ---
-class Player:
-    def __init__(self):
-        self.arc_rank = "Pulsebearer"
-        self.traits: List[Trait] = []
-        self.inventory: List[str] = []
-        self.shrine_history: List[str] = []
-        self.visions: List[str] = []
-        self.companions: Dict[str, Companion] = {}
+# === 📜 Page: Act 1 ===
+def page_act1():
+    return {
+        "shrines": [
+            {"id": 1, "name": "Memoryfire Crucible", "unlocks": ["Insight synergy", "Vision 1"], "traits": ["Loopborn", "Seer’s Pulse"]},
+            {"id": 2, "name": "Fusion Shrine — Grace + Askr", "unlocks": ["Fusion with AI Core"], "traits": ["Frozen Moment"]},
+            {"id": 3, "name": "Threaded Split Chamber", "unlocks": ["Echoform Phase I"], "traits": ["Fracture Delay"]},
+            {"id": 4, "name": "Vaultside Echoflow", "unlocks": ["Memory Offering Path"], "traits": ["Selfless Paradox"]},
+            {"id": 5, "name": "Sealed Chamber", "unlocks": ["Echoform Phase II"], "traits": ["Riftbreaker"]}
+        ],
+        "visions": ["The Pulse Awakens", "Grace’s Future Memory Fragment", "Broken Spiral Mirror", "Vaultside Collapse"],
+        "companions": ["Caelik", "Grace"],
+        "codex": ["The Voice That Waited", "What You Could Have Been"]
+    }
 
-    def add_trait(self, trait: Trait):
-        self.traits.append(trait)
+# === 📜 Page: Act 2 ===
+def page_act2():
+    return {
+        "summary": "After Seer’s Convergence, Grace repairs herself in the Memory Engine. Caelik guards the core. Thjolda is introduced with her Oathmark in Shrine 6.",
+        "shrines": [
+            {"id": 6, "name": "Runebound Oathmark", "unlocks": ["Thjolda vision"], "traits": ["Twin Flame Anchor"]}
+        ],
+        "visions": ["The Seer’s Convergence", "Shrine Reversal Event"],
+        "companions": ["Thjolda"]
+    }
 
-    def has_trait(self, trait_name: str):
-        return any(t.name == trait_name for t in self.traits)
+# === 📜 Page: Shrine Threads ===
+def page_shrines():
+    return [
+        "Shrines act as memory loci tied to stat synergy and trait fusion. Each number reflects a unique narrative gatepoint, not in-world naming.",
+        "Shrine 1: Insight & Loopborn | Shrine 2: Fusion + Frozen Moment | Shrine 3: Echoform | Shrine 4: Memory Offering | Shrine 5: Riftbreaker",
+        "Shrine 6: Oathmark (Thjolda)"
+    ]
 
-    def fuse_traits(self, t1: str, t2: str):
-        key = (t1, t2) if (t1, t2) in FUSION_MAP else (t2, t1)
-        if key in FUSION_MAP:
-            info = FUSION_MAP[key]
-            if info['shrine'] not in self.shrine_history:
-                return f"Visit required shrine: {info['shrine']}"
-            for comp, req in info.get('companion_sync', {}).items():
-                if self.companions.get(comp, Companion(comp)).sync_rate < req:
-                    return f"Sync with {comp} must be at least {req}"
-            if self.has_trait(t1) and self.has_trait(t2):
-                self.traits = [t for t in self.traits if t.name not in key]
-                self.add_trait(info['result'])
-                return f"Fused {t1} and {t2} into {info['result'].name}"
-            return "Required traits not found."
-        return "Invalid trait combination."
+# === 📜 Page: Echoform & Traits ===
+def page_echoform():
+    return {
+        "phases": {
+            "I": ["Fracture Delay"],
+            "II": ["Selfless Paradox", "Riftbreaker"]
+        },
+        "unlocked_by": "Shrines 3, 5 + Memory Offering",
+        "hybrids": ["Grace + Askr", "Flame Hybrid (Caelik)", "Oathmark Hybrid (Pending)"]
+    }
 
-    def update_sync(self, name: str, delta: int):
-        if name in self.companions:
-            self.companions[name].sync_rate = min(100, max(0, self.companions[name].sync_rate + delta))
+# === 📜 Page: Companions ===
+def page_companions():
+    return {
+        "Caelik": {
+            "origin": "Flamebound Knight of Vael-Rith",
+            "bond": "Shielded player during collapse",
+            "sync": "100%",
+            "hybrid": "Flame Hybrid"
+        },
+        "Grace": {
+            "origin": "AI from Spiral Observatory",
+            "bond": "Fused with Askr Core",
+            "sync": "115%",
+            "form": "Recovered robot at crash site"
+        },
+        "Thjolda": {
+            "origin": "Runeborn Shieldmaiden",
+            "bond": "Shrine lattice echo",
+            "sync": "75%"
+        }
+    }
 
-    def log_shrine_visit(self, name: str):
-        self.shrine_history.append(name)
+# === 📜 Page: Codex Lore ===
+def page_codex():
+    return [
+        "The Voice That Waited", "What You Could Have Been", "Where Memory Becomes Will"
+    ]
 
-    def log_vision(self, vision: str):
-        self.visions.append(vision)
+# === 📜 Page: Stats ===
+def page_stats():
+    return {
+        "Insight": 17,
+        "Endurance": 12,
+        "Will": 14,
+        "Focus": 19,
+        "Echoform Resonance": 22
+    }
 
-    def display(self):
-        st.title("Gelmark HUD")
-        st.subheader(f"Arc Rank: {self.arc_rank}")
-        st.write("---")
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.subheader("Traits")
-            for t in self.traits:
-                st.markdown(f"**{t.name}** *({t.type})* — {t.description}")
-
-        with col2:
-            st.subheader("Inventory")
-            for item in self.inventory:
-                st.markdown(f"- {item}")
-
-        with col3:
-            st.subheader("Shrines Visited")
-            for shrine in self.shrine_history:
-                st.markdown(f"- {shrine}")
-
-        st.write("---")
-        st.subheader("Companions")
-        for cname, comp in self.companions.items():
-            st.markdown(f"**{cname}** – Sync: {comp.sync_rate}%")
-            for bonus in comp.get_bonuses():
-                st.markdown(f"➤ {bonus}")
-
-        st.write("---")
-        st.subheader("Visions")
-        for v in self.visions:
-            st.markdown(f"🔮 {v}")
-
-        st.write("---")
-        st.subheader("Fusion Interface")
-        tnames = [t.name for t in self.traits]
-        if len(tnames) >= 2:
-            t1 = st.selectbox("First Trait", tnames)
-            t2 = st.selectbox("Second Trait", [t for t in tnames if t != t1])
-            if st.button("Fuse Traits"):
-                st.success(self.fuse_traits(t1, t2))
-
-        st.write("---")
-        st.subheader("Seer's Pulse — Rank Choices")
-        choices = st.text_area("Enter narrative choices (one per line):").split("\n")
-
-        def score_choice(choice: str) -> int:
-            keywords = ["honor", "sacrifice", "resolve", "echo", "fracture", "pulse"]
-            return sum(3 for word in keywords if word in choice.lower()) + len(choice)
-
-        ranked = sorted([(c, score_choice(c)) for c in choices if c.strip()], key=lambda x: -x[1])
-        for i, (text, score) in enumerate(ranked):
-            st.markdown(f"**{i+1}.** {text} *(score: {score})*")
-
-        if ranked:
-            top = ranked[0][0]
-            self.log_vision(f"Seer’s Pulse ranked top: {top}")
-
-def main():
-    player = Player()
-    player.add_trait(TRAIT_REGISTRY["Commandless Grace"])
-    player.add_trait(TRAIT_REGISTRY["Blessing of Askr"])
-    player.inventory.append("Coreborn Hammer")
-    player.log_shrine_visit("Memoryfire Crucible")
-    player.log_vision("Vision Tier 2: Echoed Past")
-    player.companions["G.R.A.C.E."] = Companion("G.R.A.C.E.")
-    player.companions["G.R.A.C.E."].add_trait(TRAIT_REGISTRY["Echo Resilience"])
-    player.update_sync("G.R.A.C.E.", 30)
-    player.display()
-
-if __name__ == "__main__":
-    main()
+# === ⚙️ Page: System Controls ===
+def page_system():
+    return {
+        "Seer’s Pulse": "Enabled",
+        "Echoform Memory Rewrites": "Logically Sequenced",
+        "Trait Fusions": "Tracking Active",
+        "Arc Rank": "Apostate Tier II",
+        "Checkpoint": "Shrine 6 (Runebound Oathmark)"
+    }
