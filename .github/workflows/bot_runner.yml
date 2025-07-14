@@ -1,4 +1,4 @@
-name: Lore Bot Runner
+name: Lore Updater Bot
 
 on:
   schedule:
@@ -9,21 +9,58 @@ jobs:
   update-lore:
     runs-on: ubuntu-latest
 
+    # --- THIS IS THE CRITICAL PERMISSIONS BLOCK ---
+    # It gives the bot the right to create a pull request.
+    permissions:
+      contents: write      # Allows creating branches and committing
+      pull-requests: write # Allows creating the pull request
+
     steps:
+      # Step 1: Download the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install google-generativeai gitpython
 
+      # Step 4: Run the pipeline inside the correct folder
       - name: Run Lore Update Pipeline
+        working-directory: ./My gm   # This is correct if the folder exists
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
+
+      # Step 5: Create Pull Request from within the correct folder
+      - name: Create Pull Request
+        working-directory: ./My gm # This is also correct
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name 'Lore Bot'
+          git config --global user.email 'lore-bot@users.noreply.github.com'
+
+          # Exit if there are no changes made by the script
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit. Exiting."
+            exit 0
+          fi
+          
+          # Create and push a new branch with the changes
+          BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          git add -A
+          git commit -m "Automated Lore Update"
+          git push -u origin $BRANCH_NAME
+          
+          # Use the GitHub CLI to create the Pull Request
+          gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot."
