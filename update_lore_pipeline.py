@@ -1,21 +1,22 @@
 import os
-import openai
+import google.generativeai as genai
 from git import Repo
 import ast
 import pprint
 
 # --- ⚙️ Configuration ---
+# Get your key from Google AI Studio: https://aistudio.google.com/
 # It is highly recommended to set this as an environment variable for security
-OPENAI_API_KEY = "YOUR_OPENAI_API_KEY" 
+GEMINI_API_KEY = "AIzaSyAQ5hOepF_TWqJpptBKuiym0sjKr0o1pGA"
 
 # The local file path to your Git repository (your project folder)
 # Use "." if the script is in the root of the repository.
 REPO_PATH = "." 
 LORE_MODULES_DIR = "lore_modules"
 
-# --- 🤖 OpenAI and Git Setup ---
+# --- 🤖 Google Gemini and Git Setup ---
 try:
-    openai.api_key = OPENAI_API_KEY
+    genai.configure(api_key=GEMINI_API_KEY)
     repo = Repo(REPO_PATH)
 except Exception as e:
     print(f"Error initializing script: {e}")
@@ -32,36 +33,31 @@ def get_file_content(module_name):
     with open(file_path, 'r') as f:
         return f.read()
 
-def generate_updated_lore(module_name, current_code, prompt):
+def generate_updated_lore_with_gemini(module_name, current_code, prompt):
     """
-    Sends a request to the OpenAI API to update the lore code.
+    Sends a request to the Gemini API to update the lore code.
     """
-    system_prompt = (
-        "You are an expert Python assistant. Your task is to modify a Python dictionary containing game lore. "
-        "The user will provide the current code and a request for a change. "
-        "Your response MUST be ONLY the complete, updated Python code for the dictionary variable. "
-        "Do not include any other text, explanations, markdown formatting, or the word 'python'."
-    )
+    # Using a newer, fast model. You can also use 'gemini-1.5-pro' for higher quality.
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
+    # Gemini works well with a single, detailed prompt.
     full_prompt = (
-        f"Here is the current Python code for the '{module_name}' module:\n\n"
-        f"```python\n{current_code}\n```\n\n"
-        f"Please apply this change: '{prompt}'"
+        "You are an expert Python assistant. Your task is to modify a Python dictionary that contains game lore. "
+        "I will provide you with the current Python code and a request for a change. "
+        "Your response MUST be ONLY the complete, updated Python code for the dictionary variable. "
+        "Do not include any other text, explanations, or markdown code fences like ```python."
+        "\n\n--- CURRENT CODE ---\n"
+        f"{current_code}"
+        "\n\n--- CHANGE REQUEST ---\n"
+        f"Apply this change: '{prompt}'"
     )
 
-    print("🤖 Sending request to OpenAI... This may take a moment.")
+    print("🤖 Sending request to Gemini... This may take a moment.")
     try:
-        response = openai.chat.completions.create(
-            model="gpt-4",  # Using a more advanced model is better for code generation
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_prompt}
-            ],
-            temperature=0.5
-        )
-        return response.choices[0].message.content.strip()
+        response = model.generate_content(full_prompt)
+        return response.text.strip()
     except Exception as e:
-        print(f"❌ An error occurred with the OpenAI API: {e}")
+        print(f"❌ An error occurred with the Gemini API: {e}")
         return None
 
 def save_and_commit(module_name, new_code_string, commit_message):
@@ -71,15 +67,15 @@ def save_and_commit(module_name, new_code_string, commit_message):
     # 1. Validate the code is a valid Python dictionary
     try:
         # ast.literal_eval is a safe way to parse Python literals
-        parsed_dict = ast.literal_eval(new_code_string.split('=', 1)[1].strip())
-        variable_name = new_code_string.split('=', 1)[0].strip()
+        parsed_dict = ast.literal_eval(new_code_string.split('=', 1).strip())
+        variable_name = new_code_string.split('=', 1).strip()
     except (ValueError, SyntaxError) as e:
-        print(f"❌ Validation Error: The code from OpenAI is not a valid Python dictionary. Aborting. Error: {e}")
+        print(f"❌ Validation Error: The code from Gemini is not a valid Python dictionary. Aborting. Error: {e}")
         print("\n--- Received Code ---\n")
         print(new_code_string)
         return
 
-    # 2. Format and Save the code
+    # 2. Format and Save the code using pprint for nice formatting
     formatted_code = f"{variable_name} = {pprint.pformat(parsed_dict, indent=4)}"
     file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
     with open(file_path, 'w') as f:
@@ -114,7 +110,7 @@ if __name__ == "__main__":
     user_prompt = input(f"What change would you like to make to '{target_module}'? ")
 
     current_code = get_file_content(target_module)
-    new_code = generate_updated_lore(target_module, current_code, user_prompt)
+    new_code = generate_updated_lore_with_gemini(target_module, current_code, user_prompt)
 
     if new_code:
         save_and_commit(target_module, new_code, user_prompt)
