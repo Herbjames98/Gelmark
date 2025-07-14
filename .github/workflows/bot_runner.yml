@@ -35,14 +35,14 @@ jobs:
 
       # Step 4: Run your Python script from inside the correct folder
       - name: Run Lore Update Pipeline
-        working-directory: ./My gm
+        working-directory: /My gm
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
 
       # Step 5: Check for changes and create a Pull Request if necessary
       - name: Create Pull Request
-        working-directory: ./My gm
+        working-directory: /My gm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
