@@ -17,38 +17,20 @@ pages = {
     "System Controls": "page_system"
 }
 
+# === Modular Imports ===
+from lore_modules import prologue, act1, act2
+
 # === 📜 Page: Prologue ===
 def page_prologue():
-    return {
-        "summary": "The protagonist, unnamed at first, arrives through a time fracture caused by the Pulse Engine, crashing in the Age of Blades near a Norse-like village. Mistaken as a fated omen, they uncover fragments of Grace, a broken AI from a collapsed future spiral.",
-        "arrival_event": "Meteoric descent into the Viking hinterlands; Grace’s core discovered." 
-    }
+    return prologue.get_data()
 
 # === 📜 Page: Act 1 ===
 def page_act1():
-    return {
-        "shrines": [
-            {"id": 1, "name": "Memoryfire Crucible", "unlocks": ["Insight synergy", "Vision 1"], "traits": ["Loopborn", "Seer’s Pulse"]},
-            {"id": 2, "name": "Fusion Shrine — Grace + Askr", "unlocks": ["Fusion with AI Core"], "traits": ["Frozen Moment"]},
-            {"id": 3, "name": "Threaded Split Chamber", "unlocks": ["Echoform Phase I"], "traits": ["Fracture Delay"]},
-            {"id": 4, "name": "Vaultside Echoflow", "unlocks": ["Memory Offering Path"], "traits": ["Selfless Paradox"]},
-            {"id": 5, "name": "Sealed Chamber", "unlocks": ["Echoform Phase II"], "traits": ["Riftbreaker"]}
-        ],
-        "visions": ["The Pulse Awakens", "Grace’s Future Memory Fragment", "Broken Spiral Mirror", "Vaultside Collapse"],
-        "companions": ["Caelik", "Grace"],
-        "codex": ["The Voice That Waited", "What You Could Have Been"]
-    }
+    return act1.get_data()
 
 # === 📜 Page: Act 2 ===
 def page_act2():
-    return {
-        "summary": "After Seer’s Convergence, Grace repairs herself in the Memory Engine. Caelik guards the core. Thjolda is introduced with her Oathmark in Shrine 6.",
-        "shrines": [
-            {"id": 6, "name": "Runebound Oathmark", "unlocks": ["Thjolda vision"], "traits": ["Twin Flame Anchor"]}
-        ],
-        "visions": ["The Seer’s Convergence", "Shrine Reversal Event"],
-        "companions": ["Thjolda"]
-    }
+    return act2.get_data()
 
 # === 📜 Page: Shrine Threads ===
 def page_shrines():
