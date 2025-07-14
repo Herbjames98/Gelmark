@@ -37,7 +37,9 @@ traits = [
     ("Vaultbind Glyph", "Unlocked via Shrine 4 memory offering"),
     ("Mirrorphase Fragment", "Linked to Vision 6 — temporal feedback trait"),
     ("Pulse Anchor", "Seer-threaded. Grants resonance over Echoform phase shifts"),
-    ("Caelik's Echo Brand", "Triggers shrine protection at critical sync events")
+    ("Caelik's Echo Brand", "Triggers shrine protection at critical sync events"),
+    ("Chronospike Halo", "Timeline defense fragment from Shrine 3 collapse"),
+    ("Glyphseed Core", "Unlocked by Shrine 2 flame trial")
 ]
 for i, (name, desc) in enumerate(traits):
     with trait_cols[i % 4]:
