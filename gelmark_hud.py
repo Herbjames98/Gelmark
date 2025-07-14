@@ -20,8 +20,7 @@ def load_lore_module(module_name):
         return None
 
 # === ✍️ Lore Editor UI ===
-# In gelmark_hud.py, replace your entire lore_editor_ui function with this one.
-# This version includes the correct MIME types for Word documents.
+# In gelmark_hud.py, replace the lore_editor_ui function with this final version.
 
 import streamlit as st
 import importlib.util
@@ -34,13 +33,14 @@ def lore_editor_ui():
     """Adds a lore editing interface to the sidebar."""
     st.sidebar.title("🛠️ Lore Editor")
     
-    # --- Simple Editor ---
+    # --- Simple Editor (remains the same) ---
     st.sidebar.subheader("Simple Edit")
     lore_files = [f.replace('.py', '') for f in os.listdir("lore_modules") if f.endswith('.py') and '__init__' not in f]
     selected_module = st.sidebar.selectbox("Choose a module to edit:", lore_files)
     edit_instruction = st.sidebar.text_area("What simple change do you want to make?", height=100)
 
     if st.sidebar.button("Submit Simple Update"):
+        # ... (This logic is unchanged)
         if not edit_instruction:
             st.sidebar.warning("Please provide an instruction for the update.")
             return
@@ -54,48 +54,45 @@ def lore_editor_ui():
     
     st.sidebar.markdown("---")
 
-    # --- Narrative Save Section ---
+    # --- FINAL, CLEANED-UP Narrative Save Section ---
     st.sidebar.subheader("Narrative Save")
     
-    # --- THIS IS THE CORRECTED LINE ---
-    # We now include the official MIME types for .docx and .doc files.
+    # The label is now the source of truth for the user. We set type=None.
     uploaded_file = st.sidebar.file_uploader(
-        "Upload a conversation log (.txt, .docx)", 
-        type=['txt', 'md', 'docx', 'doc', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']
+        "Upload Conversation Log (.txt or .docx)", 
+        type=None # Allow any file, we will check it ourselves.
     )
 
     if st.sidebar.button("Process and Save Narrative from File"):
         if uploaded_file is None:
             st.sidebar.warning("Please upload a file to save.")
             return
-        
+            
+        # --- NEW: Manual File Type Validation ---
+        file_name = uploaded_file.name
+        if not (file_name.endswith('.txt') or file_name.endswith('.md') or file_name.endswith('.docx')):
+            st.sidebar.error("Invalid file type. Please upload a .txt, .md, or .docx file.")
+            return # Stop the function here if the file type is wrong.
+
         narrative_log = ""
         
         try:
-            # Check the MIME type OR the name for '.docx'
-            if uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or uploaded_file.name.endswith('.docx'):
+            # We now only need to check the file name extension
+            if file_name.endswith('.docx'):
                 document = docx.Document(uploaded_file)
                 narrative_log = "\n".join([para.text for para in document.paragraphs])
-            # Check for older .doc files
-            elif uploaded_file.type == "application/msword" or uploaded_file.name.endswith('.doc'):
-                 st.sidebar.error(".doc files are not supported, please save as .docx or .txt")
-                 return
-            else: # Treat as plain text
+            else: # Handles .txt and .md
                 narrative_log = uploaded_file.read().decode("utf-8")
         except Exception as e:
-            st.sidebar.error(f"Error reading file: {e}")
+            st.sidebar.error(f"Error reading file content: {e}")
             return
 
         if not narrative_log:
             st.sidebar.error("Could not extract any text from the uploaded file.")
             return
 
-        new_job = {
-            "id": datetime.now().isoformat(),
-            "type": "narrative_save",
-            "data": narrative_log,
-            "status": "pending"
-        }
+        # The rest of the logic remains identical
+        new_job = { "id": datetime.now().isoformat(), "type": "narrative_save", "data": narrative_log, "status": "pending" }
         try:
             with open("job_queue.json", 'r+') as f:
                 queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
