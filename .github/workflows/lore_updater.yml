@@ -8,6 +8,11 @@ on:
 jobs:
   update-lore:
     runs-on: ubuntu-latest
+    
+    # This removes any default working directory that might be set
+    defaults:
+      run:
+        working-directory: ./
 
     steps:
       # Step 1: Download your repository code
@@ -18,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Matches the version you specified
+          python-version: '3.11'
 
       # Step 3: Install the Python libraries your script needs
       - name: Install dependencies
@@ -27,8 +32,7 @@ jobs:
           pip install google-generativeai gitpython
 
       # Step 4: Run the main pipeline script
-      # This assumes your script is named "update_lore_pipeline.py"
-      # and is in the root of your repository.
+      # It runs in the root directory, which is what your Python script expects.
       - name: Run Lore Update Pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
