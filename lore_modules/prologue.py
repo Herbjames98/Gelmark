@@ -2,7 +2,7 @@
 
 prologue_lore = {
     "summary": "Not the warp",
-    "key events": (
+    "key_events": (
           "The protagonist, unnamed at first, arrives through a time fracture caused by the Pulse Engine, crashing "
             "in the Age of Blades near a Norse-like village. Mistaken as a fated omen, they uncover fragments of Grace, "
             "a broken AI from a collapsed future spiral."
