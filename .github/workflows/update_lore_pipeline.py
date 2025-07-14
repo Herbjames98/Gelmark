@@ -19,7 +19,7 @@ except ImportError:
 
 # --- ⚙️ Configuration ---
 # Get your key from Google AI Studio: https://aistudio.google.com/
-GEMINI_API_KEY = "AIzaSyCGN72PxIS0v4Z4zOHgvSwwXdrDhBR3rXM" # <--- PASTE YOUR KEY HERE
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # <--- PASTE YOUR KEY HERE
 
 # The local file path to your Git repository (your project folder)
 REPO_PATH = "." 
