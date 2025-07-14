@@ -5,6 +5,9 @@ import os
 # === 📁 Modular Lore Loader ===
 
 def load_lore_module(module_name):
+    """
+    Loads a lore module from the 'lore_modules' directory.
+    """
     try:
         path = os.path.join("lore_modules", f"{module_name}.py")
         spec = importlib.util.spec_from_file_location(module_name, path)
@@ -57,10 +60,9 @@ if lore_data:
             for c in section["companions"]:
                 if isinstance(c, dict):
                     st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
-                    st.markdown(str(c))
-                    st.markdown(f"- Bond: {c['bond']}")
-                    st.markdown(f"- Sync: {c['sync']}")
-                    st.markdown(f"- Traits: {', '.join(c['trait_alignment'])}")
+                    st.markdown(f"- Bond: {c.get('bond', 'N/A')}")
+                    st.markdown(f"- Sync: {c.get('sync', 'N/A')}")
+                    st.markdown(f"- Traits: {', '.join(c.get('trait_alignment', []))}")
                 else:
                     st.markdown(str(c))
 
