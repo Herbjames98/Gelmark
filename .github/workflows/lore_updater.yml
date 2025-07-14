@@ -1,49 +1,63 @@
-# This is the name of your GitHub Action
 name: Lore Updater Bot
 
-# This section defines when the action runs
 on:
-  # Run automatically on a schedule (every 5 minutes)
   schedule:
     - cron: '*/5 * * * *'
-  # Also allow running it manually from the GitHub Actions tab
   workflow_dispatch:
 
-# This section defines the jobs to be run
 jobs:
   update-lore:
-    # Run the job on a virtual machine provided by GitHub
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out your repository code so the script can access it
+      # Step 1: Checkout repository (no change)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up the Python environment
+      # Step 2: Set up Python (no change)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Use a modern Python version
+          python-version: '3.11'
 
-      # Step 3: Install the required Python libraries
+      # Step 3: Install dependencies (no change)
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install google-generativeai gitpython
 
-      # Step 4: Run your pipeline script
-      # It uses a "secret" for the API key, which is more secure
+      # Step 4: Run your pipeline script (no change)
       - name: Run Lore Update Pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline_gemini.py
 
-      # Step 5: If the script made changes, commit and push them back
-      - name: Commit and Push Changes
+      # --- UPGRADED STEP 5: Create a Pull Request Instead of Pushing to Main ---
+      - name: Create Pull Request
+        # This step uses the GitHub CLI, which is pre-installed on runners
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is automatically provided by GitHub
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Configure git with a bot user
+          git config --global user.name 'Lore Bot'
+          git config --global user.email 'lore-bot@users.noreply.github.com'
+
+          # Check if there are any changes. If not, exit gracefully.
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit. Exiting."
+            exit 0
+          fi
+
+          # Create a new branch with a unique name based on the date
+          BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
+
+          # Add and commit the changes
           git add -A
-          # Only commit and push if there are actual changes
-          git diff-index --quiet HEAD || git commit -m "Automated Lore Update" && git push
+          git commit -m "Automated Lore Update"
+          
+          # Push the new branch to the repository
+          git push -u origin $BRANCH_NAME
+
+          # Create the pull request
+          gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot. These changes were generated based on the latest narrative save job."

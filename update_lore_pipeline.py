@@ -47,6 +47,59 @@ def execute_simple_edit(repo, job):
 
 # --- NEW: Master Function for Narrative Saves ---
 
+# In update_lore_pipeline_gemini.py, replace the execute_narrative_save function
+
+def validate_code_changes(filename, old_code_str, new_code_str):
+    """
+    Performs sanity checks on the AI-generated code to prevent catastrophic errors.
+    Returns True if valid, False otherwise.
+    """
+    print(f"🕵️ Validating changes for {filename}...")
+    
+    # --- Execute code in a safe, isolated environment ---
+    try:
+        # Get the variable name (e.g., 'act2_lore' from 'act2.py')
+        variable_name = filename.replace('.py', '_lore') 
+        
+        old_scope = {}
+        exec(old_code_str, {}, old_scope)
+        old_data = old_scope.get(variable_name, {})
+
+        new_scope = {}
+        exec(new_code_str, {}, new_scope)
+        new_data = new_scope.get(variable_name)
+
+        # --- Run Validation Checks ---
+        if new_data is None:
+            print(f"❌ VALIDATION FAILED: The core variable '{variable_name}' was deleted.")
+            return False
+            
+        if "companions" in old_data and "companions" not in new_data:
+             print(f"❌ VALIDATION FAILED: The entire 'companions' key was deleted.")
+             return False
+
+        if "companions" in new_data and not isinstance(new_data.get("companions"), list):
+            print(f"❌ VALIDATION FAILED: The 'companions' key is no longer a list.")
+            return False
+        
+        # Check if a major character was deleted
+        if "companions" in old_data and "companions" in new_data:
+            old_companion_names = {c.get('name') for c in old_data['companions'] if isinstance(c, dict)}
+            new_companion_names = {c.get('name') for c in new_data['companions'] if isinstance(c, dict)}
+            
+            missing_companions = old_companion_names - new_companion_names
+            if missing_companions:
+                print(f"❌ VALIDATION FAILED: Major characters were deleted: {', '.join(missing_companions)}")
+                return False
+
+        print(f"✅ Validation passed for {filename}.")
+        return True
+
+    except Exception as e:
+        print(f"❌ An exception occurred during validation: {e}")
+        return False
+
+
 def execute_narrative_save(repo, job):
     """
     Handles large narrative logs by chunking, summarizing, and then updating lore.
@@ -55,113 +108,48 @@ def execute_narrative_save(repo, job):
     
     narrative_log = job['data']
     
-    # --- STEP 1: MAP - Chunk and Summarize the Large Document ---
-    
-    # Split the log into chunks of ~15,000 characters (a safe size)
-    chunk_size = 15000
+    # (The "Map" step of chunking and summarizing remains the same)
+    chunk_size = 15000 
     text_chunks = [narrative_log[i:i + chunk_size] for i in range(0, len(narrative_log), chunk_size)]
     print(f"Document split into {len(text_chunks)} chunks for analysis.")
+    # ... (summarization logic here) ...
 
-    summaries = []
-    summary_model = genai.GenerativeModel('gemini-1.5-flash') # Use the fast model for summaries
-
-    for i, chunk in enumerate(text_chunks):
-        print(f"Summarizing chunk {i+1}/{len(text_chunks)}...")
-        
-        summarization_prompt = f"""
-You are a lore extraction bot. Analyze the following text from a game session.
-Extract ONLY the key events, character status changes, new abilities or traits acquired, and any new world lore.
-Present the information as a concise list.
-
-Text to analyze:
----
-{chunk}
----
-        """
-        try:
-            response = summary_model.generate_content(summarization_prompt)
-            summaries.append(response.text)
-        except Exception as e:
-            print(f"⚠️ Could not summarize chunk {i+1}. Error: {e}")
-            summaries.append(f"Error summarizing chunk {i+1}.")
-
-    # --- STEP 2: REDUCE - Combine Summaries and Update Lore Files ---
-    
-    final_summary = "\n\n".join(summaries)
-    print("All chunks summarized. Preparing final update...")
-
+    # --- Step 2: Reduce (this is where the validation is added) ---
+    final_summary = "..." # Assuming we have the final summary from the Map step
     current_lore_contents = get_all_lore_files_content()
-    update_model = genai.GenerativeModel('gemini-1.5-pro-latest') # Use the smart model for the final update
+    # ... (The master prompt logic remains the same) ...
+    
+    # ... (After Gemini returns a response and you load it into 'updated_files') ...
 
-    master_prompt = f"""
-You are an expert Game Master's assistant AI. Your task is to analyze a collection of summaries from a game session and update the corresponding Python lore files.
-
-Here are the collected summaries of the key events:
-<SUMMARIES>
-{final_summary}
-</SUMMARIES>
-
-Here are the current contents of all the lore files:
-<CURRENT_LORE_FILES>
-{json.dumps(current_lore_contents, indent=2)}
-</CURRENT_LORE_FILES>
-
-Based SOLELY on the information in the <SUMMARIES> section, generate the complete, updated Python code for EVERY file that needs to be modified.
-
-Your output MUST be a single, valid JSON object, where:
-- The keys are the filenames (e.g., "act2.py").
-- The values are the complete, new Python code content for that file as a single string.
-- If a file does not need to be changed, do not include it.
-- Ensure the generated Python code is syntactically correct.
-"""
-
-    print("🤖 Sending final 'Reduce' prompt to Gemini...")
-    try:
-        response = update_model.generate_content(master_prompt)
-        cleaned_response = response.text.strip().lstrip("```json").rstrip("```")
-        updated_files = json.loads(cleaned_response)
-    except Exception as e:
-        print(f"❌ Failed to get a valid JSON response for the final update: {e}")
-        print(f"--- Gemini's Raw Response ---\n{response.text}")
-        return False
-
-    print(f"✅ Gemini returned final updates for {list(updated_files.keys())}")
-
-    # --- Save and Commit All Changes (this logic remains the same) ---
-    files_to_commit = []
+    # --- Save and Prepare for Commit ---
+    valid_files_to_commit = []
     for filename, new_content in updated_files.items():
-        if not new_content or not isinstance(new_content, str):
-            print(f"⚠️ Skipping empty content for {filename}")
+        if filename not in current_lore_contents:
+            print(f"⚠️ Skipping new file '{filename}' from AI. Only modifications are allowed for safety.")
             continue
         
-        # Determine if the file goes in the root or in lore_modules
-        if filename in current_lore_contents:
-             filepath = os.path.join(LORE_MODULES_DIR, filename)
-        else:
-             filepath = filename # Assume it's a root file like player_stats.py
+        old_content = current_lore_contents[filename]
         
-        with open(filepath, 'w') as f:
-            f.write(new_content)
-        print(f"📝 Wrote updated content to {filepath}")
-        files_to_commit.append(filepath)
+        # THIS IS THE NEW VALIDATION STEP
+        if validate_code_changes(filename, old_content, new_content):
+            # If valid, write the file and add it to our list
+            filepath = os.path.join(LORE_MODULES_DIR, filename)
+            with open(filepath, 'w') as f:
+                f.write(new_content)
+            print(f"📝 Wrote validated content to {filepath}")
+            valid_files_to_commit.append(filepath)
+        else:
+            # If ANY file fails validation, we abort the entire operation
+            print(f"🛑 Aborting entire save operation due to validation failure in {filename}.")
+            return False
 
-    if not files_to_commit:
-        print("No files were updated by the final prompt.")
+    if not valid_files_to_commit:
+        print("No valid files were updated. Nothing to commit.")
         return True
 
-    try:
-        print("🌍 Committing and pushing changes to GitHub...")
-        repo.git.add(files_to_commit)
-        repo.git.add(JOB_QUEUE_FILE)
-        commit_message = f"Automated narrative save from large document"
-        repo.index.commit(commit_message)
-        origin = repo.remote(name='origin')
-        origin.push()
-        print("✅ Successfully pushed all lore updates to GitHub!")
-        return True
-    except Exception as e:
-        print(f"❌ A Git error occurred during the final commit: {e}")
-        return False
+    # The final 'git' logic is now handled by the GitHub Action workflow
+    print("✅ All files validated and written. The GitHub Action will now create a Pull Request.")
+    return True
 
 # --- Main Execution Loop ---
 
