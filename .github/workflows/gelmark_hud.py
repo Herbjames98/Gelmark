@@ -91,13 +91,16 @@ if lore_data:
         if "companions" in section:
             st.subheader("🧑‍🤝‍🧑 Companions")
             for c in section["companions"]:
+        # This 'if' statement is the key fix.
+        # It checks if 'c' is a dictionary before trying to access its keys.
                 if isinstance(c, dict):
                     st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
                     st.markdown(f"- Bond: {c.get('bond', 'N/A')}")
                     st.markdown(f"- Sync: {c.get('sync', 'N/A')}")
                     st.markdown(f"- Traits: {', '.join(c.get('trait_alignment', []))}")
-                else:
-                    st.markdown(str(c))
+        else:
+            # If 'c' is not a dictionary (e.g., just a string), print it directly.
+            st.markdown(f"- {str(c)}")
         if "codex_expansions" in section:
             st.subheader("📖 Codex Expansions")
             st.markdown("\n".join([f"- {c}" for c in section["codex_expansions"]]))
