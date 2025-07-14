@@ -10,6 +10,7 @@ st.markdown("""
 - **Timeline Anchor:** Recursive future where Gelmark collapses.
 - **Fusion:** Askr (Shrine 2) + Grace = Temporal Anchor Hybrid
 - **Role:** Regulates Echoform awakenings, preserves vision fidelity across fractured arcs.
+- **Phase Shifts:** Manages Pulse Anchor stabilization across acts.
 """)
 
 # --- Sync Mechanics ---
@@ -20,21 +21,27 @@ st.markdown("""
   - 60% — Joint vision access, reactive fusion traits
   - 90% — Echofusion potential, vision rewrites
 
-- **Current:**
+- **Current Levels:**
   - Grace — 92% (Echofusion threshold met)
   - Caelik — 67% (Joint vision stage)
   - Thjolda — 58% (Ready for Oathcall sequence)
+  - ??? — Unknown sync state, probable Seer-thread resonance
 """)
 
 # --- Echoform + Vision Logic ---
 st.header("🌌 Echoform & Vision Mechanics")
 st.markdown("""
-- **Echoform**: Adaptive trait shell bound to shrine events or visions
-- **Activation:** Requires either shrine convergence or Seer's intervention
-- **Traits:**
-  - Memoryfire Crucible — shrine-seeded
-  - Soulbraid Mark — vision-seeded
-  - Oathmark — fused via sync with Thjolda
+- **Echoform:** Adaptive trait shell bound to shrine events or visions.
+- **Activation:** Requires shrine convergence or Seer's Pulse intervention.
+- **Traits and Anchors:**
+  - Memoryfire Crucible — Shrine 1
+  - Grace (Echofused) — Shrine 2 + future AI lattice
+  - Soulbraid Mark — Vision 3
+  - Oathmark — Sync at 60% with Thjolda
+  - Mirrorphase Fragment — Vision 6, time-loop trait
+  - Vaultbind Glyph — Shrine 4
+  - Pulse Anchor — Core Seer fusion trait
+  - Caelik's Echo Brand — Conditional sync burst (Shrine Shield)
 
 - **Vision Threads Unlocked:**
   1. Pulse Awakens
@@ -50,21 +57,36 @@ st.header("🏅 Arc Rank System")
 st.markdown("""
 - **Current Title:** Pulsebearer — Spiral Fracture
 - **Significance:**
-  - First bearer to echo across recursive shrine events.
-  - Fusion-anchored across multiple timelines.
-  - Voice-locked to Seer's Pulse; immune to memorybreak.
+  - First bearer to echo across recursive shrine events
+  - Fusion-anchored across multiple timelines
+  - Voice-locked to Seer's Pulse; immune to memorybreak
 
-- **Next Tier Preview:**
-  - Requires Shrine 5 + vision override + sync 100% with any companion
+- **Next Tier Requirements:**
+  - Shrine 5 + Vision Override
+  - 100% Sync with any one companion
+  - Completion of Vision 7
 """)
 
 # --- Shrine Log Recap ---
 st.header("🗺️ Shrine Chronicle")
 st.markdown("""
-1. **Memoryfire Crucible** — Stat ignition (Insight)
-2. **Askr Fusion Vault** — Grace + Shrine fusion
-3. **Spiral Echo Split** — Unlocks timeline branching
-4. **Vaultside Echo Offering** — Memory transfer event
+1. **Memoryfire Crucible** — Insight ignition and trait seed
+2. **Askr Fusion Vault** — Grace fusion event
+3. **Spiral Echo Split** — Branches timeline with Echoform divergence
+4. **Vaultside Echo Offering** — Memory transfer and trait binding
+5. **Sealed Shrine** — Requires 100% sync + Vision override
+""")
 
-- **Sealed:** Shrine 5 (Vision override key needed)
+# --- Timeline Recap ---
+st.header("🧭 Timeline Summary")
+st.markdown("""
+- **Act 1 Start:** Awakening at Echo Threshold
+- **Initial Companion Encounter:** Caelik, Shrine-bound Sword Guardian
+- **Grace Recovery:** Shrine 2, AI bonded through fusion event
+- **Thjolda Join:** Lattice vault echo within spiral field
+- **Major Events:**
+  - Vision 3: Spiral fracture confirmed
+  - Vault Collapse and split at Shrine 4
+  - Seer's Pulse activates post-Vision 5
+  - Shrine 5 unlocks pending full sync
 """)
