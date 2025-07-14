@@ -53,11 +53,11 @@ if lore_data:
             st.markdown("\n".join([f"- {v}" for v in section["visions"]]))
 
         if "companions" in section:
-            st.subheader("🧍 Companions")
+            st.subheader("🧑‍🤝‍🧑 Companions")
             for c in section["companions"]:
                 if isinstance(c, dict):
                     st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
-                else:
+            else:
                     st.markdown(str(c))
                     st.markdown(f"- Bond: {c['bond']}")
                     st.markdown(f"- Sync: {c['sync']}")
