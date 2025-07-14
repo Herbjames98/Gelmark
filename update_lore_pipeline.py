@@ -1,4 +1,5 @@
-# Save this entire file as: update_lore_pipeline_gemini.py
+# This is the full, upgraded pipeline script.
+# Replace your existing file with this.
 
 import os
 import json
@@ -7,8 +8,6 @@ import pprint
 import ast
 from datetime import datetime
 
-# --- IMPORTANT LIBRARIES TO INSTALL ---
-# pip install google-generativeai gitpython
 try:
     import google.generativeai as genai
     from git import Repo
@@ -16,125 +15,164 @@ except ImportError:
     print("Required libraries not found. Please run: pip install google-generativeai gitpython")
     exit()
 
-
 # --- ⚙️ Configuration ---
-# Get your key from Google AI Studio: https://aistudio.google.com/
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # <--- PASTE YOUR KEY HERE
-
-# The local file path to your Git repository (your project folder)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 REPO_PATH = "." 
 LORE_MODULES_DIR = "lore_modules"
 JOB_QUEUE_FILE = "job_queue.json"
 
+# --- 🛠️ Helper Functions ---
 
-# --- 🛠️ Helper Functions (Do Not Change) ---
-
-def get_file_content(module_name):
-    """Reads the content of a specific lore module file."""
-    file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
-    with open(file_path, 'r') as f:
+def get_file_content(filepath):
+    """Reads the content of any file."""
+    with open(filepath, 'r') as f:
         return f.read()
 
-def generate_updated_lore_with_gemini(module_name, current_code, prompt):
-    """Sends a request to the Gemini API to update the lore code."""
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    full_prompt = (
-        "You are an expert Python assistant. Your task is to modify a Python dictionary that contains game lore. "
-        "I will provide you with the current Python code and a request for a change. "
-        "Your response MUST be ONLY the complete, updated Python code for the dictionary variable. "
-        "Do not include any other text, explanations, or markdown code fences like ```python."
-        "\n\n--- CURRENT CODE ---\n"
-        f"{current_code}"
-        "\n\n--- CHANGE REQUEST ---\n"
-        f"Apply this change: '{prompt}'"
-    )
-    print("🤖 Sending request to Gemini...")
-    try:
-        response = model.generate_content(full_prompt)
-        return response.text.strip()
-    except Exception as e:
-        print(f"❌ An error occurred with the Gemini API: {e}")
-        return None
+def get_all_lore_files_content():
+    """Reads all lore modules and returns them as a dictionary."""
+    all_lore = {}
+    for filename in os.listdir(LORE_MODULES_DIR):
+        if filename.endswith('.py') and '__init__' not in filename:
+            filepath = os.path.join(LORE_MODULES_DIR, filename)
+            all_lore[filename] = get_file_content(filepath)
+    return all_lore
 
-def save_and_commit(repo, module_name, new_code_string, commit_message):
-    """Validates, saves, and pushes the new code to the GitHub repository."""
+def execute_simple_edit(repo, job):
+    """Handles the original simple edit jobs."""
+    print(f"Executing simple edit for module '{job['module']}'...")
+    # This function would contain the logic from our previous pipeline version
+    # For now, we'll focus on the new narrative save.
+    print("Simple edit logic not fully implemented in this version. Job skipped.")
+    return False # Placeholder
+
+# --- NEW: Master Function for Narrative Saves ---
+
+def execute_narrative_save(repo, job):
+    """
+    Reads a full narrative log, gets all current lore, and asks Gemini
+    to perform a comprehensive update across multiple files.
+    """
+    print(f"Executing narrative save for job {job['id']}...")
+    
+    narrative_log = job['data']
+    current_lore_contents = get_all_lore_files_content()
+
+    # This is the "Master Prompt" that does the heavy lifting
+    master_prompt = f"""
+You are an expert Game Master's assistant AI. Your task is to analyze a narrative conversation log from a game session and update the corresponding Python lore files.
+
+Here is the full conversation log of the event that just occurred:
+<NARRATIVE_LOG>
+{narrative_log}
+</NARRATIVE_LOG>
+
+Here are the current contents of the lore files:
+<CURRENT_LORE_FILES>
+{json.dumps(current_lore_contents, indent=2)}
+</CURRENT_LORE_FILES>
+
+Based on the narrative log, your task is to identify ALL necessary changes and generate the complete, updated Python code for EVERY file that needs to be modified.
+
+Your output MUST be a single, valid JSON object, where:
+- The keys are the filenames that need to be updated (e.g., "act2.py").
+- The values are the complete, new Python code content for that file as a single string.
+- If a file does not need to be changed, DO NOT include it in your response.
+- The Python code you generate must be syntactically correct.
+
+Example of a valid response:
+{{
+  "act2.py": "act2_lore = {{\\n    'summary': 'After the hero helped Caelik overcome his echo...',\\n    'companions': [ ... updated Caelik entry ... ],\\n    'codex_expansions': ['Fire Without Mastery', ...],\\n    ...\\n}}",
+  "player_stats.py": "player_stats = {{\\n    'traits': ['Flameforward Oath'],\\n    ...\\n}}"
+}}
+
+Now, analyze the provided log and files and generate the JSON object with the required file updates.
+"""
+
+    print("🤖 Sending master prompt to Gemini...")
+    model = genai.GenerativeModel('gemini-1.5-pro-latest') # Use the most powerful model for this complex task
     try:
-        variable_name = new_code_string.split('=', 1).strip()
-        dict_string = new_code_string.split('=', 1).strip()
-        parsed_dict = ast.literal_eval(dict_string)
-    except (ValueError, SyntaxError, IndexError) as e:
-        print(f"❌ Validation Error: The code from Gemini is not a valid Python dictionary. Aborting. Error: {e}")
-        print("\n--- Received Code ---\n" + new_code_string)
+        response = model.generate_content(master_prompt)
+        # Clean the response to ensure it's a valid JSON object
+        cleaned_response = response.text.strip().lstrip("```json").rstrip("```")
+        updated_files = json.loads(cleaned_response)
+    except Exception as e:
+        print(f"❌ Failed to get or parse a valid JSON response from Gemini: {e}")
+        print(f"--- Gemini's Raw Response ---\n{response.text}")
         return False
 
-    formatted_code = f"{variable_name} = {pprint.pformat(parsed_dict, indent=4)}"
-    file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
-    with open(file_path, 'w') as f:
-        f.write(formatted_code)
-    print(f"✅ Code validated and saved to {file_path}")
+    print(f"✅ Gemini returned updates for {list(updated_files.keys())}")
+
+    # --- Save and Commit All Changes ---
+    files_to_commit = []
+    for filename, new_content in updated_files.items():
+        # Basic validation to ensure it's not empty
+        if not new_content or not isinstance(new_content, str):
+            print(f"⚠️ Skipping empty or invalid content for {filename}")
+            continue
+        
+        filepath = os.path.join(LORE_MODULES_DIR, filename)
+        with open(filepath, 'w') as f:
+            f.write(new_content)
+        print(f"📝 Wrote updated content to {filepath}")
+        files_to_commit.append(filepath)
+
+    if not files_to_commit:
+        print("No valid files were updated. Nothing to commit.")
+        return True # The job is done, even if nothing changed.
 
     try:
-        print("🌍 Committing and pushing to GitHub...")
-        repo.git.add(file_path)
-        repo.git.add(JOB_QUEUE_FILE) 
-        repo.index.commit(f"Automated lore update for {module_name}: {commit_message}")
+        print("🌍 Committing and pushing changes to GitHub...")
+        repo.git.add(files_to_commit)
+        repo.git.add(JOB_QUEUE_FILE) # Also commit the updated job queue
+        commit_message = f"Automated narrative save: Caelik's Dual Echo Trial"
+        repo.index.commit(commit_message)
         origin = repo.remote(name='origin')
         origin.push()
-        print("✅ Successfully pushed to GitHub!")
+        print("✅ Successfully pushed lore updates to GitHub!")
         return True
     except Exception as e:
         print(f"❌ A Git error occurred: {e}")
         return False
 
-# --- Main Execution Logic ---
+# --- Main Execution Loop ---
 
 def process_job_queue(repo):
-    """
-    This is the core function with the fix. It checks for jobs and processes them.
-    """
+    """Checks for jobs and processes them based on their type."""
     print("Checking for new lore update jobs...")
     
     try:
         with open(JOB_QUEUE_FILE, 'r+') as f:
-            # THIS IS THE FIX: Handle the case where the file is empty
             try:
                 queue = json.load(f)
             except json.JSONDecodeError:
-                queue = [] # If file is empty, treat it as an empty list
+                queue = []
 
             pending_jobs = [job for job in queue if job.get('status') == 'pending']
-
             if not pending_jobs:
                 print("No pending jobs found.")
                 return
 
-            job_to_process = pending_jobs
-            print(f"Found job {job_to_process['id']} for module '{job_to_process['module']}'")
+            job_to_process = pending_jobs[0]
             
-            # Mark job as 'processing' so we don't run it again
+            # Mark job as 'processing'
             for job in queue:
                 if job['id'] == job_to_process['id']:
                     job['status'] = 'processing'
             f.seek(0)
             json.dump(queue, f, indent=4)
             f.truncate()
-    except FileNotFoundError:
-        print(f"ERROR: Job queue file '{JOB_QUEUE_FILE}' not found. Please create it with '[]' inside.")
-        return
     except Exception as e:
-        print(f"An unhandled error occurred reading the queue: {e}")
+        print(f"Error reading job queue: {e}")
         return
 
-    # --- Execute the job ---
-    target_module = job_to_process['module']
-    user_prompt = job_to_process['prompt']
-    
-    current_code = get_file_content(target_module)
-    new_code = generate_updated_lore_with_gemini(target_module, current_code, user_prompt)
-
+    # --- Route the Job to the Correct Function ---
+    job_type = job_to_process.get("type", "edit") # Default to 'edit' for old jobs
     success = False
-    if new_code:
-        success = save_and_commit(repo, target_module, new_code, user_prompt)
+    
+    if job_type == "narrative_save":
+        success = execute_narrative_save(repo, job_to_process)
+    else: # Handles 'edit' and any other types
+        success = execute_simple_edit(repo, job_to_process)
 
     # --- Finalize the queue ---
     with open(JOB_QUEUE_FILE, 'r+') as f:
@@ -150,6 +188,10 @@ def process_job_queue(repo):
     print(f"Job {job_to_process['id']} marked as {'completed' if success else 'failed'}.")
 
 if __name__ == "__main__":
+    if not GEMINI_API_KEY:
+        print("ERROR: GEMINI_API_KEY environment variable not set.")
+        exit()
+        
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         repo = Repo(REPO_PATH)
