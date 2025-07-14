@@ -1,7 +1,10 @@
 # lore_modules/act1.py
 
-def get_act1():
-    return {
+act1_lore = {
+    "summary": "Unknown",
+    "key_events": [
+        "Unknown"
+    ],
         "shrines": [
             {"id": 1, "name": "Memoryfire Crucible", "unlocks": ["Insight synergy", "Vision 1"], "traits": ["Loopborn", "Seer’s Pulse"]},
             {"id": 2, "name": "Fusion Shrine — Grace + Askr", "unlocks": ["Fusion with AI Core"], "traits": ["Frozen Moment"]},
