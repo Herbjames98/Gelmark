@@ -55,7 +55,7 @@ if lore_data:
         if "companions" in section:
             st.subheader("🧍 Companions")
             for c in section["companions"]:
-                st.markdown(f"**{c['name']}** — {c['origin']}")
+                st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
                 st.markdown(f"- Bond: {c['bond']}")
                 st.markdown(f"- Sync: {c['sync']}")
                 st.markdown(f"- Traits: {', '.join(c['trait_alignment'])}")
