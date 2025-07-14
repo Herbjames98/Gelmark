@@ -1,3 +1,5 @@
+# This is the final, correct workflow file.
+
 name: Lore Updater Bot
 
 on:
@@ -10,28 +12,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # This step downloads your repository into a directory named "Gelmark"
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # Install libraries
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install google-generativeai gitpython
 
-      # --- THIS IS THE CORRECTED STEP ---
-      # It now uses the correct filename for your script.
+      # This is the first corrected step.
+      # It tells the runner to CD into the "Gelmark" folder before running the script.
       - name: Run Lore Update Pipeline
+        working-directory: ./Gelmark  # <--- THIS IS CRITICAL
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python update_lore_pipeline.py  # Corrected filename
+        run: python update_lore_pipeline.py # <--- AND THIS IS THE CORRECT FILENAME
 
-      # --- Create Pull Request Step ---
+      # This is the second corrected step.
+      # It also needs to run from inside the repository folder to find the .git directory.
       - name: Create Pull Request
+        working-directory: ./Gelmark # <--- THIS IS ALSO CRITICAL
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
