@@ -49,89 +49,118 @@ def execute_simple_edit(repo, job):
 
 def execute_narrative_save(repo, job):
     """
-    Reads a full narrative log, gets all current lore, and asks Gemini
-    to perform a comprehensive update across multiple files.
+    Handles large narrative logs by chunking, summarizing, and then updating lore.
     """
-    print(f"Executing narrative save for job {job['id']}...")
+    print(f"Executing ADVANCED narrative save for job {job['id']}...")
     
     narrative_log = job['data']
+    
+    # --- STEP 1: MAP - Chunk and Summarize the Large Document ---
+    
+    # Split the log into chunks of ~15,000 characters (a safe size)
+    chunk_size = 15000
+    text_chunks = [narrative_log[i:i + chunk_size] for i in range(0, len(narrative_log), chunk_size)]
+    print(f"Document split into {len(text_chunks)} chunks for analysis.")
+
+    summaries = []
+    summary_model = genai.GenerativeModel('gemini-1.5-flash') # Use the fast model for summaries
+
+    for i, chunk in enumerate(text_chunks):
+        print(f"Summarizing chunk {i+1}/{len(text_chunks)}...")
+        
+        summarization_prompt = f"""
+You are a lore extraction bot. Analyze the following text from a game session.
+Extract ONLY the key events, character status changes, new abilities or traits acquired, and any new world lore.
+Present the information as a concise list.
+
+Text to analyze:
+---
+{chunk}
+---
+        """
+        try:
+            response = summary_model.generate_content(summarization_prompt)
+            summaries.append(response.text)
+        except Exception as e:
+            print(f"⚠️ Could not summarize chunk {i+1}. Error: {e}")
+            summaries.append(f"Error summarizing chunk {i+1}.")
+
+    # --- STEP 2: REDUCE - Combine Summaries and Update Lore Files ---
+    
+    final_summary = "\n\n".join(summaries)
+    print("All chunks summarized. Preparing final update...")
+
     current_lore_contents = get_all_lore_files_content()
+    update_model = genai.GenerativeModel('gemini-1.5-pro-latest') # Use the smart model for the final update
 
-    # This is the "Master Prompt" that does the heavy lifting
     master_prompt = f"""
-You are an expert Game Master's assistant AI. Your task is to analyze a narrative conversation log from a game session and update the corresponding Python lore files.
+You are an expert Game Master's assistant AI. Your task is to analyze a collection of summaries from a game session and update the corresponding Python lore files.
 
-Here is the full conversation log of the event that just occurred:
-<NARRATIVE_LOG>
-{narrative_log}
-</NARRATIVE_LOG>
+Here are the collected summaries of the key events:
+<SUMMARIES>
+{final_summary}
+</SUMMARIES>
 
-Here are the current contents of the lore files:
+Here are the current contents of all the lore files:
 <CURRENT_LORE_FILES>
 {json.dumps(current_lore_contents, indent=2)}
 </CURRENT_LORE_FILES>
 
-Based on the narrative log, your task is to identify ALL necessary changes and generate the complete, updated Python code for EVERY file that needs to be modified.
+Based SOLELY on the information in the <SUMMARIES> section, generate the complete, updated Python code for EVERY file that needs to be modified.
 
 Your output MUST be a single, valid JSON object, where:
-- The keys are the filenames that need to be updated (e.g., "act2.py").
+- The keys are the filenames (e.g., "act2.py").
 - The values are the complete, new Python code content for that file as a single string.
-- If a file does not need to be changed, DO NOT include it in your response.
-- The Python code you generate must be syntactically correct.
-
-Example of a valid response:
-{{
-  "act2.py": "act2_lore = {{\\n    'summary': 'After the hero helped Caelik overcome his echo...',\\n    'companions': [ ... updated Caelik entry ... ],\\n    'codex_expansions': ['Fire Without Mastery', ...],\\n    ...\\n}}",
-  "player_stats.py": "player_stats = {{\\n    'traits': ['Flameforward Oath'],\\n    ...\\n}}"
-}}
-
-Now, analyze the provided log and files and generate the JSON object with the required file updates.
+- If a file does not need to be changed, do not include it.
+- Ensure the generated Python code is syntactically correct.
 """
 
-    print("🤖 Sending master prompt to Gemini...")
-    model = genai.GenerativeModel('gemini-1.5-pro-latest') # Use the most powerful model for this complex task
+    print("🤖 Sending final 'Reduce' prompt to Gemini...")
     try:
-        response = model.generate_content(master_prompt)
-        # Clean the response to ensure it's a valid JSON object
+        response = update_model.generate_content(master_prompt)
         cleaned_response = response.text.strip().lstrip("```json").rstrip("```")
         updated_files = json.loads(cleaned_response)
     except Exception as e:
-        print(f"❌ Failed to get or parse a valid JSON response from Gemini: {e}")
+        print(f"❌ Failed to get a valid JSON response for the final update: {e}")
         print(f"--- Gemini's Raw Response ---\n{response.text}")
         return False
 
-    print(f"✅ Gemini returned updates for {list(updated_files.keys())}")
+    print(f"✅ Gemini returned final updates for {list(updated_files.keys())}")
 
-    # --- Save and Commit All Changes ---
+    # --- Save and Commit All Changes (this logic remains the same) ---
     files_to_commit = []
     for filename, new_content in updated_files.items():
-        # Basic validation to ensure it's not empty
         if not new_content or not isinstance(new_content, str):
-            print(f"⚠️ Skipping empty or invalid content for {filename}")
+            print(f"⚠️ Skipping empty content for {filename}")
             continue
         
-        filepath = os.path.join(LORE_MODULES_DIR, filename)
+        # Determine if the file goes in the root or in lore_modules
+        if filename in current_lore_contents:
+             filepath = os.path.join(LORE_MODULES_DIR, filename)
+        else:
+             filepath = filename # Assume it's a root file like player_stats.py
+        
         with open(filepath, 'w') as f:
             f.write(new_content)
         print(f"📝 Wrote updated content to {filepath}")
         files_to_commit.append(filepath)
 
     if not files_to_commit:
-        print("No valid files were updated. Nothing to commit.")
-        return True # The job is done, even if nothing changed.
+        print("No files were updated by the final prompt.")
+        return True
 
     try:
         print("🌍 Committing and pushing changes to GitHub...")
         repo.git.add(files_to_commit)
-        repo.git.add(JOB_QUEUE_FILE) # Also commit the updated job queue
-        commit_message = f"Automated narrative save: Caelik's Dual Echo Trial"
+        repo.git.add(JOB_QUEUE_FILE)
+        commit_message = f"Automated narrative save from large document"
         repo.index.commit(commit_message)
         origin = repo.remote(name='origin')
         origin.push()
-        print("✅ Successfully pushed lore updates to GitHub!")
+        print("✅ Successfully pushed all lore updates to GitHub!")
         return True
     except Exception as e:
-        print(f"❌ A Git error occurred: {e}")
+        print(f"❌ A Git error occurred during the final commit: {e}")
         return False
 
 # --- Main Execution Loop ---
