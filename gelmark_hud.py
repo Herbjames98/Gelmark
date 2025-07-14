@@ -24,14 +24,13 @@ def lore_editor_ui():
     """Adds a lore editing interface to the sidebar."""
     st.sidebar.title("🛠️ Lore Editor")
     
-    # --- Simple Editor ---
+    # --- Simple Editor (remains the same) ---
     st.sidebar.subheader("Simple Edit")
     lore_files = [f.replace('.py', '') for f in os.listdir("lore_modules") if f.endswith('.py') and '__init__' not in f]
     selected_module = st.sidebar.selectbox("Choose a module to edit:", lore_files)
     edit_instruction = st.sidebar.text_area("What simple change do you want to make?", height=100)
 
     if st.sidebar.button("Submit Simple Update"):
-        # ... (This part remains the same)
         if not edit_instruction:
             st.sidebar.warning("Please provide an instruction for the update.")
             return
@@ -45,25 +44,35 @@ def lore_editor_ui():
     
     st.sidebar.markdown("---")
 
-    # --- NEW: Narrative Save Section ---
+    # --- UPGRADED: Narrative Save Section with File Uploader ---
     st.sidebar.subheader("Narrative Save")
-    narrative_log = st.sidebar.text_area("Paste the full conversation or event log here:", height=250)
-    if st.sidebar.button("Process and Save Narrative"):
-        if not narrative_log:
-            st.sidebar.warning("Please paste a narrative log to save.")
+    
+    # Replace the text_area with a file_uploader
+    uploaded_file = st.sidebar.file_uploader(
+        "Upload a conversation log", 
+        type=['txt', 'md'] # We can restrict to plain text file types
+    )
+
+    if st.sidebar.button("Process and Save Narrative from File"):
+        # Check if a file was actually uploaded
+        if uploaded_file is None:
+            st.sidebar.warning("Please upload a file to save.")
             return
         
-        # This job has a different 'type' and includes the full log as 'data'
+        # Read the content from the uploaded file object
+        # .read() gets the bytes, .decode() turns the bytes into a string
+        narrative_log = uploaded_file.read().decode("utf-8")
+        
         new_job = {
             "id": datetime.now().isoformat(),
             "type": "narrative_save",
-            "data": narrative_log,
+            "data": narrative_log, # The data is now the content of the file
             "status": "pending"
         }
         try:
             with open("job_queue.json", 'r+') as f:
                 queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
-            st.sidebar.success("Narrative save request submitted! The system will now update all relevant lore.")
+            st.sidebar.success("Narrative save request from file submitted!")
             st.balloons()
         except Exception as e:
             st.sidebar.error(f"Could not write to job queue: {e}")
