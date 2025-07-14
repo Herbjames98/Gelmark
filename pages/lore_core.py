@@ -1,3 +1,5 @@
+import streamlit as st
+
 # lore_core.py
 
 """
