@@ -24,33 +24,46 @@ def lore_editor_ui():
     """Adds a lore editing interface to the sidebar."""
     st.sidebar.title("🛠️ Lore Editor")
     
+    # --- Simple Editor ---
+    st.sidebar.subheader("Simple Edit")
     lore_files = [f.replace('.py', '') for f in os.listdir("lore_modules") if f.endswith('.py') and '__init__' not in f]
-    
     selected_module = st.sidebar.selectbox("Choose a module to edit:", lore_files)
-    edit_instruction = st.sidebar.text_area("What change do you want to make?", height=100)
+    edit_instruction = st.sidebar.text_area("What simple change do you want to make?", height=100)
 
-    if st.sidebar.button("Submit Update Request"):
+    if st.sidebar.button("Submit Simple Update"):
+        # ... (This part remains the same)
         if not edit_instruction:
             st.sidebar.warning("Please provide an instruction for the update.")
             return
+        new_job = { "id": datetime.now().isoformat(), "type": "edit", "module": selected_module, "prompt": edit_instruction, "status": "pending" }
+        try:
+            with open("job_queue.json", 'r+') as f:
+                queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
+            st.sidebar.success(f"Edit request for '{selected_module}' submitted!")
+        except Exception as e:
+            st.sidebar.error(f"Could not write to job queue: {e}")
+    
+    st.sidebar.markdown("---")
 
+    # --- NEW: Narrative Save Section ---
+    st.sidebar.subheader("Narrative Save")
+    narrative_log = st.sidebar.text_area("Paste the full conversation or event log here:", height=250)
+    if st.sidebar.button("Process and Save Narrative"):
+        if not narrative_log:
+            st.sidebar.warning("Please paste a narrative log to save.")
+            return
+        
+        # This job has a different 'type' and includes the full log as 'data'
         new_job = {
             "id": datetime.now().isoformat(),
-            "module": selected_module,
-            "prompt": edit_instruction,
+            "type": "narrative_save",
+            "data": narrative_log,
             "status": "pending"
         }
-
         try:
-            # This logic is for the deployed app; it will fail locally, which is OK.
-            # Locally, you will run the pipeline script directly.
             with open("job_queue.json", 'r+') as f:
-                queue = json.load(f)
-                queue.append(new_job)
-                f.seek(0)
-                json.dump(queue, f, indent=4)
-                f.truncate()
-            st.sidebar.success(f"Request submitted for '{selected_module}'!")
+                queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
+            st.sidebar.success("Narrative save request submitted! The system will now update all relevant lore.")
             st.balloons()
         except Exception as e:
             st.sidebar.error(f"Could not write to job queue: {e}")
