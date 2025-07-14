@@ -1,100 +1,69 @@
-# Gelmark Synced Core (Page-Based System)
+import streamlit as st
+import importlib.util
+import os
 
-"""
-This unified module uses a page-based structure to manage narrative progression, stat tracking, Echoform evolution, companion arcs, shrine interactions, and systemic branching across acts.
-"""
+# === 📁 Modular Lore Loader ===
 
-# === 📖 Page Index ===
+def load_lore_module(module_name):
+    try:
+        path = os.path.join("lore_modules", f"{module_name}.py")
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        lore_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(lore_module)
+        return lore_module
+    except Exception as e:
+        st.error(f"Failed to load module: {module_name} - {e}")
+        return None
+
+# === 📊 Gelmark Lore HUD ===
+st.set_page_config(page_title="Gelmark Lore HUD", layout="wide")
+st.title("📖 Gelmark Interactive Lore HUD")
+
 pages = {
-    "Prologue": "page_prologue",
-    "Act 1": "page_act1",
-    "Act 2": "page_act2",
-    "Shrine Threads": "page_shrines",
-    "Echoform & Traits": "page_echoform",
-    "Companions": "page_companions",
-    "Codex Lore": "page_codex",
-    "Stats": "page_stats",
-    "System Controls": "page_system"
+    "Prologue": "prologue",
+    "Act 1": "act1",
+    "Act 2": "act2"
 }
 
-# === Modular Imports ===
-from lore_modules import prologue, act1, act2
+selected_page = st.sidebar.radio("Lore Sections", list(pages.keys()))
 
-# === 📜 Page: Prologue ===
-def page_prologue():
-    return prologue.get_data()
+module_key = pages[selected_page]
+lore_data = load_lore_module(module_key)
 
-# === 📜 Page: Act 1 ===
-def page_act1():
-    return act1.get_data()
+if lore_data:
+    section = getattr(lore_data, f"{module_key}_lore", None)
 
-# === 📜 Page: Act 2 ===
-def page_act2():
-    return act2.get_data()
+    if section:
+        st.subheader(f"📘 {selected_page} Summary")
+        st.markdown(section.get("summary", "No summary provided."))
 
-# === 📜 Page: Shrine Threads ===
-def page_shrines():
-    return [
-        "Shrines act as memory loci tied to stat synergy and trait fusion. Each number reflects a unique narrative gatepoint, not in-world naming.",
-        "Shrine 1: Insight & Loopborn | Shrine 2: Fusion + Frozen Moment | Shrine 3: Echoform | Shrine 4: Memory Offering | Shrine 5: Riftbreaker",
-        "Shrine 6: Oathmark (Thjolda)"
-    ]
+        if "key_events" in section:
+            st.subheader("🧩 Key Events")
+            st.markdown("\n".join([f"- {event}" for event in section["key_events"]]))
 
-# === 📜 Page: Echoform & Traits ===
-def page_echoform():
-    return {
-        "phases": {
-            "I": ["Fracture Delay"],
-            "II": ["Selfless Paradox", "Riftbreaker"]
-        },
-        "unlocked_by": "Shrines 3, 5 + Memory Offering",
-        "hybrids": ["Grace + Askr", "Flame Hybrid (Caelik)", "Oathmark Hybrid (Pending)"]
-    }
+        if "shrines" in section:
+            st.subheader("🛕 Shrines")
+            for shrine in section["shrines"]:
+                st.markdown(f"**Shrine {shrine['id']}: {shrine['name']}**")
+                st.markdown(f"- Unlocks: {', '.join(shrine['unlocks'])}")
+                st.markdown(f"- Traits: {', '.join(shrine['traits'])}")
 
-# === 📜 Page: Companions ===
-def page_companions():
-    return {
-        "Caelik": {
-            "origin": "Flamebound Knight of Vael-Rith",
-            "bond": "Shielded player during collapse",
-            "sync": "100%",
-            "hybrid": "Flame Hybrid"
-        },
-        "Grace": {
-            "origin": "AI from Spiral Observatory",
-            "bond": "Fused with Askr Core",
-            "sync": "115%",
-            "form": "Recovered robot at crash site"
-        },
-        "Thjolda": {
-            "origin": "Runeborn Shieldmaiden",
-            "bond": "Shrine lattice echo",
-            "sync": "75%"
-        }
-    }
+        if "visions" in section:
+            st.subheader("🔮 Visions")
+            st.markdown("\n".join([f"- {v}" for v in section["visions"]]))
 
-# === 📜 Page: Codex Lore ===
-def page_codex():
-    return [
-        "The Voice That Waited", "What You Could Have Been", "Where Memory Becomes Will"
-    ]
+        if "companions" in section:
+            st.subheader("🧍 Companions")
+            for c in section["companions"]:
+                st.markdown(f"**{c['name']}** — {c['origin']}")
+                st.markdown(f"- Bond: {c['bond']}")
+                st.markdown(f"- Sync: {c['sync']}")
+                st.markdown(f"- Traits: {', '.join(c['trait_alignment'])}")
 
-# === 📜 Page: Stats ===
-def page_stats():
-    return {
-        "Insight": 17,
-        "Endurance": 12,
-        "Will": 14,
-        "Focus": 19,
-        "Echoform Resonance": 22
-    }
-
-# === ⚙️ Page: System Controls ===
-def page_system():
-    return {
-        "Seer’s Pulse": "Enabled",
-        "Echoform Memory Rewrites": "Logically Sequenced",
-        "Trait Fusions": "Tracking Active",
-        "Arc Rank": "Apostate Tier II",
-        "Checkpoint": "Shrine 6 (Runebound Oathmark)"
-    }
+        if "codex_expansions" in section:
+            st.subheader("📖 Codex Expansions")
+            st.markdown("\n".join([f"- {c}" for c in section["codex_expansions"]]))
+    else:
+        st.warning("Module loaded but no lore section found.")
+else:
+    st.error("Lore module could not be read.")
