@@ -1,0 +1,80 @@
+# --- Main Execution Logic (This is what changes) ---
+def process_job_queue():
+    print("Checking for new lore update jobs...")
+    
+    # Safely read and lock the queue
+    try:
+        with open(JOB_QUEUE_FILE, 'r+') as f:
+            # --- MODIFICATION START ---
+            # Try to load JSON, but if the file is empty, handle the error
+            try:
+                queue = json.load(f)
+            except json.JSONDecodeError:
+                queue = [] # If the file is empty, treat it as an empty list
+            # --- MODIFICATION END ---
+            
+            pending_jobs = [job for job in queue if job.get('status') == 'pending']
+
+            if not pending_jobs:
+                print("No pending jobs found.")
+                return
+
+            # Get the oldest pending job
+            job_to_process = pending_jobs[0]
+            print(f"Found job {job_to_process['id']} for module '{job_to_process['module']}'")
+            
+            # Mark job as "processing" to prevent re-running
+            for job in queue:
+                if job['id'] == job_to_process['id']:
+                    job['status'] = 'processing'
+                    break
+            f.seek(0)
+            json.dump(queue, f, indent=4)
+            f.truncate()
+
+    except FileNotFoundError:
+        print(f"Job queue file not found at '{JOB_QUEUE_FILE}'. Please create it.")
+        return
+    except Exception as e:
+        print(f"An error occurred reading the job queue: {e}")
+        return
+
+
+    # --- Execute the job ---
+    target_module = job_to_process['module']
+    user_prompt = job_to_process['prompt']
+    
+    current_code = get_file_content(target_module)
+    # NOTE: Ensure you have your `generate_updated_lore_with_gemini` and `save_and_commit` functions in the script
+    new_code = generate_updated_lore_with_gemini(target_module, current_code, user_prompt)
+
+    success = False
+    if new_code:
+        success = save_and_commit(target_module, new_code, user_prompt)
+
+    # --- Finalize the queue ---
+    with open(JOB_QUEUE_FILE, 'r+') as f:
+        # Load the latest version of the queue
+        try:
+            queue = json.load(f)
+        except json.JSONDecodeError:
+            # This should not happen as we just wrote to it, but good to be safe
+            queue = [] 
+            
+        for job in queue:
+            if job['id'] == job_to_process['id']:
+                job['status'] = 'completed' if success else 'failed'
+                job['finished_at'] = datetime.now().isoformat()
+                break
+        f.seek(0)
+        json.dump(queue, f, indent=4)
+        f.truncate()
+    
+    print(f"Job {job_to_process['id']} marked as {'completed' if success else 'failed'}.")```
+
+### What to Do Now
+
+1.  **Fix the file:** Change your empty `job_queue.json` to contain `[]`.
+2.  **Update the script:** Replace your old `process_job_queue` function with the new, more robust version above.
+3.  **Commit your changes:** Save both files and commit them to your GitHub repository.
+4.  **Run the worker again:** Now, when you run `python update_lore_pipeline_gemini.py`, it should correctly read the empty list and print "No pending jobs found." without crashing. It is now ready to receive jobs from your Streamlit app.

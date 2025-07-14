@@ -67,7 +67,10 @@ def process_job_queue():
     print("Checking for new lore update jobs...")
     
     # Safely read and lock the queue
-    with open(JOB_QUEUE_FILE, 'r+') as f:
+import sys
+import datetime
+
+with open(JOB_QUEUE_FILE, 'r+') as f:
         queue = json.load(f)
         pending_jobs = [job for job in queue if job.get('status') == 'pending']
 
@@ -114,9 +117,9 @@ def process_job_queue():
     print(f"Job {job_to_process['id']} marked as {'completed' if success else 'failed'}.")
 
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
     # Configure API and Repo
-    genai.configure(api_key=GEMINI_API_KEY)
+      genai.configure(api_key=GEMINI_API_KEY)
     
     # This script now runs once to process one job.
     # For continuous running, you would wrap this in a loop with a sleep timer.
