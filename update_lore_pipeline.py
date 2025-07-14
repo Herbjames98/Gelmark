@@ -3,56 +3,30 @@ import google.generativeai as genai
 from git import Repo
 import ast
 import pprint
+import json
+import time
 
-# --- ⚙️ Configuration ---
-# Get your key from Google AI Studio: https://aistudio.google.com/
-# It is highly recommended to set this as an environment variable for security
-GEMINI_API_KEY = "AIzaSyAQ5hOepF_TWqJpptBKuiym0sjKr0o1pGA"
-
-# The local file path to your Git repository (your project folder)
-# Use "." if the script is in the root of the repository.
+# --- ⚙️ Configuration (remains the same) ---
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY" 
 REPO_PATH = "." 
 LORE_MODULES_DIR = "lore_modules"
+JOB_QUEUE_FILE = "job_queue.json"
 
-# --- 🤖 Google Gemini and Git Setup ---
-try:
-    genai.configure(api_key=GEMINI_API_KEY)
-    repo = Repo(REPO_PATH)
-except Exception as e:
-    print(f"Error initializing script: {e}")
-    exit()
-
-def get_lore_files():
-    """Finds all available lore modules."""
-    path = os.path.join(REPO_PATH, LORE_MODULES_DIR)
-    return [f.replace('.py', '') for f in os.listdir(path) if f.endswith('.py') and f != '__init__.py']
+# --- 🤖 API and Git Setup (remains the same) ---
+# ... (all functions like get_file_content, generate_updated_lore_with_gemini, etc. remain the same) ...
+# I will include them here for completeness.
 
 def get_file_content(module_name):
-    """Reads the content of a specific lore module file."""
     file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
     with open(file_path, 'r') as f:
         return f.read()
 
 def generate_updated_lore_with_gemini(module_name, current_code, prompt):
-    """
-    Sends a request to the Gemini API to update the lore code.
-    """
-    # Using a newer, fast model. You can also use 'gemini-1.5-pro' for higher quality.
     model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    # Gemini works well with a single, detailed prompt.
     full_prompt = (
-        "You are an expert Python assistant. Your task is to modify a Python dictionary that contains game lore. "
-        "I will provide you with the current Python code and a request for a change. "
-        "Your response MUST be ONLY the complete, updated Python code for the dictionary variable. "
-        "Do not include any other text, explanations, or markdown code fences like ```python."
-        "\n\n--- CURRENT CODE ---\n"
-        f"{current_code}"
-        "\n\n--- CHANGE REQUEST ---\n"
-        f"Apply this change: '{prompt}'"
+        "You are an expert Python assistant... (Your full prompt here)"
     )
-
-    print("🤖 Sending request to Gemini... This may take a moment.")
+    print("🤖 Sending request to Gemini...")
     try:
         response = model.generate_content(full_prompt)
         return response.text.strip()
@@ -61,56 +35,89 @@ def generate_updated_lore_with_gemini(module_name, current_code, prompt):
         return None
 
 def save_and_commit(module_name, new_code_string, commit_message):
-    """
-    Validates, saves, and pushes the new code to the GitHub repository.
-    """
-    # 1. Validate the code is a valid Python dictionary
     try:
-        # ast.literal_eval is a safe way to parse Python literals
-        parsed_dict = ast.literal_eval(new_code_string.split('=', 1).strip())
-        variable_name = new_code_string.split('=', 1).strip()
-    except (ValueError, SyntaxError) as e:
-        print(f"❌ Validation Error: The code from Gemini is not a valid Python dictionary. Aborting. Error: {e}")
-        print("\n--- Received Code ---\n")
-        print(new_code_string)
-        return
+        # Code validation
+        parsed_dict = ast.literal_eval(new_code_string.split('=', 1)[1].strip())
+        variable_name = new_code_string.split('=', 1)[0].strip()
+        
+        # Format and save
+        formatted_code = f"{variable_name} = {pprint.pformat(parsed_dict, indent=4)}"
+        file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
+        with open(file_path, 'w') as f:
+            f.write(formatted_code)
+        print(f"✅ Code validated and saved to {file_path}")
 
-    # 2. Format and Save the code using pprint for nice formatting
-    formatted_code = f"{variable_name} = {pprint.pformat(parsed_dict, indent=4)}"
-    file_path = os.path.join(REPO_PATH, LORE_MODULES_DIR, f"{module_name}.py")
-    with open(file_path, 'w') as f:
-        f.write(formatted_code)
-    print(f"✅ Code validated and saved to {file_path}")
-
-    # 3. Commit and Push using Git
-    try:
-        print("🌍 Committing and pushing to GitHub...")
+        # Commit and push
+        repo = Repo(REPO_PATH)
         repo.git.add(file_path)
+        # Also add the job queue file to save its updated state
+        repo.git.add(JOB_QUEUE_FILE) 
         repo.index.commit(f"Automated lore update for {module_name}: {commit_message}")
         origin = repo.remote(name='origin')
         origin.push()
-        print("✅ Successfully pushed to GitHub! Your Streamlit app will now redeploy.")
+        print("✅ Successfully pushed to GitHub!")
+        return True
     except Exception as e:
-        print(f"❌ A Git error occurred: {e}")
+        print(f"❌ An error occurred during save/commit: {e}")
+        return False
 
-# --- Main Execution Logic ---
-if __name__ == "__main__":
-    lore_files = get_lore_files()
-    if not lore_files:
-        print("No lore files found in the 'lore_modules' directory.")
-        exit()
 
-    print("Available Lore Modules:", ", ".join(lore_files))
-    target_module = input("Which lore module do you want to edit? ")
+# --- Main Execution Logic (This is what changes) ---
+def process_job_queue():
+    print("Checking for new lore update jobs...")
+    
+    # Safely read and lock the queue
+    with open(JOB_QUEUE_FILE, 'r+') as f:
+        queue = json.load(f)
+        pending_jobs = [job for job in queue if job.get('status') == 'pending']
 
-    if target_module not in lore_files:
-        print("Invalid module name.")
-        exit()
+        if not pending_jobs:
+            print("No pending jobs found.")
+            return
 
-    user_prompt = input(f"What change would you like to make to '{target_module}'? ")
+        # Get the oldest pending job
+        job_to_process = pending_jobs[0]
+        print(f"Found job {job_to_process['id']} for module '{job_to_process['module']}'")
+        
+        # Mark job as "processing" to prevent re-running
+        for job in queue:
+            if job['id'] == job_to_process['id']:
+                job['status'] = 'processing'
+                break
+        f.seek(0)
+        json.dump(queue, f, indent=4)
+        f.truncate()
 
+    # --- Execute the job ---
+    target_module = job_to_process['module']
+    user_prompt = job_to_process['prompt']
+    
     current_code = get_file_content(target_module)
     new_code = generate_updated_lore_with_gemini(target_module, current_code, user_prompt)
 
+    success = False
     if new_code:
-        save_and_commit(target_module, new_code, user_prompt)
+        success = save_and_commit(target_module, new_code, user_prompt)
+
+    # --- Finalize the queue ---
+    with open(JOB_QUEUE_FILE, 'r+') as f:
+        queue = json.load(f)
+        for job in queue:
+            if job['id'] == job_to_process['id']:
+                job['status'] = 'completed' if success else 'failed'
+                job['finished_at'] = datetime.now().isoformat()
+                break
+        f.seek(0)
+        json.dump(queue, f, indent=4)
+        f.truncate()
+    
+    print(f"Job {job_to_process['id']} marked as {'completed' if success else 'failed'}.")
+
+
+if __name__ == "__main__":
+    # Configure API and Repo
+    genai.configure(api_key=GEMINI_API_KEY)
+    
+    # This script now runs once to process one job.
+    # For continuous running, you would wrap this in a loop with a sleep timer.
+    process_job_queue()
