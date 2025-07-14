@@ -20,22 +20,21 @@ def load_lore_module(module_name):
         return None
 
 # === ✍️ Lore Editor UI ===
-      
-# In gelmark_hud.py, replace your existing lore_editor_ui function with this one.
-# Notice the new 'import docx' line at the top of the file.
+# In gelmark_hud.py, replace your entire lore_editor_ui function with this one.
+# This version includes the correct MIME types for Word documents.
 
 import streamlit as st
 import importlib.util
 import os
 import json
 from datetime import datetime
-import docx # <--- NEW: Import the library for reading .docx files
+import docx
 
 def lore_editor_ui():
     """Adds a lore editing interface to the sidebar."""
     st.sidebar.title("🛠️ Lore Editor")
     
-    # --- Simple Editor (remains the same) ---
+    # --- Simple Editor ---
     st.sidebar.subheader("Simple Edit")
     lore_files = [f.replace('.py', '') for f in os.listdir("lore_modules") if f.endswith('.py') and '__init__' not in f]
     selected_module = st.sidebar.selectbox("Choose a module to edit:", lore_files)
@@ -45,7 +44,6 @@ def lore_editor_ui():
         if not edit_instruction:
             st.sidebar.warning("Please provide an instruction for the update.")
             return
-        # This job creation logic is unchanged
         new_job = { "id": datetime.now().isoformat(), "type": "edit", "module": selected_module, "prompt": edit_instruction, "status": "pending" }
         try:
             with open("job_queue.json", 'r+') as f:
@@ -56,13 +54,14 @@ def lore_editor_ui():
     
     st.sidebar.markdown("---")
 
-    # --- UPGRADED: Narrative Save Section now accepts .docx ---
+    # --- Narrative Save Section ---
     st.sidebar.subheader("Narrative Save")
     
-    # Add 'docx' to the list of accepted file types
+    # --- THIS IS THE CORRECTED LINE ---
+    # We now include the official MIME types for .docx and .doc files.
     uploaded_file = st.sidebar.file_uploader(
-        "Upload a conversation log", 
-        type=['txt', 'md', 'docx'] 
+        "Upload a conversation log (.txt, .docx)", 
+        type=['txt', 'md', 'docx', 'doc', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']
     )
 
     if st.sidebar.button("Process and Save Narrative from File"):
@@ -70,32 +69,31 @@ def lore_editor_ui():
             st.sidebar.warning("Please upload a file to save.")
             return
         
-        narrative_log = "" # Initialize an empty string for the log
+        narrative_log = ""
         
-        # --- NEW LOGIC TO HANDLE DIFFERENT FILE TYPES ---
         try:
-            # Check if the uploaded file is a Word document
-            if uploaded_file.name.endswith('.docx'):
-                print("Reading from a .docx file...")
+            # Check the MIME type OR the name for '.docx'
+            if uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or uploaded_file.name.endswith('.docx'):
                 document = docx.Document(uploaded_file)
-                # Join the text from all paragraphs to create the full log
                 narrative_log = "\n".join([para.text for para in document.paragraphs])
-            else: # Otherwise, treat it as a plain text file (.txt, .md)
-                print("Reading from a plain text file...")
+            # Check for older .doc files
+            elif uploaded_file.type == "application/msword" or uploaded_file.name.endswith('.doc'):
+                 st.sidebar.error(".doc files are not supported, please save as .docx or .txt")
+                 return
+            else: # Treat as plain text
                 narrative_log = uploaded_file.read().decode("utf-8")
         except Exception as e:
             st.sidebar.error(f"Error reading file: {e}")
-            return # Stop if we can't read the file
+            return
 
         if not narrative_log:
             st.sidebar.error("Could not extract any text from the uploaded file.")
             return
 
-        # The rest of the logic is identical!
         new_job = {
             "id": datetime.now().isoformat(),
             "type": "narrative_save",
-            "data": narrative_log, # The data is now the text extracted from the file
+            "data": narrative_log,
             "status": "pending"
         }
         try:
