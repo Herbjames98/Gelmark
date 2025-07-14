@@ -1,118 +1,96 @@
-import streamlit as st
-import datetime
 
-# --- Title and Metadata ---
-st.set_page_config(page_title="Gelmark HUD v2", layout="wide")
-st.title("🌌 Gelmark HUD — Rebuild Edition")
+# lore_core.py
 
-# --- Core Player Stats ---
-st.sidebar.header("Player Core")
-st.sidebar.text("Arc Rank: Pulsebearer — Spiral Fracture")
-st.sidebar.text("Current Location: Vael-Rith Inner Core")
-st.sidebar.text("Visions Unlocked: 6")
-st.sidebar.text("Shrines Visited: 5")
-st.sidebar.text("Echoform Phase: II")
+"""
+This module contains the complete narrative lore and core story elements of the Gelmark interactive saga,
+spanning from the prologue to Act 2. It includes companion backstories, shrine significance, Echoform evolution,
+and key events from the main vision threads.
+"""
 
-# --- Player Stats ---
-st.sidebar.markdown("### Stat Overview")
-st.sidebar.text("Strength: 12")
-st.sidebar.text("Focus: 11")
-st.sidebar.text("Speed: 10")
-st.sidebar.text("Defense: 11")
-st.sidebar.text("Insight: 9 (T2 Override)")
-st.sidebar.text("Endurance: 12")
-st.sidebar.text("Total Stat Points: 65")
+# === 🌌 Prologue: The Pulse Unseen ===
+prologue = {
+    "summary": "In a broken age where memory governs fate, a silent echo awakens within the Spiral Vault. The protagonist, nameless at first, is drawn to an ancient anomaly pulsing at the world's fracture point.",
+    "event": "The first contact with the Seer’s Pulse marks the player's awakening. Time blurs. Echoes ripple. The journey begins not with choice, but consequence.",
+    "arrival": "Through unstable time dilation caused by the Pulse Engine, the protagonist is pulled backward into the Age of Blades — the Norse-like era of Gelmark.",
+    "crash_site": "Landing amid a fiery meteor descent, the player emerges on the outskirts of a Viking village. Survivors mistake them for a fated omen.",
+    "grace_intro": "Grace’s initial form was a broken humanoid AI chassis from a future spiral collapse — discovered near the crash. Her core partially functional, she speaks in fragmented foresight."
+}
 
-# --- Companion Status ---
-st.sidebar.markdown("### Companions")
-st.sidebar.text("Caelik ⚔️  | Sync: 100% — Flame Hybrid Unlocked")
-st.sidebar.text("Grace  🔮 | Sync: 115% — AI Core Tier II Dialogue Active")
-st.sidebar.text("Thjolda 🛡️ | Sync: 75% — Shrine Thread Pending")
-st.sidebar.text("? ? ?      🌀 | Sync: -- — Unknown Echo")
+# === 🌀 Act 1: Echoes of the Vault ===
+act1 = {
+    "Shrine_1": {
+        "name": "Memoryfire Crucible",
+        "unlocks": ["Insight stat synergy", "Vision 1: The Pulse Awakens"],
+        "traits": ["Loopborn", "Seer’s Pulse"]
+    },
+    "Shrine_2": {
+        "name": "Fusion Shrine — Grace + Askr",
+        "unlocks": ["Fusion with AI Core", "Grace partial awakening"],
+        "traits": ["Frozen Moment"]
+    },
+    "Shrine_3": {
+        "name": "Threaded Split Chamber",
+        "unlocks": ["Echoform Phase I"],
+        "traits": ["Fracture Delay"]
+    },
+    "Shrine_4": {
+        "name": "Vaultside Echoflow",
+        "unlocks": ["Memory Offering Path"],
+        "traits": ["Selfless Paradox"]
+    },
+    "Shrine_5": {
+        "name": "Sealed Chamber",
+        "unlocks": ["Echoform Phase II"],
+        "traits": ["Riftbreaker"]
+    },
+    "visions": [
+        "The Pulse Awakens",
+        "Grace’s Future Memory Fragment",
+        "Broken Spiral Mirror",
+        "Vaultside Collapse"
+    ],
+    "companions": {
+        "Caelik": {
+            "origin": "Flamebound Knight of Vael-Rith",
+            "bond": "Shielded player during Vaultside collapse.",
+            "hybrid": "Flame Hybrid Unlocked"
+        },
+        "Grace": {
+            "origin": "AI from the Spiral Observatory — collapsed timeline",
+            "bond": "Echo AI fused with Askr Core during Shrine 2",
+            "note": "Sentient after Pulse Fusion. Sync: 115%",
+            "form": "Originally a humanoid robot partially disassembled at crash site."
+        }
+    },
+    "codex": [
+        "The Voice That Waited",
+        "What You Could Have Been",
+        "Where Memory Becomes Will"
+    ]
+}
 
-# --- Seer's Pulse Interface ---
-st.header("🔍 Seer's Pulse — Choice Ranking")
-choice = st.text_input("Enter a decision or action to rank:", "Offer memory fragment to Shrine Flame")
-if st.button("Rank Seer's Pulse"):
-    st.success("Seer's Pulse Rank: 3 — Resonant Offering. Outcome: Unlocks hybrid fusion + vision thread.")
-
-# --- Trait Panel ---
-st.header("💠 Trait Inventory")
-trait_cols = st.columns(4)
-traits = [
-    ("Grace + Askr Fusion (Locked)", "Dormant until Shrine 2 complete"),
-    ("Loopborn", "Hybrid Trait"),
-    ("Seer’s Pulse", "Hybrid Trait"),
-    ("Fracture Delay", "Hybrid Trait"),
-    ("Riftbreaker", "Hybrid Trait"),
-    ("Phantom Recall", "Hybrid Trait"),
-    ("Frozen Moment", "Hybrid Trait"),
-    ("Scorchbind Core", "Hybrid Trait"),
-    ("Twin Flame Anchor", "Hybrid Trait"),
-    ("Temporal Cinder Vow", "Hybrid Trait"),
-    ("Threadpiercer", "Hybrid Trait"),
-    ("Selfless Paradox", "Echo Trait – Sacrifice shrine memory to preserve another")
-]
-for i, (name, desc) in enumerate(traits):
-    with trait_cols[i % 4]:
-        st.subheader(name)
-        st.caption(desc)
-
-# --- Shrine Log ---
-st.header("🗺️ Shrines Visited")
-st.markdown("""
-- **Shrine 1** — Memoryfire Crucible (Insight/Fusion Unlock)
-- **Shrine 2** — Grace + Askr Fusion (Pending Completion)
-- **Shrine 3** — Echoform Thread Split (Vision Lock)
-- **Shrine 4** — Vaultside Echoflow (Memory Offering)
-- **Shrine 5** — Sealed Chamber — Locked. Sync 100% and Vision Override required.
-""")
-
-# --- Companion Logs ---
-st.header("🤝 Companion History")
-st.markdown("""
-**Grace** — Echo AI from the future. Recovered in Shrine 2. Fusion initiated via Flowbinding and Askr core. Fully sentient, voice-reactive. Sync: 115%.
-
-**Caelik** — Swordbound Guardian. Loyal to shrine protocol. Shielded player during Vaultside collapse. Flame Hybrid unlocked. Sync: 100%.
-
-**Thjolda** — Runeborn Shieldmaiden. Found in shrine lattice echo. Oathmark fusion pending. Sync: 75%.
-""")
-
-# --- Vision Recap ---
-st.header("🔮 Vision Archive")
-st.markdown("""
-- **Vision 1:** The Pulse Awakens
-- **Vision 2:** Grace’s Future Memory Fragment
-- **Vision 3:** Broken Spiral Mirror
-- **Vision 4:** Vaultside Collapse
-- **Vision 5:** The Seer’s Convergence
-- **Vision 6:** Shrine Reversal Event
-""")
-
-# --- Codex & Memory Status ---
-st.header("📘 Codex & Memory")
-st.markdown("""
-**Codex Paths Unlocked:**
-- The Voice That Waited
-- What You Could Have Been
-- Where Memory Becomes Will
-
-**Codex Effects:**
-- Shrine choice reroll (1x per act)
-- Emotional bond responses
-- Echo Trait resonance
-""")
-
-# --- Echo Slots ---
-st.header("🧬 Echo Trait Slots")
-st.markdown("""
-1. **Selfless Paradox** — ✅ Active
-2. **Grace Hybrid Trait** — 🔒 Dormant (post-Shrine 2 unlock)
-3. **Unknown Thread** — 💭 Unformed
-""")
-
-# --- Save Panel ---
-st.sidebar.header("🔒 Manual Save")
-save_name = st.sidebar.text_input("Save Slot Name", "Vault Echo")
-if st.sidebar.button("Save State"):
-    st.sidebar.success(f"✔️ Saved to slot: {save_name} — {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+# === 🔮 Act 2: The Spiral Fracture ===
+act2 = {
+    "summary": "Following the Seer’s Convergence, the group fractures. Grace self-repairs in the Memory Engine, Caelik guards the Inner Core, and Thjolda's oath-mark becomes key to Shrine 6.",
+    "Shrine_6": {
+        "name": "Runebound Oathmark",
+        "unlocks": ["Thjolda vision", "Shrine hybrid unlock"],
+        "traits": ["Twin Flame Anchor"]
+    },
+    "Echoform_II": {
+        "unlock": "Post Vaultside Collapse",
+        "trigger": "Memory sacrifice and 100% sync with Grace + Caelik",
+        "traits": ["Fracture Delay", "Riftbreaker", "Selfless Paradox"]
+    },
+    "visions": [
+        "The Seer’s Convergence",
+        "Shrine Reversal Event"
+    ],
+    "companions": {
+        "Thjolda": {
+            "origin": "Runeborn Shieldmaiden",
+            "bond": "Discovered in Shrine lattice echo",
+            "note": "Oathmark pending. Sync: 75%"
+        }
+    }
+}
