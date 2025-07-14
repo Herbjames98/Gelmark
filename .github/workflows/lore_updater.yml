@@ -23,35 +23,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install google-generativeai gitpython
 
-      # --- THIS STEP IS NOW FIXED ---
+      # --- THIS IS THE CORRECTED STEP ---
+      # It now uses the correct filename for your script.
       - name: Run Lore Update Pipeline
-        # Add this line to tell the runner where to work from
-        working-directory: ./Gelmark 
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python update_lore_pipeline_gemini.py
+        run: python update_lore_pipeline.py  # Corrected filename
 
-      # --- THIS STEP IS ALSO FIXED ---
+      # --- Create Pull Request Step ---
       - name: Create Pull Request
-        # Add this line here as well so Git commands work correctly
-        working-directory: ./Gelmark
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Check for changes first
+          # Configure git
+          git config --global user.name 'Lore Bot'
+          git config --global user.email 'lore-bot@users.noreply.github.com'
+
+          # Exit if there are no changes
           if git diff-index --quiet HEAD; then
             echo "No changes to commit. Exiting."
             exit 0
           fi
           
-          git config --global user.name 'Lore Bot'
-          git config --global user.email 'lore-bot@users.noreply.github.com'
-          
+          # Create and push a new branch
           BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
           git checkout -b $BRANCH_NAME
-          
           git add -A
           git commit -m "Automated Lore Update"
           git push -u origin $BRANCH_NAME
           
+          # Create the Pull Request
           gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot."
