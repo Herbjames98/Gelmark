@@ -1,3 +1,5 @@
+# This is the final, corrected workflow file.
+
 name: Lore Updater Bot
 
 on:
@@ -10,29 +12,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Download your repository code
+      # Step 1: Download the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- THIS IS THE CRITICAL DEBUGGING STEP ---
-      # It will list every single file and folder exactly as the server sees it.
-      - name: Show the real file structure
-        run: ls -R
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      # We will stop the workflow here for now.
-      # The steps below are commented out so we can focus on the file path issue.
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-generativeai gitpython
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.11'
+      # Step 4: Run the pipeline
+      # This step now has the CORRECT path and the CORRECT filename
+      - name: Run Lore Update Pipeline
+        working-directory: ./My gm   # Tells the runner to CD into the "My gm" folder first
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_lore_pipeline.py # The correct name of your script
 
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install google-generativeai gitpython
+      # Step 5: Create Pull Request if there are changes
+      # This step also needs to be inside the correct folder
+      - name: Create Pull Request
+        working-directory: ./My gm # Tells the git commands where to run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name 'Lore Bot'
+          git config --global user.email 'lore-bot@users.noreply.github.com'
 
-      # - name: Run Lore Update Pipeline
-      #   env:
-      #     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      #   run: python path/to/your/script.py
+          # Exit if there are no changes
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit. Exiting."
+            exit 0
+          fi
+          
+          # Create and push a new branch
+          BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          git add -A
+          git commit -m "Automated Lore Update"
+          git push -u origin $BRANCH_NAME
+          
+          # Create the Pull Request
+          gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot."
