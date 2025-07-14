@@ -1,96 +1,160 @@
 
-# lore_core.py
+import streamlit as st
+import json
+from typing import List, Dict
 
-"""
-This module contains the complete narrative lore and core story elements of the Gelmark interactive saga,
-spanning from the prologue to Act 2. It includes companion backstories, shrine significance, Echoform evolution,
-and key events from the main vision threads.
-"""
+st.set_page_config(layout="wide")
 
-# === 🌌 Prologue: The Pulse Unseen ===
-prologue = {
-    "summary": "In a broken age where memory governs fate, a silent echo awakens within the Spiral Vault. The protagonist, nameless at first, is drawn to an ancient anomaly pulsing at the world's fracture point.",
-    "event": "The first contact with the Seer’s Pulse marks the player's awakening. Time blurs. Echoes ripple. The journey begins not with choice, but consequence.",
-    "arrival": "Through unstable time dilation caused by the Pulse Engine, the protagonist is pulled backward into the Age of Blades — the Norse-like era of Gelmark.",
-    "crash_site": "Landing amid a fiery meteor descent, the player emerges on the outskirts of a Viking village. Survivors mistake them for a fated omen.",
-    "grace_intro": "Grace’s initial form was a broken humanoid AI chassis from a future spiral collapse — discovered near the crash. Her core partially functional, she speaks in fragmented foresight."
+# --- TRAITS ---
+class Trait:
+    def __init__(self, name: str, type_: str, description: str):
+        self.name = name
+        self.type = type_
+        self.description = description
+
+    def __repr__(self):
+        return f"{self.name} ({self.type})"
+
+# --- COMPANIONS ---
+class Companion:
+    def __init__(self, name: str):
+        self.name = name
+        self.sync_rate = 0
+        self.traits: List[Trait] = []
+
+    def add_trait(self, trait: Trait):
+        self.traits.append(trait)
+
+    def get_bonuses(self):
+        return [f"{trait.name}: {trait.description}" for trait in self.traits]
+
+# --- TRAIT REGISTRY ---
+TRAIT_REGISTRY = {
+    "Commandless Grace": Trait("Commandless Grace", "Permanent", "An origin-bound resilience from a fractured future."),
+    "Blessing of Askr": Trait("Blessing of Askr", "Permanent", "A relic-born boon tied to the world roots."),
+    "Grace of the Verdant Fracture": Trait("Grace of the Verdant Fracture", "Hybrid", "A synthesis of Grace and Askr, echo-bound."),
+    "Echo Resilience": Trait("Echo Resilience", "Echoform", "Boosts vision clarity when sync exceeds 50% with AI companions."),
 }
 
-# === 🌀 Act 1: Echoes of the Vault ===
-act1 = {
-    "Shrine_1": {
-        "name": "Memoryfire Crucible",
-        "unlocks": ["Insight stat synergy", "Vision 1: The Pulse Awakens"],
-        "traits": ["Loopborn", "Seer’s Pulse"]
+FUSION_MAP = {
+    ("Commandless Grace", "Blessing of Askr"): {
+        "result": TRAIT_REGISTRY["Grace of the Verdant Fracture"],
+        "shrine": "Memoryfire Crucible",
+        "companion_sync": {"G.R.A.C.E.": 25}
     },
-    "Shrine_2": {
-        "name": "Fusion Shrine — Grace + Askr",
-        "unlocks": ["Fusion with AI Core", "Grace partial awakening"],
-        "traits": ["Frozen Moment"]
-    },
-    "Shrine_3": {
-        "name": "Threaded Split Chamber",
-        "unlocks": ["Echoform Phase I"],
-        "traits": ["Fracture Delay"]
-    },
-    "Shrine_4": {
-        "name": "Vaultside Echoflow",
-        "unlocks": ["Memory Offering Path"],
-        "traits": ["Selfless Paradox"]
-    },
-    "Shrine_5": {
-        "name": "Sealed Chamber",
-        "unlocks": ["Echoform Phase II"],
-        "traits": ["Riftbreaker"]
-    },
-    "visions": [
-        "The Pulse Awakens",
-        "Grace’s Future Memory Fragment",
-        "Broken Spiral Mirror",
-        "Vaultside Collapse"
-    ],
-    "companions": {
-        "Caelik": {
-            "origin": "Flamebound Knight of Vael-Rith",
-            "bond": "Shielded player during Vaultside collapse.",
-            "hybrid": "Flame Hybrid Unlocked"
-        },
-        "Grace": {
-            "origin": "AI from the Spiral Observatory — collapsed timeline",
-            "bond": "Echo AI fused with Askr Core during Shrine 2",
-            "note": "Sentient after Pulse Fusion. Sync: 115%",
-            "form": "Originally a humanoid robot partially disassembled at crash site."
-        }
-    },
-    "codex": [
-        "The Voice That Waited",
-        "What You Could Have Been",
-        "Where Memory Becomes Will"
-    ]
 }
 
-# === 🔮 Act 2: The Spiral Fracture ===
-act2 = {
-    "summary": "Following the Seer’s Convergence, the group fractures. Grace self-repairs in the Memory Engine, Caelik guards the Inner Core, and Thjolda's oath-mark becomes key to Shrine 6.",
-    "Shrine_6": {
-        "name": "Runebound Oathmark",
-        "unlocks": ["Thjolda vision", "Shrine hybrid unlock"],
-        "traits": ["Twin Flame Anchor"]
-    },
-    "Echoform_II": {
-        "unlock": "Post Vaultside Collapse",
-        "trigger": "Memory sacrifice and 100% sync with Grace + Caelik",
-        "traits": ["Fracture Delay", "Riftbreaker", "Selfless Paradox"]
-    },
-    "visions": [
-        "The Seer’s Convergence",
-        "Shrine Reversal Event"
-    ],
-    "companions": {
-        "Thjolda": {
-            "origin": "Runeborn Shieldmaiden",
-            "bond": "Discovered in Shrine lattice echo",
-            "note": "Oathmark pending. Sync: 75%"
-        }
-    }
-}
+# --- PLAYER ---
+class Player:
+    def __init__(self):
+        self.arc_rank = "Pulsebearer"
+        self.traits: List[Trait] = []
+        self.inventory: List[str] = []
+        self.shrine_history: List[str] = []
+        self.visions: List[str] = []
+        self.companions: Dict[str, Companion] = {}
+
+    def add_trait(self, trait: Trait):
+        self.traits.append(trait)
+
+    def has_trait(self, trait_name: str):
+        return any(t.name == trait_name for t in self.traits)
+
+    def fuse_traits(self, t1: str, t2: str):
+        key = (t1, t2) if (t1, t2) in FUSION_MAP else (t2, t1)
+        if key in FUSION_MAP:
+            info = FUSION_MAP[key]
+            if info['shrine'] not in self.shrine_history:
+                return f"Visit required shrine: {info['shrine']}"
+            for comp, req in info.get('companion_sync', {}).items():
+                if self.companions.get(comp, Companion(comp)).sync_rate < req:
+                    return f"Sync with {comp} must be at least {req}"
+            if self.has_trait(t1) and self.has_trait(t2):
+                self.traits = [t for t in self.traits if t.name not in key]
+                self.add_trait(info['result'])
+                return f"Fused {t1} and {t2} into {info['result'].name}"
+            return "Required traits not found."
+        return "Invalid trait combination."
+
+    def update_sync(self, name: str, delta: int):
+        if name in self.companions:
+            self.companions[name].sync_rate = min(100, max(0, self.companions[name].sync_rate + delta))
+
+    def log_shrine_visit(self, name: str):
+        self.shrine_history.append(name)
+
+    def log_vision(self, vision: str):
+        self.visions.append(vision)
+
+    def display(self):
+        st.title("Gelmark HUD")
+        st.subheader(f"Arc Rank: {self.arc_rank}")
+        st.write("---")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.subheader("Traits")
+            for t in self.traits:
+                st.markdown(f"**{t.name}** *({t.type})* — {t.description}")
+
+        with col2:
+            st.subheader("Inventory")
+            for item in self.inventory:
+                st.markdown(f"- {item}")
+
+        with col3:
+            st.subheader("Shrines Visited")
+            for shrine in self.shrine_history:
+                st.markdown(f"- {shrine}")
+
+        st.write("---")
+        st.subheader("Companions")
+        for cname, comp in self.companions.items():
+            st.markdown(f"**{cname}** – Sync: {comp.sync_rate}%")
+            for bonus in comp.get_bonuses():
+                st.markdown(f"➤ {bonus}")
+
+        st.write("---")
+        st.subheader("Visions")
+        for v in self.visions:
+            st.markdown(f"🔮 {v}")
+
+        st.write("---")
+        st.subheader("Fusion Interface")
+        tnames = [t.name for t in self.traits]
+        if len(tnames) >= 2:
+            t1 = st.selectbox("First Trait", tnames)
+            t2 = st.selectbox("Second Trait", [t for t in tnames if t != t1])
+            if st.button("Fuse Traits"):
+                st.success(self.fuse_traits(t1, t2))
+
+        st.write("---")
+        st.subheader("Seer's Pulse — Rank Choices")
+        choices = st.text_area("Enter narrative choices (one per line):").split("\n")
+
+        def score_choice(choice: str) -> int:
+            keywords = ["honor", "sacrifice", "resolve", "echo", "fracture", "pulse"]
+            return sum(3 for word in keywords if word in choice.lower()) + len(choice)
+
+        ranked = sorted([(c, score_choice(c)) for c in choices if c.strip()], key=lambda x: -x[1])
+        for i, (text, score) in enumerate(ranked):
+            st.markdown(f"**{i+1}.** {text} *(score: {score})*")
+
+        if ranked:
+            top = ranked[0][0]
+            self.log_vision(f"Seer’s Pulse ranked top: {top}")
+
+def main():
+    player = Player()
+    player.add_trait(TRAIT_REGISTRY["Commandless Grace"])
+    player.add_trait(TRAIT_REGISTRY["Blessing of Askr"])
+    player.inventory.append("Coreborn Hammer")
+    player.log_shrine_visit("Memoryfire Crucible")
+    player.log_vision("Vision Tier 2: Echoed Past")
+    player.companions["G.R.A.C.E."] = Companion("G.R.A.C.E.")
+    player.companions["G.R.A.C.E."].add_trait(TRAIT_REGISTRY["Echo Resilience"])
+    player.update_sync("G.R.A.C.E.", 30)
+    player.display()
+
+if __name__ == "__main__":
+    main()
