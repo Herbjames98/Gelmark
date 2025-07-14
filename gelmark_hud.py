@@ -20,6 +20,17 @@ def load_lore_module(module_name):
         return None
 
 # === ✍️ Lore Editor UI ===
+      
+# In gelmark_hud.py, replace your existing lore_editor_ui function with this one.
+# Notice the new 'import docx' line at the top of the file.
+
+import streamlit as st
+import importlib.util
+import os
+import json
+from datetime import datetime
+import docx # <--- NEW: Import the library for reading .docx files
+
 def lore_editor_ui():
     """Adds a lore editing interface to the sidebar."""
     st.sidebar.title("🛠️ Lore Editor")
@@ -34,6 +45,7 @@ def lore_editor_ui():
         if not edit_instruction:
             st.sidebar.warning("Please provide an instruction for the update.")
             return
+        # This job creation logic is unchanged
         new_job = { "id": datetime.now().isoformat(), "type": "edit", "module": selected_module, "prompt": edit_instruction, "status": "pending" }
         try:
             with open("job_queue.json", 'r+') as f:
@@ -44,29 +56,46 @@ def lore_editor_ui():
     
     st.sidebar.markdown("---")
 
-    # --- UPGRADED: Narrative Save Section with File Uploader ---
+    # --- UPGRADED: Narrative Save Section now accepts .docx ---
     st.sidebar.subheader("Narrative Save")
     
-    # Replace the text_area with a file_uploader
+    # Add 'docx' to the list of accepted file types
     uploaded_file = st.sidebar.file_uploader(
         "Upload a conversation log", 
-        type=['txt', 'md'] # We can restrict to plain text file types
+        type=['txt', 'md', 'docx'] 
     )
 
     if st.sidebar.button("Process and Save Narrative from File"):
-        # Check if a file was actually uploaded
         if uploaded_file is None:
             st.sidebar.warning("Please upload a file to save.")
             return
         
-        # Read the content from the uploaded file object
-        # .read() gets the bytes, .decode() turns the bytes into a string
-        narrative_log = uploaded_file.read().decode("utf-8")
+        narrative_log = "" # Initialize an empty string for the log
         
+        # --- NEW LOGIC TO HANDLE DIFFERENT FILE TYPES ---
+        try:
+            # Check if the uploaded file is a Word document
+            if uploaded_file.name.endswith('.docx'):
+                print("Reading from a .docx file...")
+                document = docx.Document(uploaded_file)
+                # Join the text from all paragraphs to create the full log
+                narrative_log = "\n".join([para.text for para in document.paragraphs])
+            else: # Otherwise, treat it as a plain text file (.txt, .md)
+                print("Reading from a plain text file...")
+                narrative_log = uploaded_file.read().decode("utf-8")
+        except Exception as e:
+            st.sidebar.error(f"Error reading file: {e}")
+            return # Stop if we can't read the file
+
+        if not narrative_log:
+            st.sidebar.error("Could not extract any text from the uploaded file.")
+            return
+
+        # The rest of the logic is identical!
         new_job = {
             "id": datetime.now().isoformat(),
             "type": "narrative_save",
-            "data": narrative_log, # The data is now the content of the file
+            "data": narrative_log, # The data is now the text extracted from the file
             "status": "pending"
         }
         try:
