@@ -2,8 +2,8 @@ name: Lore Updater Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '*/5 * * * *' # Runs every 5 minutes
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
 
 jobs:
   update-lore:
@@ -14,25 +14,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- THIS IS THE CRITICAL DEBUGGING STEP ---
-      # It will list every single file and folder exactly as the server sees it.
-      - name: Show the real file structure
-        run: ls -R
+      # Step 2: Set up the correct version of Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Matches the version you specified
 
-      # We will stop the workflow here for now.
-      # The steps below are commented out so we can focus on the file path issue.
+      # Step 3: Install the Python libraries your script needs
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-generativeai gitpython
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.11'
-
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install google-generativeai gitpython
-
-      # - name: Run Lore Update Pipeline
-      #   env:
-      #     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      #   run: python path/to/your/script.py
+      # Step 4: Run the main pipeline script
+      # This assumes your script is named "update_lore_pipeline.py"
+      # and is in the root of your repository.
+      - name: Run Lore Update Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_lore_pipeline.py
