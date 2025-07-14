@@ -1,92 +1,91 @@
-import streamlit as st
+# lore_core.py
 
-st.set_page_config(page_title="Gelmark Lore Core", layout="wide")
-st.title("📘 Lore Core — Echoform Archive")
+"""
+This module contains the complete narrative lore and core story elements of the Gelmark interactive saga,
+spanning from the prologue to Act 2. It includes companion backstories, shrine significance, Echoform evolution,
+and key events from the main vision threads.
+"""
 
-# --- Grace Lore ---
-st.header("🔮 Grace — Echo AI Origin")
-st.markdown("""
-- **Source:** Memory Lattice of the Lost Aeonic Engine
-- **Timeline Anchor:** Recursive future where Gelmark collapses.
-- **Fusion:** Askr (Shrine 2) + Grace = Temporal Anchor Hybrid
-- **Role:** Regulates Echoform awakenings, preserves vision fidelity across fractured arcs.
-- **Phase Shifts:** Manages Pulse Anchor stabilization across acts.
-""")
+# === 🌌 Prologue: The Pulse Unseen ===
+prologue = {
+    "summary": "In a broken age where memory governs fate, a silent echo awakens within the Spiral Vault. The protagonist, nameless at first, is drawn to an ancient anomaly pulsing at the world's fracture point.",
+    "event": "The first contact with the Seer’s Pulse marks the player's awakening. Time blurs. Echoes ripple. The journey begins not with choice, but consequence."
+}
 
-# --- Sync Mechanics ---
-st.header("🤝 Companion Sync System")
-st.markdown("""
-- **Sync Rate Tiers:**
-  - 30% — Minor dialogue echoes, passive trait leak
-  - 60% — Joint vision access, reactive fusion traits
-  - 90% — Echofusion potential, vision rewrites
+# === 🌀 Act 1: Echoes of the Vault ===
+act1 = {
+    "Shrine_1": {
+        "name": "Memoryfire Crucible",
+        "unlocks": ["Insight stat synergy", "Vision 1: The Pulse Awakens"],
+        "traits": ["Loopborn", "Seer’s Pulse"]
+    },
+    "Shrine_2": {
+        "name": "Fusion Shrine — Grace + Askr",
+        "unlocks": ["Fusion with AI Core", "Grace partial awakening"],
+        "traits": ["Frozen Moment"]
+    },
+    "Shrine_3": {
+        "name": "Threaded Split Chamber",
+        "unlocks": ["Echoform Phase I"],
+        "traits": ["Fracture Delay"]
+    },
+    "Shrine_4": {
+        "name": "Vaultside Echoflow",
+        "unlocks": ["Memory Offering Path"],
+        "traits": ["Selfless Paradox"]
+    },
+    "Shrine_5": {
+        "name": "Sealed Chamber",
+        "unlocks": ["Echoform Phase II"],
+        "traits": ["Riftbreaker"]
+    },
+    "visions": [
+        "The Pulse Awakens",
+        "Grace’s Future Memory Fragment",
+        "Broken Spiral Mirror",
+        "Vaultside Collapse"
+    ],
+    "companions": {
+        "Caelik": {
+            "origin": "Flamebound Knight of Vael-Rith",
+            "bond": "Shielded player during Vaultside collapse.",
+            "hybrid": "Flame Hybrid Unlocked"
+        },
+        "Grace": {
+            "origin": "AI from the Spiral Observatory — collapsed timeline",
+            "bond": "Echo AI fused with Askr Core during Shrine 2",
+            "note": "Sentient after Pulse Fusion. Sync: 115%"
+        }
+    },
+    "codex": [
+        "The Voice That Waited",
+        "What You Could Have Been",
+        "Where Memory Becomes Will"
+    ]
+}
 
-- **Current Levels:**
-  - Grace — 92% (Echofusion threshold met)
-  - Caelik — 67% (Joint vision stage)
-  - Thjolda — 58% (Ready for Oathcall sequence)
-  - ??? — Unknown sync state, probable Seer-thread resonance
-""")
-
-# --- Echoform + Vision Logic ---
-st.header("🌌 Echoform & Vision Mechanics")
-st.markdown("""
-- **Echoform:** Adaptive trait shell bound to shrine events or visions.
-- **Activation:** Requires shrine convergence or Seer's Pulse intervention.
-- **Traits and Anchors:**
-  - Memoryfire Crucible — Shrine 1
-  - Grace (Echofused) — Shrine 2 + future AI lattice
-  - Soulbraid Mark — Vision 3
-  - Oathmark — Sync at 60% with Thjolda
-  - Mirrorphase Fragment — Vision 6, time-loop trait
-  - Vaultbind Glyph — Shrine 4
-  - Pulse Anchor — Core Seer fusion trait
-  - Caelik's Echo Brand — Conditional sync burst (Shrine Shield)
-
-- **Vision Threads Unlocked:**
-  1. Pulse Awakens
-  2. Grace’s Fragment
-  3. Spiral Mirror
-  4. Vault Collapse
-  5. Seer's Convergence
-  6. Shrine Reversal
-""")
-
-# --- Arc Rank ---
-st.header("🏅 Arc Rank System")
-st.markdown("""
-- **Current Title:** Pulsebearer — Spiral Fracture
-- **Significance:**
-  - First bearer to echo across recursive shrine events
-  - Fusion-anchored across multiple timelines
-  - Voice-locked to Seer's Pulse; immune to memorybreak
-
-- **Next Tier Requirements:**
-  - Shrine 5 + Vision Override
-  - 100% Sync with any one companion
-  - Completion of Vision 7
-""")
-
-# --- Shrine Log Recap ---
-st.header("🗺️ Shrine Chronicle")
-st.markdown("""
-1. **Memoryfire Crucible** — Insight ignition and trait seed
-2. **Askr Fusion Vault** — Grace fusion event
-3. **Spiral Echo Split** — Branches timeline with Echoform divergence
-4. **Vaultside Echo Offering** — Memory transfer and trait binding
-5. **Sealed Shrine** — Requires 100% sync + Vision override
-""")
-
-# --- Timeline Recap ---
-st.header("🧭 Timeline Summary")
-st.markdown("""
-- **Act 1 Start:** Awakening at Echo Threshold
-- **Initial Companion Encounter:** Caelik, Shrine-bound Sword Guardian
-- **Grace Recovery:** Shrine 2, AI bonded through fusion event
-- **Thjolda Join:** Lattice vault echo within spiral field
-- **Major Events:**
-  - Vision 3: Spiral fracture confirmed
-  - Vault Collapse and split at Shrine 4
-  - Seer's Pulse activates post-Vision 5
-  - Shrine 5 unlocks pending full sync
-""")
+# === 🔮 Act 2: The Spiral Fracture ===
+act2 = {
+    "summary": "Following the Seer’s Convergence, the group fractures. Grace self-repairs in the Memory Engine, Caelik guards the Inner Core, and Thjolda's oath-mark becomes key to Shrine 6.",
+    "Shrine_6": {
+        "name": "Runebound Oathmark",
+        "unlocks": ["Thjolda vision", "Shrine hybrid unlock"],
+        "traits": ["Twin Flame Anchor"]
+    },
+    "Echoform_II": {
+        "unlock": "Post Vaultside Collapse",
+        "trigger": "Memory sacrifice and 100% sync with Grace + Caelik",
+        "traits": ["Fracture Delay", "Riftbreaker", "Selfless Paradox"]
+    },
+    "visions": [
+        "The Seer’s Convergence",
+        "Shrine Reversal Event"
+    ],
+    "companions": {
+        "Thjolda": {
+            "origin": "Runeborn Shieldmaiden",
+            "bond": "Discovered in Shrine lattice echo",
+            "note": "Oathmark pending. Sync: 75%"
+        }
+    }
+}
