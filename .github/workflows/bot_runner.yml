@@ -1,66 +1,71 @@
+# This is the final, corrected workflow file.
+
 name: Lore Updater Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
+  workflow_dispatch:      # Allows manual runs from the Actions tab
 
 jobs:
   update-lore:
     runs-on: ubuntu-latest
 
-    # --- THIS IS THE CRITICAL PERMISSIONS BLOCK ---
-    # It gives the bot the right to create a pull request.
+    # These permissions are essential for the bot to create branches and pull requests.
     permissions:
-      contents: write      # Allows creating branches and committing
-      pull-requests: write # Allows creating the pull request
+      contents: write
+      pull-requests: write
 
     steps:
-      # Step 1: Download the repository code
+      # Step 1: Download your repository's code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
+      # Step 2: Set up the correct Python version
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Step 3: Install dependencies
+      # Step 3: Install the Python libraries your script needs
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install google-generativeai gitpython
 
-      # Step 4: Run the pipeline inside the correct folder
+      # Step 4: Run your Python script from inside the correct folder
       - name: Run Lore Update Pipeline
-        working-directory: ./My gm   # This is correct if the folder exists
+        working-directory: ./My gm
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
 
-      # Step 5: Create Pull Request from within the correct folder
+      # Step 5: Check for changes and create a Pull Request if necessary
       - name: Create Pull Request
-        working-directory: ./My gm # This is also correct
+        working-directory: ./My gm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git
+          # Configure git with the bot's identity
           git config --global user.name 'Lore Bot'
           git config --global user.email 'lore-bot@users.noreply.github.com'
 
-          # Exit if there are no changes made by the script
+          # Check if the python script made any file changes. If not, exit gracefully.
           if git diff-index --quiet HEAD; then
-            echo "No changes to commit. Exiting."
+            echo "No changes detected. Exiting."
             exit 0
           fi
           
-          # Create and push a new branch with the changes
+          # Create a new branch with a unique name based on the date and time
           BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
           git checkout -b $BRANCH_NAME
           git add -A
           git commit -m "Automated Lore Update"
           git push -u origin $BRANCH_NAME
           
-          # Use the GitHub CLI to create the Pull Request
+          # --- THE CRITICAL FIX ---
+          # Log in to the GitHub CLI tool using the automatically generated token.
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          
+          # Create the Pull Request using the now-authenticated GitHub CLI.
           gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot."
