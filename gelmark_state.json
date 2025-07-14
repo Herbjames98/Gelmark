@@ -1,0 +1,92 @@
+{
+  "arc_rank": "Pulsebearer \u2014 Spiral Fracture",
+  "current_location": "Shrine Vaultside Echo",
+  "visions_unlocked": 6,
+  "shrines_visited": [
+    {
+      "name": "Shrine 1",
+      "description": "Memoryfire Crucible (Insight/Fusion Unlock)"
+    },
+    {
+      "name": "Shrine 2",
+      "description": "Grace + Askr Fusion (AI Bond Awakening)"
+    },
+    {
+      "name": "Shrine 3",
+      "description": "Echoform Thread Split (Vision Lock)"
+    },
+    {
+      "name": "Shrine 4",
+      "description": "Vaultside Echoflow (Memory Offering)"
+    },
+    {
+      "name": "Shrine 5",
+      "description": "Sealed Chamber \u2014 Locked. Sync 100% and Vision Override required."
+    }
+  ],
+  "echoform_phase": "II",
+  "companions": [
+    {
+      "name": "Caelik",
+      "sync": 67,
+      "title": "Swordbound Guardian"
+    },
+    {
+      "name": "Grace",
+      "sync": 92,
+      "title": "Future AI Anchor"
+    },
+    {
+      "name": "Thjolda",
+      "sync": 58,
+      "title": "Runeborn Shieldmaiden"
+    },
+    {
+      "name": "? ? ?",
+      "sync": null,
+      "title": "Unknown Echo"
+    }
+  ],
+  "traits": [
+    {
+      "name": "Grace (Echofused)",
+      "description": "Hybrid: Askr + Flowbinding, restored from future AI core"
+    },
+    {
+      "name": "Memoryfire Crucible",
+      "description": "Shrine 1 \u2014 Insight + Focus boost, trait ignition"
+    },
+    {
+      "name": "Soulbraid Mark",
+      "description": "Vision-linked trait, unlocks during Vision 3"
+    },
+    {
+      "name": "Thjolda's Oathmark",
+      "description": "Fused at 60% sync, unlocks Echo defense"
+    },
+    {
+      "name": "Vaultbind Glyph",
+      "description": "Unlocked via Shrine 4 memory offering"
+    },
+    {
+      "name": "Mirrorphase Fragment",
+      "description": "Linked to Vision 6 \u2014 temporal feedback trait"
+    },
+    {
+      "name": "Pulse Anchor",
+      "description": "Seer-threaded. Grants resonance over Echoform phase shifts"
+    },
+    {
+      "name": "Caelik's Echo Brand",
+      "description": "Triggers shrine protection at critical sync events"
+    }
+  ],
+  "vision_log": [
+    "Vision 1: The Pulse Awakens",
+    "Vision 2: Grace\u2019s Future Memory Fragment",
+    "Vision 3: Broken Spiral Mirror",
+    "Vision 4: Vaultside Collapse",
+    "Vision 5: The Seer\u2019s Convergence",
+    "Vision 6: Shrine Reversal Event"
+  ]
+}
