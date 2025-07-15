@@ -1,16 +1,14 @@
-# Final workflow using the corrected 'my_gm' path.
+# This workflow now triggers on a remote signal from the Streamlit app.
 
 name: Lore Updater Bot
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+  repository_dispatch:
+    types: [update-lore] # This is the "button" our app will press
 
 jobs:
   update-lore:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
@@ -24,28 +22,25 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install google-generativeai gitpython
+        run: pip install google-generativeai
 
       - name: Run Lore Update Pipeline
-        # UPDATED PATH
-        working-directory: ./my_gm 
+        working-directory: ./my_gm
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # The narrative log is now passed directly from the event
+          NARRATIVE_LOG: ${{ github.event.client_payload.narrative_log }}
         run: python update_lore_pipeline.py
 
       - name: Commit and Push Changes
-        # UPDATED PATH
-        working-directory: ./my_gm 
+        working-directory: ./my_gm
         run: |
           git config --global user.name 'Lore Bot'
           git config --global user.email 'lore-bot@users.noreply.github.com'
           if git diff-index --quiet HEAD; then
-            echo "No changes detected. Exiting."
+            echo "No changes detected."
             exit 0
           fi
-          echo "Changes detected. Committing directly to main branch..."
           git add -A
           git commit -m "Automated Lore Update"
           git push origin main
