@@ -30,13 +30,13 @@ jobs:
           pip install google-generativeai gitpython
 
       - name: Run Lore Update Pipeline
-        working-directory: "./My gm"
+        working-directory: ./my_gm
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
 
       - name: Commit and Push Changes
-        working-directory: "./My gm"
+        working-directory: ./my_gm
         run: |
           git config --global user.name 'Lore Bot'
           git config --global user.email 'lore-bot@users.noreply.github.com'
