@@ -29,9 +29,14 @@ def lore_editor_ui():
     # --- Simple Editor ---
     st.sidebar.subheader("Simple Edit")
 
-    # UPDATED: Path now includes "My gm"
+    # Define paths to the correct folder
     LORE_DIR = os.path.join("My gm", "lore_modules")
     JOB_QUEUE_PATH = os.path.join("My gm", "job_queue.json")
+
+    # Check if the directory exists before listing files
+    if not os.path.exists(LORE_DIR):
+        st.sidebar.error(f"Error: The directory '{LORE_DIR}' was not found.")
+        return # Stop the function if the folder doesn't exist
 
     lore_files = [f.replace('.py', '') for f in os.listdir(LORE_DIR) if f.endswith('.py') and '__init__' not in f]
     selected_module = st.sidebar.selectbox("Choose a module to edit:", lore_files)
@@ -43,9 +48,18 @@ def lore_editor_ui():
             return
         new_job = { "id": datetime.now().isoformat(), "type": "edit", "module": selected_module, "prompt": edit_instruction, "status": "pending" }
         try:
-            # UPDATED: Path to job_queue.json is now correct
-            with open(JOB_QUEUE_PATH, 'r+') as f:
-                queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
+            # Open the job queue file (which may not exist yet)
+            if not os.path.exists(JOB_QUEUE_PATH):
+                queue = []
+            else:
+                with open(JOB_QUEUE_PATH, 'r') as f:
+                    queue = json.load(f)
+            
+            queue.append(new_job)
+            
+            with open(JOB_QUEUE_PATH, 'w') as f:
+                json.dump(queue, f, indent=4)
+
             st.sidebar.success(f"Edit request for '{selected_module}' submitted!")
         except Exception as e:
             st.sidebar.error(f"Could not write to job queue: {e}")
@@ -56,7 +70,7 @@ def lore_editor_ui():
     st.sidebar.subheader("Narrative Save")
     
     uploaded_file = st.sidebar.file_uploader(
-        "Upload Conversation Log (.txt or .docx)", 
+        "Upload Conversation Log (.txt, .md, .docx)", 
         type=['txt', 'md', 'docx']
     )
 
@@ -84,9 +98,17 @@ def lore_editor_ui():
 
         new_job = { "id": datetime.now().isoformat(), "type": "narrative_save", "data": narrative_log, "status": "pending" }
         try:
-            # UPDATED: Path to job_queue.json is now correct
-            with open(JOB_QUEUE_PATH, 'r+') as f:
-                queue = json.load(f); queue.append(new_job); f.seek(0); json.dump(queue, f, indent=4); f.truncate()
+            if not os.path.exists(JOB_QUEUE_PATH):
+                queue = []
+            else:
+                with open(JOB_QUEUE_PATH, 'r') as f:
+                    queue = json.load(f)
+
+            queue.append(new_job)
+            
+            with open(JOB_QUEUE_PATH, 'w') as f:
+                json.dump(queue, f, indent=4)
+
             st.sidebar.success("Narrative save request from file submitted!")
             st.balloons()
         except Exception as e:
@@ -111,7 +133,6 @@ lore_data = load_lore_module(module_key)
 if lore_data:
     section = getattr(lore_data, f"{module_key}_lore", None)
     if section:
-        # ... (rest of the display logic is unchanged and correct) ...
         st.subheader(f"📘 {selected_page} Summary")
         st.markdown(section.get("summary", "No summary provided."))
 
@@ -148,11 +169,3 @@ if lore_data:
         st.warning("Module loaded but no lore section found.")
 else:
     st.error("Lore module could not be read.")
-
-Summary of Changes:
-
-In load_lore_module(), the path to the lore files was changed to: os.path.join("My gm", "lore_modules", ...)
-
-In lore_editor_ui(), the paths for both lore_modules and job_queue.json were updated to point inside the My gm directory.
-
-Once you commit this updated gelmark_hud.py file, your Streamlit app should load correctly.
