@@ -1,5 +1,5 @@
 # This is the full, corrected gelmark_hud.py file.
-# It now looks for lore files inside the "My gm" directory.
+# It now looks for lore files inside the "my_gm" directory.
 
 import streamlit as st
 import importlib.util
@@ -11,8 +11,8 @@ import docx
 # === 📁 Modular Lore Loader (Corrected Path) ===
 def load_lore_module(module_name):
     try:
-        # UPDATED: Path now includes "My gm"
-        path = os.path.join("My gm", "lore_modules", f"{module_name}.py")
+        # UPDATED: Path now includes "my_gm"
+        path = os.path.join("my_gm", "lore_modules", f"{module_name}.py")
         spec = importlib.util.spec_from_file_location(module_name, path)
         lore_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(lore_module)
@@ -30,8 +30,8 @@ def lore_editor_ui():
     st.sidebar.subheader("Simple Edit")
 
     # Define paths to the correct folder
-    LORE_DIR = os.path.join("My gm", "lore_modules")
-    JOB_QUEUE_PATH = os.path.join("My gm", "job_queue.json")
+    LORE_DIR = os.path.join("my_gm", "lore_modules")
+    JOB_QUEUE_PATH = os.path.join("my_gm", "job_queue.json")
 
     # Check if the directory exists before listing files
     if not os.path.exists(LORE_DIR):
