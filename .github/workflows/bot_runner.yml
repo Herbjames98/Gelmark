@@ -1,5 +1,4 @@
-# This is the final, syntactically correct workflow file.
-# It commits changes directly to the main branch.
+# Final workflow using the corrected 'my_gm' path.
 
 name: Lore Updater Bot
 
@@ -30,22 +29,22 @@ jobs:
           pip install google-generativeai gitpython
 
       - name: Run Lore Update Pipeline
-        working-directory: ./my_gm
+        # UPDATED PATH
+        working-directory: ./my_gm 
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
 
       - name: Commit and Push Changes
-        working-directory: ./my_gm
+        # UPDATED PATH
+        working-directory: ./my_gm 
         run: |
           git config --global user.name 'Lore Bot'
           git config --global user.email 'lore-bot@users.noreply.github.com'
-          
           if git diff-index --quiet HEAD; then
-            echo "No changes detected by the script. Exiting."
+            echo "No changes detected. Exiting."
             exit 0
           fi
-          
           echo "Changes detected. Committing directly to main branch..."
           git add -A
           git commit -m "Automated Lore Update"
