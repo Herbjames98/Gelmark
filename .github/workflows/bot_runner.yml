@@ -1,20 +1,20 @@
-# This is the final, corrected workflow file.
+# This workflow commits changes directly to the main branch without a pull request.
 
 name: Lore Updater Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
-  workflow_dispatch:      # Allows manual runs from the Actions tab
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   update-lore:
     runs-on: ubuntu-latest
 
-    # These permissions are essential for the bot to create branches and pull requests.
+    # NOTE: 'pull-requests: write' is no longer needed.
+    # 'contents: write' is essential to allow the bot to push to the repository.
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       # Step 1: Download your repository's code
@@ -40,32 +40,23 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_lore_pipeline.py
 
-      # Step 5: Check for changes and create a Pull Request if necessary
-      - name: Create Pull Request
+      # Step 5: Commit and Push Changes Directly to Main Branch
+      - name: Commit and Push Changes
         working-directory: ./My gm
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Configure git with the bot's identity
           git config --global user.name 'Lore Bot'
           git config --global user.email 'lore-bot@users.noreply.github.com'
 
-          # Check if the python script made any file changes. If not, exit gracefully.
+          # Check if the python script made any file changes.
+          # If no changes, exit gracefully.
           if git diff-index --quiet HEAD; then
             echo "No changes detected. Exiting."
             exit 0
           fi
           
-          # Create a new branch with a unique name based on the date and time
-          BRANCH_NAME="lore-update-$(date +%Y-%m-%d-%H%M%S)"
-          git checkout -b $BRANCH_NAME
+          # If there are changes, add, commit, and push them directly to main.
+          echo "Changes detected. Committing directly to main branch..."
           git add -A
           git commit -m "Automated Lore Update"
-          git push -u origin $BRANCH_NAME
-          
-          # --- THE CRITICAL FIX ---
-          # Log in to the GitHub CLI tool using the automatically generated token.
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-          
-          # Create the Pull Request using the now-authenticated GitHub CLI.
-          gh pr create --base main --head $BRANCH_NAME --title "Automated Lore Update" --body "Please review the changes proposed by the Lore Bot."
+          git push origin main
