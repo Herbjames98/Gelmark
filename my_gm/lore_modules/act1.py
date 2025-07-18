@@ -1,9 +1,9 @@
 # lore_modules/act1.py
 
 act1_lore = {
-    "summary": "Unknown",
+    "summary": "The protagonist begins to uncover deeper mysteries, discovering the Mariner's Compass—an artifact attuned to ancient magic—while exploring coastal ruins.",
     "key_events": [
-        "Unknown"
+        "The protagonist discovered the Mariner's Compass in a hidden chest within ruins near the coast. This unique artifact does not point north, but rather towards the nearest source of powerful, ancient magic."
     ],
         "shrines": [
             {"id": 1, "name": "Memoryfire Crucible", "unlocks": ["Insight synergy", "Vision 1"], "traits": ["Loopborn", "Seer’s Pulse"]},
