@@ -1,5 +1,5 @@
-# This is the final, self-contained, local-only Streamlit application.
-# It uses the correct, modern st.rerun() command.
+# This is a diagnostic version of the app.
+# It will display the raw AI response on the page if an error occurs.
 
 import streamlit as st
 import os
@@ -49,66 +49,72 @@ NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
+    # --- THIS ENTIRE 'try...except' BLOCK HAS BEEN UPGRADED ---
+    raw_response_text = ""
     try:
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        print("Calling Gemini API...")
         response = model.generate_content(prompt)
-        response_text = response.text.strip().removeprefix("```json").removesuffix("```")
-        updated_files = json.loads(response_text)
+        raw_response_text = response.text
+        
+        print("AI responded. Attempting to parse JSON...")
+        # Clean the response to get only the JSON
+        json_text = raw_response_text.strip().removeprefix("```json").removesuffix("```")
+        updated_files = json.loads(json_text)
+        print("Successfully parsed AI response.")
+
     except Exception as e:
-        st.error(f"Error calling Gemini or parsing response: {e}")
+        # If anything fails, display the error and the raw response on the page
+        st.error(f"An error occurred while processing the AI response: {e}")
+        st.subheader("Raw AI Response:")
+        st.code(raw_response_text if raw_response_text else "The AI returned an empty response.", language="text")
         return False
         
     st.info("AI processing complete. Writing changes to local files...")
+    # ... (file writing logic is unchanged) ...
     for filename, content in updated_files.items():
         if filename in current_lore:
             filepath = os.path.join(LORE_FOLDER, filename)
             try:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(content)
+                print(f"Successfully wrote changes to {filepath}")
             except Exception as e:
                 st.error(f"Error writing to file {filename}: {e}")
                 return False
     return True
 
-# --- Main App Interface ---
+# --- Main App Interface (largely unchanged) ---
 st.title("📖 Gelmark Local Lore Editor")
-
 st.sidebar.title("🛠️ Lore Updater")
-uploaded_file = st.sidebar.file_uploader("Upload Narrative Log", type=['txt', 'md', 'docx'])
+
+# Using a text area for reliability
+st.sidebar.subheader("Paste Narrative Log")
+narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=250, key="narrative_input")
 
 if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"):
-        st.sidebar.error("GEMINI_API_KEY is not set! Please set the environment variable and restart.")
-    elif uploaded_file is None:
-        st.sidebar.warning("Please upload a file.")
+        st.sidebar.error("GEMINI_API_KEY is not set!")
+    elif not narrative_log_input:
+        st.sidebar.warning("Please paste a narrative log into the text area.")
     else:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        narrative_log = ""
-        try:
-            if uploaded_file.name.endswith('.docx'):
-                narrative_log = "\n".join([p.text for p in docx.Document(uploaded_file).paragraphs])
-            else:
-                narrative_log = uploaded_file.read().decode("utf-8")
-        except Exception as e:
-            st.sidebar.error(f"Error reading file: {e}")
+        with st.spinner("The AI is rewriting the lore..."):
+            success = run_lore_update(narrative_log_input)
         
-        if narrative_log:
-            with st.spinner("The AI is rewriting the lore... This may take a moment."):
-                success = run_lore_update(narrative_log)
-            
-            if success:
-                st.success("Lore files updated successfully! The page will now reload.")
-                st.balloons()
-                # --- THIS IS THE FINAL FIX ---
-                st.rerun() # Use the new, official command
-            else:
-                st.error("The lore update failed. Check the console for details.")
+        if success:
+            st.success("Lore files updated successfully!")
+            st.balloons()
+            st.rerun()
+        else:
+            st.error("The lore update failed. See details above and check the console.")
 
-# Display Area for the Lore
+# Display Area
 st.sidebar.markdown("---")
 pages = {"Prologue": "prologue", "Act 1": "act1", "Act 2": "act2"}
 selected_page = st.sidebar.radio("View Lore Section:", list(pages.keys()))
 module_data = load_lore_module(pages[selected_page])
+# ... (display logic is unchanged) ...
 if module_data:
     section = getattr(module_data, f"{pages[selected_page]}_lore", {})
     st.subheader(f"📘 {selected_page} Summary")
@@ -124,4 +130,4 @@ if module_data:
             else:
                 st.markdown(f"- {str(c)}")
 else:
-    st.warning(f"Could not display lore for '{selected_page}'. Check the file in '{LORE_FOLDER}'.")
+    st.warning(f"Could not display lore for '{selected_page}'.")
