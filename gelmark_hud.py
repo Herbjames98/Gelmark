@@ -1,4 +1,5 @@
-# This is a diagnostic version of the app to see the AI's response.
+# This is the final, fully-functional version of the local application.
+# It correctly handles filenames from the AI and removes the auto-rerun for clarity.
 
 import streamlit as st
 import os
@@ -37,48 +38,55 @@ def get_all_lore_content():
     return all_lore
 
 def run_lore_update(narrative_log):
-    """The main AI logic function with enhanced error reporting."""
+    """The main AI logic function."""
     st.info("Preparing lore and contacting the Gemini AI...")
     
     current_lore = get_all_lore_content()
     lore_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_lore.items()])
 
-    prompt = f"""You are a master storyteller and game lore keeper. Your task is to update the game's lore files based on a new narrative log.
+    prompt = f"""You are a master storyteller. Your task is to update the game's lore files based on a new narrative log.
 NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES: <lore>{lore_string}</lore>
-INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
+INSTRUCTIONS: Your response MUST be a single, valid JSON object. Keys must be the FILENAMES (e.g., "act1.py") and values must be the COMPLETE, new file content as a single string. Return ONLY the raw JSON object."""
 
-    raw_response_text = ""
     try:
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
-        raw_response_text = response.text
-        json_text = raw_response_text.strip().removeprefix("```json").removesuffix("```")
-        updated_files = json.loads(json_text)
-
+        updated_files = json.loads(response.text.strip().removeprefix("```json").removesuffix("```"))
     except Exception as e:
         st.error(f"An error occurred while processing the AI response: {e}")
         st.subheader("Raw AI Response:")
-        st.code(raw_response_text if raw_response_text else "The AI returned an empty response.", language="text")
+        st.code(response.text if 'response' in locals() else "No response from AI.", language="text")
         return False
 
-    # --- THIS IS THE NEW DIAGNOSTIC BLOCK ---
-    # It will show the parsed dictionary on the page so we can see what the AI sent.
     st.subheader("Parsed AI Response:")
     st.json(updated_files)
 
     if not updated_files:
-        st.warning("The AI returned an empty response, so no files were changed.")
-        # We will now consider an empty response a failure.
+        st.warning("The AI returned an empty response. No files were changed.")
         return False
-    # --- END OF NEW BLOCK ---
         
     st.info("AI processing complete. Writing changes to local files...")
-    for filename, content in updated_files.items():
+    files_written = 0
+    for key, content in updated_files.items():
+        # --- THIS IS THE FIX ---
+        # Get just the filename from the key (e.g., 'lore_modules/act1.py' -> 'act1.py')
+        filename = os.path.basename(key) 
+        
         if filename in current_lore:
             filepath = os.path.join(LORE_FOLDER, filename)
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
+            st.write(f"✅ Successfully wrote changes to `{filename}`.")
+            files_written += 1
+        else:
+            st.write(f"⚠️ Skipping unknown file from AI: `{filename}`.")
+    
+    # Check if any work was actually done
+    if files_written == 0:
+        st.warning("AI response processed, but no matching files were found to update.")
+        return False
+
     return True
 
 # --- Main App Interface ---
@@ -98,11 +106,10 @@ if st.sidebar.button("Process and Update Lore"):
             success = run_lore_update(narrative_log_input)
         
         if success:
-            st.success("Lore files updated successfully!")
+            st.success("Lore files updated successfully! Refresh the page (F5) to see the new content.")
             st.balloons()
-            st.rerun() # Refresh the page on success
+            # The st.rerun() line is now permanently removed for clarity.
         else:
-            # On failure, the error messages (including the AI response) will stay on the screen.
             st.error("The lore update failed. See details above.")
 
 # --- Display Area ---
