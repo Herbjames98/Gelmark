@@ -1,5 +1,5 @@
-# This is a self-contained, local-only Streamlit application.
-# It reads local files, calls the AI, and writes back to the same local files.
+# This is the final, self-contained, local-only Streamlit application.
+# It uses the correct, updated Gemini model name.
 
 import streamlit as st
 import os
@@ -41,20 +41,19 @@ def run_lore_update(narrative_log):
     """The main AI logic function."""
     st.info("Preparing lore and contacting the Gemini AI...")
     
-    # 1. Get current lore
     current_lore = get_all_lore_content()
     lore_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_lore.items()])
 
-    # 2. Create the prompt
     prompt = f"""You are a master storyteller and game lore keeper. Your task is to update the game's lore files based on a new narrative log.
 NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
-    # 3. Call the AI
     try:
-        print("Calling Gemini API...")
-        model = genai.GenerativeModel('gemini-pro')
+        # --- THIS IS THE ONLY LINE THAT CHANGED ---
+        model = genai.GenerativeModel('gemini-1.0-pro') # Using the correct, stable model name
+        
+        print("Calling Gemini API with the correct model...")
         response = model.generate_content(prompt)
         response_text = response.text.strip().removeprefix("```json").removesuffix("```")
         updated_files = json.loads(response_text)
@@ -63,7 +62,6 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
         st.error(f"Error calling Gemini or parsing response: {e}")
         return False
         
-    # 4. Write the changes to local files
     st.info("AI processing complete. Writing changes to local files...")
     for filename, content in updated_files.items():
         if filename in current_lore:
@@ -80,21 +78,16 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
 # --- Main App Interface ---
 st.title("📖 Gelmark Local Lore Editor")
 
-# Sidebar for the uploader
 st.sidebar.title("🛠️ Lore Updater")
 uploaded_file = st.sidebar.file_uploader("Upload Narrative Log", type=['txt', 'md', 'docx'])
 
 if st.sidebar.button("Process and Update Lore"):
-    # Check for API Key first
     if not os.getenv("GEMINI_API_KEY"):
         st.sidebar.error("GEMINI_API_KEY is not set! Please set the environment variable and restart.")
     elif uploaded_file is None:
         st.sidebar.warning("Please upload a file.")
     else:
-        # Configure the genai library
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        
-        # Read the document
         narrative_log = ""
         try:
             if uploaded_file.name.endswith('.docx'):
@@ -104,7 +97,6 @@ if st.sidebar.button("Process and Update Lore"):
         except Exception as e:
             st.sidebar.error(f"Error reading file: {e}")
         
-        # If document was read successfully, run the update
         if narrative_log:
             with st.spinner("The AI is rewriting the lore... This may take a moment."):
                 success = run_lore_update(narrative_log)
@@ -112,7 +104,6 @@ if st.sidebar.button("Process and Update Lore"):
             if success:
                 st.success("Lore files updated successfully! The page will now reload.")
                 st.balloons()
-                # Rerun the script to see changes immediately
                 st.experimental_rerun() 
             else:
                 st.error("The lore update failed. Check the console for details.")
@@ -121,18 +112,14 @@ if st.sidebar.button("Process and Update Lore"):
 st.sidebar.markdown("---")
 pages = {"Prologue": "prologue", "Act 1": "act1", "Act 2": "act2"}
 selected_page = st.sidebar.radio("View Lore Section:", list(pages.keys()))
-
 module_data = load_lore_module(pages[selected_page])
-
 if module_data:
     section = getattr(module_data, f"{pages[selected_page]}_lore", {})
     st.subheader(f"📘 {selected_page} Summary")
     st.markdown(section.get("summary", "No summary found."))
-    
     if "key_events" in section:
         st.subheader("🧩 Key Events")
         st.markdown("\n".join([f"- {event}" for event in section["key_events"]]))
-        
     if "companions" in section:
         st.subheader("🧑‍🤝‍🧑 Companions")
         for c in section["companions"]:
