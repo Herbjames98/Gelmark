@@ -1,5 +1,5 @@
 # This is the final, self-contained, local-only Streamlit application.
-# It uses the correct, updated Gemini model name.
+# It uses the exact model name that your API key is authorized to use.
 
 import streamlit as st
 import os
@@ -50,10 +50,10 @@ CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
     try:
-        # --- THIS IS THE ONLY LINE THAT CHANGED ---
-        model = genai.GenerativeModel('gemini-1.0-pro') # Using the correct, stable model name
+        # --- THIS IS THE CORRECTED MODEL NAME FROM YOUR SCREENSHOT ---
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
-        print("Calling Gemini API with the correct model...")
+        print("Calling Gemini API with your specific model...")
         response = model.generate_content(prompt)
         response_text = response.text.strip().removeprefix("```json").removesuffix("```")
         updated_files = json.loads(response_text)
