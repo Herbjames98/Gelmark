@@ -1,125 +1,144 @@
-# This is the final, complete gelmark_hud.py file.
-# It correctly displays all lore AND triggers the bot via repository dispatch.
+# This is a self-contained, local-only Streamlit application.
+# It reads local files, calls the AI, and writes back to the same local files.
 
 import streamlit as st
-import importlib.util
 import os
 import json
-import requests # Used to send the signal to GitHub
+import google.generativeai as genai
 import docx
+import importlib.util
 
-# === 📁 Helper Function to Load Lore Modules ===
+# --- Configuration and Setup ---
+st.set_page_config(page_title="Gelmark Lore HUD", layout="wide")
+LORE_FOLDER = os.path.join("my_gm", "lore_modules")
+
+# --- Core Functions ---
+
 def load_lore_module(module_name):
     """Loads a Python file from the lore_modules directory."""
     try:
-        path = os.path.join("my_gm", "lore_modules", f"{module_name}.py")
+        path = os.path.join(LORE_FOLDER, f"{module_name}.py")
+        if not os.path.exists(path): return None
         spec = importlib.util.spec_from_file_location(module_name, path)
-        lore_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(lore_module)
-        return lore_module
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
     except Exception as e:
-        # Don't show a big error on the page, just return None.
-        # The main display logic will handle the missing module.
-        print(f"Failed to load module: {module_name} - {e}")
+        st.error(f"Error loading {module_name}: {e}")
         return None
 
-# === ⚙️ Page Setup ===
-st.set_page_config(page_title="Gelmark Lore HUD", layout="wide")
-st.title("📖 Gelmark Interactive Lore HUD")
+def get_all_lore_content():
+    """Reads all current lore files into a dictionary."""
+    all_lore = {}
+    for filename in os.listdir(LORE_FOLDER):
+        if filename.endswith('.py') and '__init__' not in filename:
+            filepath = os.path.join(LORE_FOLDER, filename)
+            with open(filepath, 'r', encoding='utf-8') as f:
+                all_lore[filename] = f.read()
+    return all_lore
 
+def run_lore_update(narrative_log):
+    """The main AI logic function."""
+    st.info("Preparing lore and contacting the Gemini AI...")
+    
+    # 1. Get current lore
+    current_lore = get_all_lore_content()
+    lore_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_lore.items()])
 
-# === 🖊️ Sidebar Editor UI ===
-st.sidebar.title("🛠️ Lore Editor")
-st.sidebar.subheader("Narrative Save")
-uploaded_file = st.sidebar.file_uploader("Upload Conversation Log", type=['txt', 'md', 'docx'])
+    # 2. Create the prompt
+    prompt = f"""You are a master storyteller and game lore keeper. Your task is to update the game's lore files based on a new narrative log.
+NARRATIVE LOG: <log>{narrative_log}</log>
+CURRENT LORE FILES: <lore>{lore_string}</lore>
+INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
-if st.sidebar.button("Process and Save Narrative"):
-    if uploaded_file is None:
+    # 3. Call the AI
+    try:
+        print("Calling Gemini API...")
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(prompt)
+        response_text = response.text.strip().removeprefix("```json").removesuffix("```")
+        updated_files = json.loads(response_text)
+        print("Successfully received and parsed AI response.")
+    except Exception as e:
+        st.error(f"Error calling Gemini or parsing response: {e}")
+        return False
+        
+    # 4. Write the changes to local files
+    st.info("AI processing complete. Writing changes to local files...")
+    for filename, content in updated_files.items():
+        if filename in current_lore:
+            filepath = os.path.join(LORE_FOLDER, filename)
+            try:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Successfully wrote changes to {filepath}")
+            except Exception as e:
+                st.error(f"Error writing to file {filename}: {e}")
+                return False
+    return True
+
+# --- Main App Interface ---
+st.title("📖 Gelmark Local Lore Editor")
+
+# Sidebar for the uploader
+st.sidebar.title("🛠️ Lore Updater")
+uploaded_file = st.sidebar.file_uploader("Upload Narrative Log", type=['txt', 'md', 'docx'])
+
+if st.sidebar.button("Process and Update Lore"):
+    # Check for API Key first
+    if not os.getenv("GEMINI_API_KEY"):
+        st.sidebar.error("GEMINI_API_KEY is not set! Please set the environment variable and restart.")
+    elif uploaded_file is None:
         st.sidebar.warning("Please upload a file.")
     else:
-        # --- Read the uploaded document ---
+        # Configure the genai library
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        # Read the document
         narrative_log = ""
         try:
             if uploaded_file.name.endswith('.docx'):
-                document = docx.Document(uploaded_file)
-                narrative_log = "\n".join([para.text for para in document.paragraphs])
+                narrative_log = "\n".join([p.text for p in docx.Document(uploaded_file).paragraphs])
             else:
                 narrative_log = uploaded_file.read().decode("utf-8")
         except Exception as e:
             st.sidebar.error(f"Error reading file: {e}")
-            st.stop()
+        
+        # If document was read successfully, run the update
+        if narrative_log:
+            with st.spinner("The AI is rewriting the lore... This may take a moment."):
+                success = run_lore_update(narrative_log)
             
-        if not narrative_log:
-            st.sidebar.error("Could not extract any text from the file.")
-            st.stop()
+            if success:
+                st.success("Lore files updated successfully! The page will now reload.")
+                st.balloons()
+                # Rerun the script to see changes immediately
+                st.experimental_rerun() 
+            else:
+                st.error("The lore update failed. Check the console for details.")
 
-        # --- Trigger the GitHub Action ---
-        try:
-            headers = {
-                "Accept": "application/vnd.github.v3+json",
-                "Authorization": f"token {st.secrets.github.token}"
-            }
-            url = f"https://api.github.com/repos/{st.secrets.github.repo}/dispatches"
-            data = {
-                "event_type": "update-lore",
-                "client_payload": { "narrative_log": narrative_log }
-            }
-            
-            with st.spinner("Sending update signal to the Lore Bot..."):
-                response = requests.post(url, headers=headers, data=json.dumps(data))
-                if response.status_code == 204:
-                    st.sidebar.success("✅ Success! Lore Bot has been activated.")
-                    st.balloons()
-                else:
-                    st.sidebar.error(f"Error activating bot: {response.status_code} - {response.text}")
-        except Exception as e:
-            st.sidebar.error("An error occurred while contacting GitHub.")
-            st.exception(e)
-
-# === 📖 Main Page Lore Display (Restored) ===
-st.sidebar.markdown("---") # Visual separator
-pages = { "Prologue": "prologue", "Act 1": "act1", "Act 2": "act2" }
+# Display Area for the Lore
+st.sidebar.markdown("---")
+pages = {"Prologue": "prologue", "Act 1": "act1", "Act 2": "act2"}
 selected_page = st.sidebar.radio("View Lore Section:", list(pages.keys()))
 
-module_key = pages[selected_page]
-lore_data = load_lore_module(module_key)
+module_data = load_lore_module(pages[selected_page])
 
-if lore_data:
-    section = getattr(lore_data, f"{module_key}_lore", None)
-    if section:
-        st.subheader(f"📘 {selected_page} Summary")
-        st.markdown(section.get("summary", "No summary provided."))
-
-        if "key_events" in section:
-            st.subheader("🧩 Key Events")
-            st.markdown("\n".join([f"- {event}" for event in section["key_events"]]))
-
-        if "shrines" in section:
-            st.subheader("🛕 Shrines")
-            for shrine in section["shrines"]:
-                st.markdown(f"**Shrine {shrine.get('id', 'N/A')}: {shrine.get('name', 'Unnamed')}**")
-                st.markdown(f"- Unlocks: {', '.join(shrine.get('unlocks', []))}")
-                st.markdown(f"- Traits: {', '.join(shrine.get('traits', []))}")
-
-        if "visions" in section:
-            st.subheader("🔮 Visions")
-            st.markdown("\n".join([f"- {v}" for v in section["visions"]]))
-            
-        if "companions" in section:
-            st.subheader("🧑‍🤝‍🧑 Companions")
-            for c in section["companions"]:
-                if isinstance(c, dict):
-                    st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown origin')}")
-                    st.markdown(f"- Bond: {c.get('bond', 'N/A')}")
-                    st.markdown(f"- Sync: {c.get('sync', 'N/A')}")
-                    st.markdown(f"- Traits: {', '.join(c.get('trait_alignment', []))}")
-                else:
-                    st.markdown(f"- {str(c)}")
+if module_data:
+    section = getattr(module_data, f"{pages[selected_page]}_lore", {})
+    st.subheader(f"📘 {selected_page} Summary")
+    st.markdown(section.get("summary", "No summary found."))
+    
+    if "key_events" in section:
+        st.subheader("🧩 Key Events")
+        st.markdown("\n".join([f"- {event}" for event in section["key_events"]]))
         
-        if "codex_expansions" in section:
-            st.subheader("📖 Codex Expansions")
-            st.markdown("\n".join([f"- {c}" for c in section["codex_expansions"]]))
-    else:
-        st.warning(f"Variable '{module_key}_lore' not found in the lore module.")
+    if "companions" in section:
+        st.subheader("🧑‍🤝‍🧑 Companions")
+        for c in section["companions"]:
+            if isinstance(c, dict):
+                st.markdown(f"**{c.get('name', 'Unnamed')}** — {c.get('origin', 'Unknown')}")
+            else:
+                st.markdown(f"- {str(c)}")
 else:
-    st.error(f"Lore module '{module_key}.py' could not be read. Please check the 'my_gm/lore_modules' folder.")
+    st.warning(f"Could not display lore for '{selected_page}'. Check the file in '{LORE_FOLDER}'.")
