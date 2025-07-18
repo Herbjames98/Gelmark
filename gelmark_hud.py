@@ -1,5 +1,4 @@
-# This is the final diagnostic version.
-# It will display the successfully parsed AI response directly on the page.
+# This is a diagnostic version of the app to see the AI's response.
 
 import streamlit as st
 import os
@@ -64,12 +63,14 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
         return False
 
     # --- THIS IS THE NEW DIAGNOSTIC BLOCK ---
+    # It will show the parsed dictionary on the page so we can see what the AI sent.
     st.subheader("Parsed AI Response:")
-    st.json(updated_files) # This will display the dictionary the AI sent back.
+    st.json(updated_files)
 
     if not updated_files:
-        st.warning("The AI returned an empty response. No files were changed.")
-        return False # We will now consider an empty response a failure.
+        st.warning("The AI returned an empty response, so no files were changed.")
+        # We will now consider an empty response a failure.
+        return False
     # --- END OF NEW BLOCK ---
         
     st.info("AI processing complete. Writing changes to local files...")
@@ -99,9 +100,9 @@ if st.sidebar.button("Process and Update Lore"):
         if success:
             st.success("Lore files updated successfully!")
             st.balloons()
-            # We add the rerun back in now that we can see the output.
-            st.rerun()
+            st.rerun() # Refresh the page on success
         else:
+            # On failure, the error messages (including the AI response) will stay on the screen.
             st.error("The lore update failed. See details above.")
 
 # --- Display Area ---
@@ -112,7 +113,6 @@ module_data = load_lore_module(pages[selected_page])
 
 if module_data:
     section = getattr(module_data, f"{pages[selected_page]}_lore", {})
-    # ... display logic is correct ...
     st.subheader(f"📘 {selected_page} Summary")
     st.markdown(section.get("summary", "No summary found."))
     if "key_events" in section:
