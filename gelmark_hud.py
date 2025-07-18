@@ -1,5 +1,5 @@
-# This is a diagnostic version of the app.
-# It will display the raw AI response on the page if an error occurs.
+# This is the final version of the app.
+# The automatic page refresh (st.rerun) has been removed so feedback stays on screen.
 
 import streamlit as st
 import os
@@ -38,7 +38,7 @@ def get_all_lore_content():
     return all_lore
 
 def run_lore_update(narrative_log):
-    """The main AI logic function."""
+    """The main AI logic function with enhanced error reporting."""
     st.info("Preparing lore and contacting the Gemini AI...")
     
     current_lore = get_all_lore_content()
@@ -49,7 +49,6 @@ NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
-    # --- THIS ENTIRE 'try...except' BLOCK HAS BEEN UPGRADED ---
     raw_response_text = ""
     try:
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
@@ -58,20 +57,17 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
         raw_response_text = response.text
         
         print("AI responded. Attempting to parse JSON...")
-        # Clean the response to get only the JSON
         json_text = raw_response_text.strip().removeprefix("```json").removesuffix("```")
         updated_files = json.loads(json_text)
         print("Successfully parsed AI response.")
 
     except Exception as e:
-        # If anything fails, display the error and the raw response on the page
         st.error(f"An error occurred while processing the AI response: {e}")
         st.subheader("Raw AI Response:")
         st.code(raw_response_text if raw_response_text else "The AI returned an empty response.", language="text")
         return False
         
     st.info("AI processing complete. Writing changes to local files...")
-    # ... (file writing logic is unchanged) ...
     for filename, content in updated_files.items():
         if filename in current_lore:
             filepath = os.path.join(LORE_FOLDER, filename)
@@ -84,13 +80,12 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
                 return False
     return True
 
-# --- Main App Interface (largely unchanged) ---
+# --- Main App Interface ---
 st.title("📖 Gelmark Local Lore Editor")
 st.sidebar.title("🛠️ Lore Updater")
 
-# Using a text area for reliability
 st.sidebar.subheader("Paste Narrative Log")
-narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=250, key="narrative_input")
+narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=300, key="narrative_input_box")
 
 if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"):
@@ -102,19 +97,20 @@ if st.sidebar.button("Process and Update Lore"):
         with st.spinner("The AI is rewriting the lore..."):
             success = run_lore_update(narrative_log_input)
         
+        # This section is now fixed. The messages will stay on the screen.
         if success:
-            st.success("Lore files updated successfully!")
+            st.success("Lore files updated successfully! Check your files to see the changes.")
             st.balloons()
-            st.rerun()
+            # The st.rerun() line has been removed.
         else:
-            st.error("The lore update failed. See details above and check the console.")
+            st.error("The lore update failed. See details above.")
 
-# Display Area
+# Display Area for the Lore
 st.sidebar.markdown("---")
 pages = {"Prologue": "prologue", "Act 1": "act1", "Act 2": "act2"}
 selected_page = st.sidebar.radio("View Lore Section:", list(pages.keys()))
 module_data = load_lore_module(pages[selected_page])
-# ... (display logic is unchanged) ...
+
 if module_data:
     section = getattr(module_data, f"{pages[selected_page]}_lore", {})
     st.subheader(f"📘 {selected_page} Summary")
