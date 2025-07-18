@@ -1,5 +1,5 @@
 # This is the final, self-contained, local-only Streamlit application.
-# It uses the exact model name that your API key is authorized to use.
+# It uses the correct, modern st.rerun() command.
 
 import streamlit as st
 import os
@@ -50,14 +50,10 @@ CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are the filenames to be changed and values are the COMPLETE, new content of those files as a single string. Return ONLY the raw JSON object."""
 
     try:
-        # --- THIS IS THE CORRECTED MODEL NAME FROM YOUR SCREENSHOT ---
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        
-        print("Calling Gemini API with your specific model...")
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
         response_text = response.text.strip().removeprefix("```json").removesuffix("```")
         updated_files = json.loads(response_text)
-        print("Successfully received and parsed AI response.")
     except Exception as e:
         st.error(f"Error calling Gemini or parsing response: {e}")
         return False
@@ -69,7 +65,6 @@ INSTRUCTIONS: Your response MUST be a single, valid JSON object where keys are t
             try:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(content)
-                print(f"Successfully wrote changes to {filepath}")
             except Exception as e:
                 st.error(f"Error writing to file {filename}: {e}")
                 return False
@@ -104,7 +99,8 @@ if st.sidebar.button("Process and Update Lore"):
             if success:
                 st.success("Lore files updated successfully! The page will now reload.")
                 st.balloons()
-                st.experimental_rerun() 
+                # --- THIS IS THE FINAL FIX ---
+                st.rerun() # Use the new, official command
             else:
                 st.error("The lore update failed. Check the console for details.")
 
