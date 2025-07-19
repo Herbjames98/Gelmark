@@ -1,5 +1,5 @@
-# This is the final, polished version of the local application.
-# It now sorts the lore sections in the correct, natural order (Prologue, Act 1, Act 2...).
+# This is the final, polished version with the SyntaxError corrected.
+# It sorts the lore sections in the correct, natural order (Prologue, Act 1, Act 2...).
 
 import streamlit as st
 import os
@@ -95,18 +95,17 @@ def display_section(title, data):
         else:
             st.markdown(data)
 
-# --- THIS IS THE NEW HELPER FUNCTION FOR SORTING ---
+# --- Helper Function for Sorting ---
 def custom_sort_key(filename):
     """A custom key for sorting lore files naturally."""
     if filename == 'prologue':
-        return 0  # Prologue always comes first
+        return 0
     if filename.startswith('act'):
         try:
-            # Extract the number from 'actX' and return it
             return int(filename.replace('act', ''))
         except ValueError:
-            return 999 # Fallback for non-numeric acts
-    return 999 # All other files go to the end
+            return 999
+    return 999
 
 # --- Main App Interface ---
 st.title("📖 Gelmark Local Lore Editor")
@@ -130,14 +129,14 @@ if st.sidebar.button("Process and Update Lore"):
             with st.spinner("The AI is building your world... This may take a while for large documents."):
                 success = run_lore_update(narrative_log)
             if success:
-                st.success("Lore files updated successfully! Refresh the page (F5) to see the changes.")
+                st.success("Lore files updated successfully! The page will now reload.")
                 st.balloons()
+                st.rerun()
             else:
                 st.error("The lore update failed. See details above.")
 
 # --- Main Display Area ---
 st.sidebar.markdown("---")
-# This now uses our custom sorting function to get the correct order
 found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
 lore_files = sorted(found_files, key=custom_sort_key)
 pages = {file.replace('_', ' ').title(): file for file in lore_files}
@@ -152,7 +151,7 @@ if pages:
         if not section_data:
             st.warning(f"Could not find `{section_variable_name}` in `{selected_module_name}.py`.")
         else:
-            # Display all 16 sections
+            # Display all 16 sections (now with the corrected line)
             display_section("📘 Summary", section_data.get("summary"))
             display_section("🧩 Major Events", section_data.get("major_events"))
             display_section("🧑‍🤝‍🧑 Companions & Bond Status", section_data.get("companions_bond_status"))
@@ -164,4 +163,12 @@ if pages:
             display_section("🔑 Key Terms Introduced", section_data.get("key_terms_introduced"))
             display_section("🗺️ Locations & Realms Visited", section_data.get("locations_realms_visited"))
             display_section("👽 Faction or Threat Encounters", section_data.get("faction_threat_encounters"))
-            display_section("📜 Oaths & Rituals Performed", section_da
+            # --- THIS IS THE CORRECTED LINE ---
+            display_section("📜 Oaths & Rituals Performed", section_data.get("oaths_rituals_performed"))
+            display_section("🏺 Artifacts Discovered", section_data.get("artifacts_discovered"))
+            display_section("❓ Narrative Threads Opened", section_data.get("narrative_threads_opened"))
+            display_section("✅ Narrative Threads Closed", section_data.get("narrative_threads_closed"))
+    else:
+        st.error(f"Could not read lore module for '{selected_page_title}'.")
+else:
+    st.warning(f"No lore files found in the '{LORE_FOLDER}' directory.")
