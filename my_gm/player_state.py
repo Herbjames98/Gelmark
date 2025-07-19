@@ -9,15 +9,15 @@ player_profile = {
 
 stats_overview = {
     "Strength": 13,
-    "Dexterity": 10, # Assuming Dexterity is a new stat you want to track
+    "Dexterity": 0,
     "Insight": 10,
     "Focus": 12,
-    "Charisma": 1, # From Commandless Grace
-    "Resolve": 10,
-    "Spirit": 10,
-    "Agility": 10,
-    "Willpower": 10,
-    "Lore": 10
+    "Charisma": 1,
+    "Resolve": 0,
+    "Spirit": 0,
+    "Agility": 0,
+    "Willpower": 0,
+    "Lore": 0
 }
 
 traits = {
@@ -29,7 +29,9 @@ traits = {
         "Mirrorburst (Awakened in Act 1)"
     ],
     "hybrid_fusion_traits": [
-        "A list of fused traits would go here."
+        "Twin Flame Anchor (Caelik Bond)",
+        "Scorchbind Core (Caelik Bond)",
+        "Pulse Woven (Grace Bond)"
     ],
     "unlocked_vision_threads": [
         "The Blinding Crown's true nature",
@@ -74,21 +76,35 @@ companions = [
         "name": "G.R.A.C.E.",
         "origin": "Crown AI Fragment, Guardian Threadline Unit",
         "echoform_link_oath_status": "Deeply bonded through shared memory and sacrifice.",
-        "current_sync_percent": "53% (Sync Collapse Drift detected)",
-        "traits_shared": [],
+        "current_sync_percent": "115% (Override Dialogue Tier II unlocked)",
+        "traits_shared": ["Pulse Woven"],
         "key_shared_events": [
             "Activation at the Refusal Spiral Shrine",
-            "Witnessed the Vow of the Memorykeeper"
+            "Witnessed the Vow of the Memorykeeper",
+            "Memoryfire Crucible Trial"
         ]
     },
     {
         "name": "Thjolda",
         "origin": "Former royal shieldbearer, now an exile.",
-        "echoform_link_oath_status": "Loyal, awaiting her narrative arc.",
-        "current_sync_percent": "High (exact % not specified yet)",
-        "traits_shared": [],
+        "echoform_link_oath_status": "Bond maxed at 100% after 'The Blade Before the Call' trial.",
+        "current_sync_percent": "100%",
+        "traits_shared": ["Oathburdened Echo (Glimpse)"],
         "key_shared_events": [
-            "Stood by during the Blinding Crown pacification."
+            "Stood by during the Blinding Crown pacification.",
+            "Memory rewrite trial: 'What She Forged For You'"
+        ]
+    },
+    {
+        "name": "Caelik",
+        "origin": "Recursion soldier, bearer of the Refused Flame.",
+        "echoform_link_oath_status": "Bond maxed at 100% after 'Ash Born Twice' trial.",
+        "current_sync_percent": "100%",
+        "traits_shared": ["Twin Flame Anchor", "Scorchbind Core", "Flameforward Oath"],
+        "key_shared_events": [
+            "Defense Shrine Trial: 'The Choice'",
+            "Echo combat simulation",
+            "Final loyalty trial: 'Ash Born Twice'"
         ]
     }
 ]
