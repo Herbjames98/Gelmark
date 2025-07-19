@@ -1,39 +1,18 @@
-# === 📜 Lore Module: Act 2 ===
+# lore_modules/act2.py
 
 act2_lore = {
-    "summary": "After the convergence at Shrine 5, Grace initiates her autonomous reboot within the Memory Engine, while Caelik assumes protective oversight of the chamber. A new anomaly draws the party toward a Norse ruin housing Thjolda, a warrior entangled in recursive shrine lattice echoes.",
+    "summary": "The protagonist is enslaved by Vikings and forced to work in the Gæl Mines.  They undergo rigorous training, and encounter a new alien force, the Pakariin, who seek a sealed Viking king.  The protagonist eventually joins the Valking order and begins a path to awakening the Frozen King.",
     "key_events": [
-        "Grace reconstructs core memory functions via Memory Engine relink.",
-        "Caelik reveals latent Echoform traits during a Rift backlash.",
-        "The shrine lattice fractures, leading to the activation of Shrine 6.",
-        "Thjolda joins as a hybrid-linked entity with an unclaimed oath memory."
+        "The protagonist is captured by Vikings and sent to the Gæl Mines.",
+        "The protagonist undergoes intense training in the mines, developing strength, speed, defense, endurance, and focus.",
+        "The protagonist crafts a gel charger, partially restoring G.R.A.C.E.'s functionality.",
+        "The Pakariin, an alien force, arrive and capture several guards, seeking the Viking king.",
+        "The protagonist completes the Chasm Trial and earns independence, but the Pakariin return and enslave the camp.",
+        "The protagonist joins the Valking order, learning hunting skills and crafting new items.",
+        "G.R.A.C.E. reveals the Pakariin's connection to future destruction, and the protagonist begins the quest to awaken the Frozen King."
     ],
-    "shrines": [
-        {
-            "id": 6,
-            "name": "Runebound Oathmark",
-            "unlocks": ["Thjolda vision"],
-            "traits": ["Twin Flame Anchor"]
-        }
-    ],
-    "visions": [
-        "The Seer’s Convergence",
-        "Shrine Reversal Event",
-        "Grace’s Mirror Stabilization Log",
-        "Thjolda’s Echo Confession"
-    ],
-    "companions": [
-        {
-            "name": "Thjolda",
-            "origin": "Runeborn Shieldmaiden of the Lattice Fracture",
-            "bond": "Linked through recursive oath pulses triggered at Shrine 6",
-            "sync": "75%",
-            "trait_alignment": ["Anchor Ritual", "Oath-Echo"]
-        }
-    ],
-    "codex_expansions": [
-        "Memory Lattice Mechanics",
-        "Shrine Echo Tuning",
-        "Hybrid-Bound Oathmarks"
-    ]
+    "shrines": [],
+    "visions": [],
+    "companions": [{"name": "G.R.A.C.E.", "status": "Partially restored"}],
+    "codex": []
 }

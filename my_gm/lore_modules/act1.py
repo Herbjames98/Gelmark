@@ -1,23 +1,15 @@
 # lore_modules/act1.py
 
 act1_lore = {
-    "summary": "The protagonist begins to uncover deeper mysteries, discovering the Mariner's Compass—an artifact attuned to ancient magic—while exploring coastal ruins.",
+    "summary": "The protagonist, a low-ranking GelCap Guild security trainee, survives a catastrophic explosion that sends them hurtling through time. They land in the Viking Age, their futuristic technology drawing the attention of local warriors.",
     "key_events": [
-        "The protagonist discovered the Mariner's Compass in a hidden chest within ruins near the coast. This unique artifact does not point north, but rather towards the nearest source of powerful, ancient magic."
+        "A massive explosion destroys the GelCap Guild facility, leaving the protagonist as the sole survivor.",
+        "The protagonist discovers a Gel Capsule pod, which transports them back in time.",
+        "The protagonist lands in a Viking-age forest and encounters warriors wearing helmets containing a crude form of GelCap matter.",
+        "G.R.A.C.E., the protagonist's AI assistant, sacrifices most of its functions to enable language translation."
     ],
-        "shrines": [
-            {"id": 1, "name": "Memoryfire Crucible", "unlocks": ["Insight synergy", "Vision 1"], "traits": ["Loopborn", "Seer’s Pulse"]},
-            {"id": 2, "name": "Fusion Shrine — Grace + Askr", "unlocks": ["Fusion with AI Core"], "traits": ["Frozen Moment"]},
-            {"id": 3, "name": "Threaded Split Chamber", "unlocks": ["Echoform Phase I"], "traits": ["Fracture Delay"]},
-            {"id": 4, "name": "Vaultside Echoflow", "unlocks": ["Memory Offering Path"], "traits": ["Selfless Paradox"]},
-            {"id": 5, "name": "Sealed Chamber", "unlocks": ["Echoform Phase II"], "traits": ["Riftbreaker"]}
-        ],
-        "visions": [
-            "The Pulse Awakens",
-            "Grace’s Future Memory Fragment",
-            "Broken Spiral Mirror",
-            "Vaultside Collapse"
-        ],
-        "companions": ["Caelik", "Grace"],
-        "codex": ["The Voice That Waited", "What You Could Have Been"]
-    }
+    "shrines": [],
+    "visions": [],
+    "companions": ["G.R.A.C.E."],
+    "codex": []
+}
