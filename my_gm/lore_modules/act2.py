@@ -1,7 +1,7 @@
 # Act 2 Lore Module with Standardized Structure
 
 act2_lore = {
-    "summary":[]
+    "summary":[],
     "major_events": [],
     "companions_bond_status": [],
     "traits_unlocked": [],
