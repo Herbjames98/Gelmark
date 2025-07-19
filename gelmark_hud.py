@@ -1,5 +1,4 @@
-# This is the final, two-page application with corrected display logic.
-# It features a Character Sheet homepage and a Lore Browser.
+# This is the final, two-page application with emojis restored to the headers.
 
 import streamlit as st
 import os
@@ -16,7 +15,6 @@ PLAYER_STATE_FILE = os.path.join("my_gm", "player_state.py")
 # --- Data Loading Functions ---
 
 def load_lore_module(module_name):
-    """Loads a Python file from the lore_modules directory."""
     try:
         path = os.path.join(LORE_FOLDER, f"{module_name}.py")
         if not os.path.exists(path): return None
@@ -30,7 +28,6 @@ def load_lore_module(module_name):
         return None
 
 def load_player_state():
-    """Loads the player_state.py file."""
     try:
         if not os.path.exists(PLAYER_STATE_FILE): return None
         spec = importlib.util.spec_from_file_location("player_state", PLAYER_STATE_FILE)
@@ -42,7 +39,6 @@ def load_player_state():
         return None
 
 def get_all_lore_content():
-    """Reads all current lore files into a dictionary for the AI."""
     all_content = {}
     if os.path.exists(PLAYER_STATE_FILE):
         with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f:
@@ -55,20 +51,22 @@ def get_all_lore_content():
     return all_content
 
 def run_lore_update(narrative_log):
-    """The main AI logic function."""
     st.info("Preparing lore and contacting the Gemini AI...")
     current_content = get_all_lore_content()
     content_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_content.items()])
+
     prompt = f"""You are a master storyteller and game lore keeper. Your task is to update a complete set of game data files based on a new narrative log. You must differentiate between the player's CURRENT status and historical lore.
 NARRATIVE LOG: <log>{narrative_log}</log>
 GAME DATA FILES: <files>{content_string}</files>
 INSTRUCTIONS:
-1. Read the new log.
-2. Update `player_state.py` to reflect the player's MOST RECENT status.
-3. Update the historical lore files (`prologue.py`, etc.) with events from that act.
-4. Modify MULTIPLE files. Populate all relevant sections with detail.
-5. Your response MUST be a single, valid JSON object. Keys are filenames, values are the new file content.
+1. Read the new narrative log.
+2. Update `player_state.py` to reflect the player's MOST RECENT stats, inventory, traits, and companion statuses.
+3. CRITICAL RULE: In the `stats_overview` section of `player_state.py`, no stat should ever be 0. If a stat is not mentioned or would be 0, its value must be a baseline of 10.
+4. Update the historical lore files (`prologue.py`, etc.) with the events that occurred in that act.
+5. You are expected to modify MULTIPLE files. Populate all relevant sections with detail.
+6. Your response MUST be a single, valid JSON object. Keys are the filenames you modified, values are the COMPLETE new file content.
 Return ONLY the raw JSON object."""
+
     try:
         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         response = model.generate_content(prompt)
@@ -82,10 +80,8 @@ Return ONLY the raw JSON object."""
         with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
     return True
 
-# --- UI DISPLAY FUNCTIONS (Corrected) ---
-
+# --- UI Display Functions (with Emojis) ---
 def display_section(title, data):
-    """Intelligently displays a section based on its data type."""
     if data:
         st.subheader(title)
         if isinstance(data, list):
@@ -98,19 +94,16 @@ def display_section(title, data):
                                 st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
                 else:
                     st.markdown(f"- {item}")
-        # This 'else' block handles strings (like the summary) correctly
         else:
             st.markdown(data)
 
 def display_dict_section(title, data):
-    """Displays a simple dictionary."""
     if data:
         st.subheader(title)
         for key, value in data.items():
             st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
 
 # --- PAGE DEFINITIONS ---
-
 def render_character_sheet():
     st.title("Character Sheet")
     state = load_player_state()
@@ -145,6 +138,9 @@ def render_character_sheet():
             display_section("Key Items", inventory.get("key_items"))
         
         display_section("🧑‍🤝‍🧑 Companions", getattr(state, 'companions', None))
+        display_dict_section("🏕️ Camp / Base Upgrades", getattr(state, 'camp_base_upgrades', None))
+        display_dict_section("📖 Codex Unlocks", getattr(state, 'codex_unlocks', None))
+
     else:
         st.error("Could not load player state. Make sure `my_gm/player_state.py` exists.")
 
@@ -167,14 +163,21 @@ def render_lore_browser():
         if module_data:
             section_variable_name = f"{selected_module_name}_lore"
             section_data = getattr(module_data, section_variable_name, {})
-            # This loop now uses the intelligent display_section function
-            for key, value in section_data.items():
-                display_section(key.replace('_', ' ').title(), value)
+            # This is the list of headers with their emojis for the lore browser
+            lore_headers = {
+                "summary": "📘 Summary", "major_events": "🧩 Major Events", "companions_bond_status": "🧑‍🤝‍🧑 Companions & Bond Status",
+                "traits_unlocked": "✨ Traits Unlocked", "shrines_visited": "🛕 Shrines Visited", "visions_echo_sequences": "🔮 Visions & Echo Sequences",
+                "lore_codex_expansions": "📖 Lore Entries / Codex Expansions", "timeline_edits": "⏳ Timeline Edits", "key_terms_introduced": "🔑 Key Terms Introduced",
+                "locations_realms_visited": "🗺️ Locations & Realms Visited", "faction_threat_encounters": "👽 Faction or Threat Encounters",
+                "oaths_rituals_performed": "📜 Oaths & Rituals Performed", "artifacts_discovered": "🏺 Artifacts Discovered",
+                "narrative_threads_opened": "❓ Narrative Threads Opened", "narrative_threads_closed": "✅ Narrative Threads Closed"
+            }
+            for key, title in lore_headers.items():
+                display_section(title, section_data.get(key))
     else:
         st.warning(f"No lore files found in '{LORE_FOLDER}'.")
 
 # --- MAIN APP LAYOUT ---
-
 st.sidebar.title("Navigation")
 main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser"])
 st.sidebar.markdown("---")

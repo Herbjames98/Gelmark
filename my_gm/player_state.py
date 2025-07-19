@@ -9,15 +9,15 @@ player_profile = {
 
 stats_overview = {
     "Strength": 13,
-    "Dexterity": 0,
+    "Dexterity": 10,  # Raised from 0
     "Insight": 10,
     "Focus": 12,
-    "Charisma": 1,
-    "Resolve": 0,
-    "Spirit": 0,
-    "Agility": 0,
-    "Willpower": 0,
-    "Lore": 0
+    "Charisma": 1,   # This was not 0, so it remains as is.
+    "Resolve": 10,   # Raised from 0
+    "Spirit": 10,    # Raised from 0
+    "Agility": 10,   # Raised from 0
+    "Willpower": 10, # Raised from 0
+    "Lore": 10       # Raised from 0
 }
 
 traits = {
