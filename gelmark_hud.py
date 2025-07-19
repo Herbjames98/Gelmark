@@ -153,4 +153,3 @@ if pages:
         st.error(f"Could not read the lore module for '{selected_page_title}'.")
 else:
     st.warning(f"No lore files found in the '{LORE_FOLDER}' directory.")
-```Your workflow is now perfectly set up. You can create new, empty act files with the template, and the AI will be much more intelligent about placing the right story beats in the right file.
