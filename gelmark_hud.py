@@ -1,5 +1,5 @@
 # This is the final, feature-complete version of the local application.
-# The AI prompt has been upgraded to ensure it populates the correct lore file.
+# It uses the file uploader and is designed to work with the .streamlit/config.toml file.
 
 import streamlit as st
 import os
@@ -44,16 +44,15 @@ def run_lore_update(narrative_log):
     current_lore = get_all_lore_content()
     lore_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_lore.items()])
 
-    # --- THIS PROMPT IS NOW SMARTER ---
     prompt = f"""You are a master storyteller and game lore keeper for a dark fantasy world named Gelmark. Your task is to update the game's lore files based on a new narrative log.
 NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES: <lore>{lore_string}</lore>
 INSTRUCTIONS:
-1.  First, analyze the narrative log to determine which act it belongs to (e.g., Prologue, Act 1, Act 2, etc.).
-2.  CRITICAL: Select ONLY the corresponding lore file (e.g., `prologue.py`, `act1.py`) that matches the narrative's context. Do NOT add Act 2 events to the Act 1 file.
-3.  Populate all 16 sections of the chosen file with a high level of detail based on the log.
-4.  Your response MUST be a single, valid JSON object. The keys must be the filename(s) you have modified, and the values must be the COMPLETE, new Python code content for that file.
-5.  Only return the file(s) you have actually changed.
+1. First, analyze the narrative log to determine which act it belongs to (e.g., Prologue, Act 1, Act 2, etc.).
+2. CRITICAL: Select ONLY the corresponding lore file (e.g., `prologue.py`, `act1.py`) that matches the narrative's context. Do NOT add Act 2 events to the Act 1 file.
+3. Populate all 16 sections of the chosen file with a high level of detail based on the log.
+4. Your response MUST be a single, valid JSON object. The keys must be the filename(s) you have modified, and the values must be the COMPLETE, new Python code content for that file.
+5. Only return the file(s) you have actually changed.
 Return ONLY the raw JSON object."""
 
     try:
@@ -80,6 +79,7 @@ Return ONLY the raw JSON object."""
 
 # --- UI Display Functions ---
 def display_section(title, data):
+    # (This function is unchanged)
     if data:
         st.subheader(title)
         if isinstance(data, list):
@@ -99,41 +99,55 @@ def display_section(title, data):
 # --- Main App Interface ---
 st.title("📖 Gelmark Local Lore Editor")
 st.sidebar.title("🛠️ Lore Updater")
-st.sidebar.subheader("Paste Narrative Log")
-narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=300)
+
+# --- THIS SECTION NOW CORRECTLY USES THE FILE UPLOADER ---
+st.sidebar.subheader("Upload Narrative Log")
+uploaded_file = st.sidebar.file_uploader("Upload a .txt or .docx file", type=['txt', 'md', 'docx'])
 
 if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"): st.sidebar.error("GEMINI_API_KEY is not set!")
-    elif not narrative_log_input: st.sidebar.warning("Please paste a narrative log.")
+    elif uploaded_file is None: st.sidebar.warning("Please upload a file.")
     else:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        with st.spinner("The AI is rewriting the lore..."):
-            success = run_lore_update(narrative_log_input)
         
-        if success:
-            st.success("Lore files updated successfully! The page will now reload.")
-            st.balloons()
-            st.rerun()
-        else:
-            st.error("The lore update failed. See details above.")
+        # Read the content from the uploaded file
+        narrative_log = ""
+        try:
+            if uploaded_file.name.endswith('.docx'):
+                narrative_log = "\n".join([p.text for p in docx.Document(uploaded_file).paragraphs])
+            else:
+                narrative_log = uploaded_file.read().decode("utf-8")
+        except Exception as e:
+            st.sidebar.error(f"Error reading file: {e}")
+
+        # If the file was read successfully, run the update
+        if narrative_log:
+            with st.spinner("The AI is rewriting the lore..."):
+                success = run_lore_update(narrative_log)
+            
+            if success:
+                st.success("Lore files updated successfully! Refresh the page (F5) to see the changes.")
+                st.balloons()
+            else:
+                st.error("The lore update failed. See details above.")
+# --- END OF CORRECTED SECTION ---
 
 # --- Main Display Area ---
 st.sidebar.markdown("---")
-# This will now automatically find any .py file in the lore folder
+# (This section is unchanged and automatically finds all your lore files)
 lore_files = sorted([f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f])
 pages = {file.replace('_', ' ').title(): file for file in lore_files}
-
 if pages:
     selected_page_title = st.sidebar.radio("View Lore Section:", list(pages.keys()))
     selected_module_name = pages[selected_page_title]
     module_data = load_lore_module(selected_module_name)
-
     if module_data:
         section_variable_name = f"{selected_module_name}_lore"
         section_data = getattr(module_data, section_variable_name, {})
         if not section_data:
-            st.warning(f"Could not find the lore dictionary named `{section_variable_name}` in `{selected_module_name}.py`.")
+            st.warning(f"Could not find `{section_variable_name}` in `{selected_module_name}.py`.")
         else:
+            # Display all 16 sections
             display_section("📘 Summary", section_data.get("summary"))
             display_section("🧩 Major Events", section_data.get("major_events"))
             display_section("🧑‍🤝‍🧑 Companions & Bond Status", section_data.get("companions_bond_status"))
@@ -150,6 +164,6 @@ if pages:
             display_section("❓ Narrative Threads Opened", section_data.get("narrative_threads_opened"))
             display_section("✅ Narrative Threads Closed", section_data.get("narrative_threads_closed"))
     else:
-        st.error(f"Could not read the lore module for '{selected_page_title}'.")
+        st.error(f"Could not read lore module for '{selected_page_title}'.")
 else:
-    st.warning(f"No lore files found in the '{LORE_FOLDER}' directory.")
+    st.warning(f"No lore files found in '{LORE_FOLDER}'.")
