@@ -1,7 +1,9 @@
-# Act 1 Lore Module with Standardized Structure
+# This is a blank template for a new lore act.
+# IMPORTANT: Rename the variable 'act_name_lore' to match the file.
+# For example, in 'act3.py', this should be 'act3_lore'.
 
 act1_lore = {
-    "summary":[],
+    "summary": "",
     "major_events": [],
     "companions_bond_status": [],
     "traits_unlocked": [],
