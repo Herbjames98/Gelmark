@@ -1,18 +1,19 @@
-# lore_modules/act2.py
+# Act 2 Lore Module with Standardized Structure
 
 act2_lore = {
-    "summary": "The protagonist is enslaved by Vikings and forced to work in the Gæl Mines.  They undergo rigorous training, and encounter a new alien force, the Pakariin, who seek a sealed Viking king.  The protagonist eventually joins the Valking order and begins a path to awakening the Frozen King.",
-    "key_events": [
-        "The protagonist is captured by Vikings and sent to the Gæl Mines.",
-        "The protagonist undergoes intense training in the mines, developing strength, speed, defense, endurance, and focus.",
-        "The protagonist crafts a gel charger, partially restoring G.R.A.C.E.'s functionality.",
-        "The Pakariin, an alien force, arrive and capture several guards, seeking the Viking king.",
-        "The protagonist completes the Chasm Trial and earns independence, but the Pakariin return and enslave the camp.",
-        "The protagonist joins the Valking order, learning hunting skills and crafting new items.",
-        "G.R.A.C.E. reveals the Pakariin's connection to future destruction, and the protagonist begins the quest to awaken the Frozen King."
-    ],
-    "shrines": [],
-    "visions": [],
-    "companions": [{"name": "G.R.A.C.E.", "status": "Partially restored"}],
-    "codex": []
+    "summary":[]
+    "major_events": [],
+    "companions_bond_status": [],
+    "traits_unlocked": [],
+    "shrines_visited": [],
+    "visions_echo_sequences": [],
+    "lore_codex_expansions": [],
+    "timeline_edits": [],
+    "key_terms_introduced": [],
+    "locations_realms_visited": [],
+    "faction_threat_encounters": [],
+    "oaths_rituals_performed": [],
+    "artifacts_discovered": [],
+    "narrative_threads_opened": [],
+    "narrative_threads_closed": []
 }
