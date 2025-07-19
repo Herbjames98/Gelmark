@@ -1,5 +1,5 @@
-# This is the final, feature-complete version of the local application.
-# The AI is now instructed to act as a "world-builder," populating all files from a single master document.
+# This is the final, polished version of the local application.
+# It now sorts the lore sections in the correct, natural order (Prologue, Act 1, Act 2...).
 
 import streamlit as st
 import os
@@ -39,12 +39,11 @@ def get_all_lore_content():
     return all_lore
 
 def run_lore_update(narrative_log):
-    """The main AI logic function with the final 'world-builder' prompt."""
+    """The main AI logic function with the 'world-builder' prompt."""
     st.info("Preparing lore and contacting the Gemini AI...")
     current_lore = get_all_lore_content()
     lore_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_lore.items()])
 
-    # --- THIS IS THE FINAL, UPGRADED PROMPT ---
     prompt = f"""You are a master storyteller and game lore keeper for a dark fantasy world named Gelmark. Your task is to act as a historian and populate a complete set of lore files based on a comprehensive narrative log that covers the entire story so far.
 NARRATIVE LOG: <log>{narrative_log}</log>
 CURRENT LORE FILES (some may be blank): <lore>{lore_string}</lore>
@@ -80,7 +79,6 @@ Return ONLY the raw JSON object."""
 
 # --- UI Display Functions ---
 def display_section(title, data):
-    # (This function is unchanged)
     if data:
         st.subheader(title)
         if isinstance(data, list):
@@ -96,6 +94,19 @@ def display_section(title, data):
                     st.markdown(f"- {item}")
         else:
             st.markdown(data)
+
+# --- THIS IS THE NEW HELPER FUNCTION FOR SORTING ---
+def custom_sort_key(filename):
+    """A custom key for sorting lore files naturally."""
+    if filename == 'prologue':
+        return 0  # Prologue always comes first
+    if filename.startswith('act'):
+        try:
+            # Extract the number from 'actX' and return it
+            return int(filename.replace('act', ''))
+        except ValueError:
+            return 999 # Fallback for non-numeric acts
+    return 999 # All other files go to the end
 
 # --- Main App Interface ---
 st.title("📖 Gelmark Local Lore Editor")
@@ -126,9 +137,11 @@ if st.sidebar.button("Process and Update Lore"):
 
 # --- Main Display Area ---
 st.sidebar.markdown("---")
-# (This section is unchanged and automatically finds all your lore files)
-lore_files = sorted([f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f])
+# This now uses our custom sorting function to get the correct order
+found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
+lore_files = sorted(found_files, key=custom_sort_key)
 pages = {file.replace('_', ' ').title(): file for file in lore_files}
+
 if pages:
     selected_page_title = st.sidebar.radio("View Lore Section:", list(pages.keys()))
     selected_module_name = pages[selected_page_title]
@@ -142,7 +155,6 @@ if pages:
             # Display all 16 sections
             display_section("📘 Summary", section_data.get("summary"))
             display_section("🧩 Major Events", section_data.get("major_events"))
-            # ... and so on for all 16 sections ...
             display_section("🧑‍🤝‍🧑 Companions & Bond Status", section_data.get("companions_bond_status"))
             display_section("✨ Traits Unlocked", section_data.get("traits_unlocked"))
             display_section("🛕 Shrines Visited", section_data.get("shrines_visited"))
@@ -152,11 +164,4 @@ if pages:
             display_section("🔑 Key Terms Introduced", section_data.get("key_terms_introduced"))
             display_section("🗺️ Locations & Realms Visited", section_data.get("locations_realms_visited"))
             display_section("👽 Faction or Threat Encounters", section_data.get("faction_threat_encounters"))
-            display_section("📜 Oaths & Rituals Performed", section_data.get("oaths_rituals_performed"))
-            display_section("🏺 Artifacts Discovered", section_data.get("artifacts_discovered"))
-            display_section("❓ Narrative Threads Opened", section_data.get("narrative_threads_opened"))
-            display_section("✅ Narrative Threads Closed", section_data.get("narrative_threads_closed"))
-    else:
-        st.error(f"Could not read lore module for '{selected_page_title}'.")
-else:
-    st.warning(f"No lore files found in '{LORE_FOLDER}'.")
+            display_section("📜 Oaths & Rituals Performed", section_da
