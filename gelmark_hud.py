@@ -1,5 +1,5 @@
-# This is the definitive, feature-complete version of the local application.
-# It uses the file uploader, includes emojis, and has all other fixes integrated.
+# This is the Gelmark Engine V1.
+# It features a Character Sheet, a Lore Browser, and an interactive "Play the Game" tab.
 
 import streamlit as st
 import os
@@ -9,11 +9,11 @@ import docx
 import importlib.util
 
 # --- Configuration and Setup ---
-st.set_page_config(page_title="Gelmark Lore HUD", layout="wide")
+st.set_page_config(page_title="Gelmark Engine", layout="wide")
 LORE_FOLDER = os.path.join("my_gm", "lore_modules")
 PLAYER_STATE_FILE = os.path.join("my_gm", "player_state.py")
 
-# --- Core Functions ---
+# --- CORE DATA & AI FUNCTIONS ---
 
 def load_lore_module(module_name):
     """Loads a Python file from the lore_modules directory, avoiding cache issues."""
@@ -26,8 +26,7 @@ def load_lore_module(module_name):
         spec.loader.exec_module(module)
         return module
     except Exception as e:
-        st.error(f"Error loading {module_name}: {e}")
-        return None
+        st.error(f"Error loading {module_name}: {e}"); return None
 
 def load_player_state():
     """Loads the player_state.py file."""
@@ -38,11 +37,10 @@ def load_player_state():
         spec.loader.exec_module(player_state_module)
         return player_state_module
     except Exception as e:
-        st.error(f"Error loading player state: {e}")
-        return None
+        st.error(f"Error loading player state: {e}"); return None
 
-def get_all_lore_content():
-    """Reads all game data files into a dictionary for the AI."""
+def get_all_game_data_as_string():
+    """Reads all game data files into a single string for the AI to use as context."""
     all_content = {}
     if os.path.exists(PLAYER_STATE_FILE):
         with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f:
@@ -52,44 +50,60 @@ def get_all_lore_content():
             filepath = os.path.join(LORE_FOLDER, filename)
             with open(filepath, 'r', encoding='utf-8') as f:
                 all_content[filename] = f.read()
-    return all_content
+    return "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in all_content.items()])
 
-def run_lore_update(narrative_log):
-    """The main AI logic function with the 'world-builder' prompt."""
+def run_lore_update(narrative_log, game_data_string):
+    """The 'Lore Updater' AI. Updates all files based on a session log."""
     st.info("Preparing lore and contacting the Gemini AI...")
-    current_content = get_all_lore_content()
-    content_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in current_content.items()])
-
-    prompt = f"""You are a master storyteller. Your task is to update a complete set of game data files based on a new narrative log. Differentiate between the player's CURRENT status and historical lore.
-
+    prompt = f"""You are a meticulous and detail-oriented historian AI. Your task is to update a complete set of game data files based on a comprehensive narrative log. You must be exhaustive and leave no detail behind.
 NARRATIVE LOG: <log>{narrative_log}</log>
-
-GAME DATA FILES: <files>{content_string}</files>
-
-INSTRUCTIONS:
-1. Read the new narrative log.
-2. Update `player_state.py` to reflect the player's MOST RECENT stats, inventory, traits, and companion statuses.
-3. CRITICAL RULE: In the `stats_overview` section of `player_state.py`, no stat should ever be 0. If a stat would be 0, its value must be a baseline of 10.
-4. Update the historical lore files (`prologue.py`, etc.) with the events that occurred in that act.
-5. Modify MULTIPLE files. Populate all relevant sections with detail.
-6. Your response MUST be a single, valid JSON object. Keys are the filenames you modified, values are the COMPLETE new file content.
-Return ONLY the raw JSON object."""
-
+GAME DATA FILES: <files>{game_data_string}</files>
+YOUR UN-SKIPPABLE INSTRUCTIONS:
+1.  **Analyze the Player's Final State:** Scrutinize the entire narrative log to determine the character's status AT THE END of the log. Update `player_state.py` with this final information.
+    *   **Stats:** Update all numerical stats. If a stat is not mentioned, assume it has a baseline of 10.
+    *   **Inventory & Abilities:** Meticulously list every single artifact, relic, key item, and piece of equipment mentioned. List all combat techniques, skills, and powers. DO NOT leave these sections empty if the information exists in the log.
+    *   **Companions:** Update the status, sync %, and key events for all companions based on the final state of the log.
+2.  **Analyze the Historical Lore:** Read the log chronologically from the beginning.
+    *   For each event, identify which Act (Prologue, Act 1, Act 2, etc.) it belongs to.
+    *   Populate the corresponding lore file for that Act (`prologue.py`, `act1.py`, etc.).
+    *   Be detailed. Extract every "Major Event," "Artifact Discovered," "Trait Unlocked," etc., for each Act. You must populate MULTIPLE historical files.
+3.  **Final Output:** Your response MUST be a single, valid JSON object. The keys must be ALL the filenames you have modified. The values must be the COMPLETE, new Python code content for each file. Do not summarize. Be verbose and comprehensive. Return ONLY the raw JSON object."""
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
         response = model.generate_content(prompt)
         updated_files = json.loads(response.text.strip().removeprefix("```json").removesuffix("```"))
     except Exception as e:
-        st.error(f"An error occurred while processing the AI response: {e}"); return False
-        
-    st.info("AI processing complete. Writing changes to local files...")
+        st.error(f"An error occurred while processing the AI response: {e}");
+        st.subheader("Raw AI Response:")
+        st.code(response.text if 'response' in locals() else "No response from AI.", language="text")
+        return False
+    st.info("Writing changes to local files...")
     for key, content in updated_files.items():
         filename = os.path.basename(key) 
         filepath = os.path.join("my_gm", filename) if filename == "player_state.py" else os.path.join(LORE_FOLDER, filename)
         with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
     return True
+    
+def run_cyoa_turn(chat_history, game_data_string):
+    """The 'Game Master' AI. Continues the story based on player choice."""
+    prompt = f"""You are the Game Master (GM) for the dark fantasy CYOA game, 'The Gelmark'. Your personality is immersive, detailed, and you adhere to the established canon.
+CANON DATA (Your Memory): <canon>{game_data_string}</canon>
+CURRENT SCENE SO FAR: <history>{chat_history}</history>
+INSTRUCTIONS:
+1.  Read the Canon Data to understand the world, the player's current stats, traits, and story progress.
+2.  Read the Current Scene to understand the immediate context.
+3.  Based on the player's last action, continue the story in a compelling, literary style.
+4.  Your response must end with 2-4 clear, actionable choices for the player to make.
+5.  Do NOT break character or refer to yourself as an AI."""
+    try:
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"An error occurred while contacting the GM: {e}"
 
-# --- UI Display Functions ---
+# --- UI DISPLAY & PAGE RENDERING FUNCTIONS ---
+
 def display_section(title, data):
     if data:
         st.subheader(title)
@@ -99,20 +113,15 @@ def display_section(title, data):
                     item_title = item.get('name', item.get('term', 'Entry'))
                     with st.expander(f"**{item_title}**"):
                         for k, v in item.items():
-                            if k.lower() not in ['name', 'term']:
-                                st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
-                else:
-                    st.markdown(f"- {item}")
-        else:
-            st.markdown(data)
+                            if k.lower() not in ['name', 'term']: st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                else: st.markdown(f"- {item}")
+        else: st.markdown(data)
 
 def display_dict_section(title, data):
     if data:
         st.subheader(title)
-        for key, value in data.items():
-            st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
+        for key, value in data.items(): st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
 
-# --- PAGE DEFINITIONS ---
 def render_character_sheet():
     st.title("Character Sheet")
     state = load_player_state()
@@ -123,31 +132,26 @@ def render_character_sheet():
         if stats:
             cols = st.columns(3)
             i = 0
-            for key, value in stats.items():
-                cols[i % 3].metric(label=key, value=value)
-                i += 1
-        traits = getattr(state, 'traits', {})
+            for key, value in stats.items(): cols[i % 3].metric(label=key, value=value); i += 1
+        traits = getattr(state, 'traits', {});
         if traits:
             st.subheader("🧬 Traits")
             display_section("Active Traits", traits.get("active_traits"))
             display_section("Echoform Traits", traits.get("echoform_traits"))
-            # ... and so on for all trait types
-        
-        abilities = getattr(state, 'abilities_techniques', {})
-        if abilities:
+            display_section("Hybrid/Fusion Traits", traits.get("hybrid_fusion_traits"))
+        abilities = getattr(state, 'abilities_techniques', {});
+        if abilities: 
             st.subheader("🪄 Abilities / Techniques")
-            # ... display abilities
-        
-        inventory = getattr(state, 'inventory', {})
-        if inventory:
+            display_section("Combat Techniques", abilities.get("combat_techniques"))
+            display_section("Memory Engine Skills", abilities.get("memory_engine_skills"))
+        inventory = getattr(state, 'inventory', {});
+        if inventory: 
             st.subheader("🎒 Inventory")
-            # ... display inventory
-        
+            display_section("Artifacts / Relics", inventory.get("artifacts_relics"))
+            display_section("Key Items", inventory.get("key_items"))
         display_section("🧑‍🤝‍🧑 Companions", getattr(state, 'companions', None))
         display_dict_section("🏕️ Camp / Base Upgrades", getattr(state, 'camp_base_upgrades', None))
-        # ... and so on
-    else:
-        st.error("Could not load player state. Make sure `my_gm/player_state.py` exists.")
+    else: st.error("Could not load player state.")
 
 def render_lore_browser():
     st.title("📖 Gelmark Lore Browser")
@@ -157,7 +161,6 @@ def render_lore_browser():
             try: return int(filename.replace('act', ''))
             except ValueError: return 999
         return 999
-
     found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
     lore_files = sorted(found_files, key=custom_sort_key)
     pages = {file.replace('_', ' ').title(): file for file in lore_files}
@@ -176,44 +179,50 @@ def render_lore_browser():
                 "oaths_rituals_performed": "📜 Oaths & Rituals Performed", "artifacts_discovered": "🏺 Artifacts Discovered",
                 "narrative_threads_opened": "❓ Narrative Threads Opened", "narrative_threads_closed": "✅ Narrative Threads Closed"
             }
-            for key, title in lore_headers.items():
-                display_section(title, section_data.get(key))
-    else:
-        st.warning(f"No lore files found in '{LORE_FOLDER}'.")
+            for key, title in lore_headers.items(): display_section(title, section_data.get(key))
+    else: st.warning(f"No lore files found in '{LORE_FOLDER}'.")
+
+def render_play_game_page():
+    st.title("🎲 Play the Game")
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Welcome, Pulse-Bearer. The threads of fate are still. What would you like to do?"}]
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]): st.markdown(message["content"])
+    if prompt := st.chat_input("Your action..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"): st.markdown(prompt)
+        with st.chat_message("assistant"):
+            with st.spinner("The world responds..."):
+                game_data_string = get_all_game_data_as_string()
+                chat_history = json.dumps(st.session_state.messages)
+                response = run_cyoa_turn(chat_history, game_data_string)
+                st.markdown(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 # --- MAIN APP LAYOUT ---
 st.sidebar.title("Navigation")
-main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser"])
+main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
 st.sidebar.markdown("---")
 st.sidebar.title("🛠️ Lore Updater")
-
-# --- THE FILE UPLOADER IS RESTORED HERE ---
-st.sidebar.subheader("Upload Narrative Log")
-uploaded_file = st.sidebar.file_uploader("Upload your master story document", type=['txt', 'md', 'docx'])
-
+st.sidebar.subheader("Save Your Session")
+narrative_log_input = st.sidebar.text_area("After playing, paste the session transcript here to update the lore:", height=150)
 if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"): st.sidebar.error("GEMINI_API_KEY is not set!")
-    elif uploaded_file is None: st.sidebar.warning("Please upload a file.")
+    elif not narrative_log_input: st.sidebar.warning("Please paste a narrative log.")
     else:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        narrative_log = ""
-        try:
-            if uploaded_file.name.endswith('.docx'):
-                narrative_log = "\n".join([p.text for p in docx.Document(uploaded_file).paragraphs])
-            else:
-                narrative_log = uploaded_file.read().decode("utf-8")
-        except Exception as e:
-            st.sidebar.error(f"Error reading file: {e}")
+        game_data_string = get_all_game_data_as_string()
+        with st.spinner("The AI is updating your world..."):
+            success = run_lore_update(narrative_log_input, game_data_string)
+        if success:
+            st.success("Data files updated!"); st.balloons(); st.rerun()
+        else:
+            st.error("The update failed. See details above.")
 
-        if narrative_log:
-            with st.spinner("The AI is updating your world..."):
-                success = run_lore_update(narrative_log)
-            if success:
-                st.success("Data files updated!"); st.balloons(); st.rerun()
-            else:
-                st.error("The update failed. See details above.")
-
+# Main content area renders the selected page
 if main_page == "Character Sheet":
     render_character_sheet()
-else:
+elif main_page == "Lore Browser":
     render_lore_browser()
+else:
+    render_play_game_page()
