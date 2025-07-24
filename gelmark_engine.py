@@ -1,5 +1,5 @@
-# This is the Gelmark Engine: a single, self-contained, and robust application.
-# All data is stored internally to prevent file errors.
+# This is the Gelmark Engine V6: The final, definitive version.
+# It uses the correct Gemini 2.5 Pro model and is self-contained for reliability.
 
 import streamlit as st
 import os
@@ -8,7 +8,6 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 # --- THIS IS THE BULLETPROOF .ENV FIX ---
-# It finds its own location and loads the .env file next to it. This always works.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOTENV_PATH = os.path.join(SCRIPT_DIR, '.env')
 load_dotenv(dotenv_path=DOTENV_PATH)
@@ -18,7 +17,7 @@ load_dotenv(dotenv_path=DOTENV_PATH)
 st.set_page_config(page_title="Gelmark Engine", layout="wide")
 
 
-# --- GAME DATABASE (All your lore and stats are now stored here directly) ---
+# --- GAME DATABASE (All your lore and stats are stored here directly) ---
 
 PLAYER_STATE = {
     "profile": {
@@ -109,7 +108,6 @@ LORE_DATA = {
 
 def run_ai_update(narrative_log):
     """Generates the updated Python code for the database."""
-    # Convert the current data into a string for the AI to read
     data_string = f"PLAYER_STATE = {json.dumps(PLAYER_STATE, indent=4)}\n\nLORE_DATA = {json.dumps(LORE_DATA, indent=4)}"
     
     prompt = f"""You are a meticulous historian AI. Your task is to update the Python dictionaries containing the game's data based on a new narrative log.
@@ -121,14 +119,15 @@ INSTRUCTIONS:
 3. Be exhaustive. Update stats, inventory, traits, companion statuses, and add historical events to the correct acts.
 4. Your response should ONLY be the raw Python code for the two dictionaries. Do not include any other text, explanations, or markdown formatting. Start your response with `PLAYER_STATE = {{`"""
     try:
-        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        # --- THIS IS THE FINAL, CORRECTED MODEL NAME ---
+        model = genai.GenerativeModel('gemini-2.5-pro')
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         return f"# An error occurred: {e}"
 
 # --- UI DISPLAY FUNCTIONS ---
-
+# (Unchanged)
 def display_section(title, data):
     if data:
         st.subheader(title)
@@ -149,7 +148,7 @@ def display_dict_section(title, data):
         for key, value in data.items(): st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
 
 # --- PAGE DEFINITIONS ---
-
+# (Unchanged)
 def render_character_sheet():
     st.title("Character Sheet")
     display_dict_section("🧍 Player Profile", PLAYER_STATE.get("profile"))
