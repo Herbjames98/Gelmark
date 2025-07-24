@@ -1,185 +1,163 @@
-# This is the Gelmark Engine V6: The final, definitive version.
-# It uses the correct Gemini 2.5 Pro model and is self-contained for reliability.
+# This is the Gelmark Engine V7: The final, fully automated version.
+# It reads from and writes to external data files automatically.
 
 import streamlit as st
 import os
 import json
 import google.generativeai as genai
 from dotenv import load_dotenv
+import importlib.util
 
-# --- THIS IS THE BULLETPROOF .ENV FIX ---
+# --- Bulletproof .env loading ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOTENV_PATH = os.path.join(SCRIPT_DIR, '.env')
 load_dotenv(dotenv_path=DOTENV_PATH)
-# --- END OF FIX ---
 
 # --- Configuration ---
 st.set_page_config(page_title="Gelmark Engine", layout="wide")
+LORE_FOLDER = os.path.join(SCRIPT_DIR, "lore_modules")
+PLAYER_STATE_FILE = os.path.join(SCRIPT_DIR, "player_state.py")
 
+# --- CORE DATA & AI FUNCTIONS ---
 
-# --- GAME DATABASE (All your lore and stats are stored here directly) ---
-
-PLAYER_STATE = {
-    "profile": {
-        "name_title": "Askr, the Valking",
-        "current_arc_act": "Act 3, Chapter 1: Echo Chamber",
-        "origin_class_lineage": "Human, Time-Sent Survivor, Valking Initiate",
-        "covenant_oath": "Vow to awaken the Frozen King."
-    },
-    "stats": {
-        "Strength": 15,
-        "Dexterity": 10,
-        "Insight": 10,
-        "Focus": 12,
-        "Charisma": 1,
-        "Resolve": 14,
-        "Spirit": 10,
-        "Agility": 12,
-        "Willpower": 10,
-        "Lore": 10
-    },
-    "traits": {
-        "active": [
-            "Mines-Forged",
-            "Commandless Grace"
-        ],
-        "echoform": [],
-        "fused": []
-    },
-    "inventory": {
-        "relics": [],
-        "key_items": [
-            "Makeshift Charger",
-            "Whisper-Etched Rune"
-        ],
-        "equipment": {
-            "weapon": "Valking's Axe",
-            "armor": "Reinforced Hide Armor"
-        }
-    },
-    "companions": [
-        {
-            "name": "G.R.A.C.E.",
-            "sync": "50%",
-            "status": "Partial reactivation; ancient records accessible."
-        }
-    ]
-}
-
-LORE_DATA = {
-    "Prologue": {
-        "summary": "A low-ranking security trainee for the GelCap Guild (GG), secretly the illegitimate child of the CEO planted as a 'bloodline fallback', lives a monotonous life shadowed by their personal AI, G.R.A.C.E. A massive explosion destroys their facility, leaving them the sole survivor. Following 'GG' logos through the ruins, they discover a damaged time-travel pod ('GG Hype-'), which activates and hurls them into the past.",
-        "major_events": [
-            "Protagonist is established as an undervalued GelCap security trainee, secretly the CEO's illegitimate child.",
-            "A massive explosion occurs during a lesson with G.R.A.C.E., leaving the protagonist unconscious in the ruined facility.",
-            "Waking up as the sole survivor, the protagonist follows GG logos to a hidden, fire-scarred chamber.",
-            "The protagonist discovers a 'shrink-class' transport pod that, when activated, becomes a Gel Capsule and initiates time travel."
-        ]
-    },
-    "Act 1": {
-        "summary": "The protagonist awakens in the Viking Age. They discover that the local warriors are unknowing ancestors of the GelCap Guild, using a primitive form of the corporation's signature purple gel in their helmets. To help the protagonist survive and blend in, G.R.A.C.E. sacrifices her core functions to provide a language translation module, going dormant as the protagonist approaches the Viking camp.",
-        "major_events": [
-            "The protagonist crash-lands in a forest clearing during the Viking Age.",
-            "Observes Viking warriors wearing helmets padded with a purple gel G.R.A.C.E. identifies as a primitive form of GelCap substance.",
-            "G.R.A.C.E. procures a helmet and clothes, then sacrifices all systems except for language translation to allow communication.",
-            "With G.R.A.C.E. dormant but providing translation, the disguised protagonist walks toward the Viking settlement."
-        ]
-    },
-    "Act 2": {
-        "summary": "Forced into slave labor in the G\u00e6l Mines, the protagonist hones their physical abilities through grueling tasks. They craft a makeshift charger to partially awaken G.R.A.C.E., drawing the attention of the Guard Captain. Their training is interrupted by the arrival of the alien Pakariin, who eventually enslave the entire Viking camp. Guided by G.R.A.C.E.'s newly recovered memories of the Pakariin's ancient history, the protagonist learns of the legendary Frozen King. After defeating the brainwashed Valking Captain in a final confrontation, the protagonist earns their freedom and sets out to find the king, unlocking the path to Act 3.",
-        "major_events": [
-            "Protagonist is enslaved and sent to the G\u00e6l Mines to perform five core training tasks (Strength, Speed, Defense, Endurance, Focus).",
-            "A 'Makeshift Charger' is crafted, partially reawakening G.R.A.C.E. to a whisper-mode.",
-            "The alien Pakariin arrive, seeking the sealed Viking king.",
-            "After the protagonist passes the 'Chasm Trial', the Pakariin return and conquer the camp, conscripting all survivors.",
-            "G.R.A.C.E. reaches 50% power, revealing memories of the Pakariin's ancient presence and the legend of the Frozen King.",
-            "Protagonist receives a cryptic vision from the Frozen King: 'Your presence is no longer ignored. The Captain watches. He prepares your reckoning.'",
-            "The Guard Captain, now a brainwashed 'Valking Captain', is defeated in a boss battle, ending the Act."
-        ]
-    },
-    "Act 3": {
-        "summary": "Having defeated the Valking Captain, the protagonist is now a free Valking. Guided by G.R.A.C.E.'s recovered data, they begin their search for the Echo Chamber, a place tied to the Frozen King. This act follows the quest to awaken the only power known to have driven off the Pakariin in the past, setting the stage for a confrontation that will decide the fate of both the Viking past and the protagonist's destroyed future.",
-        "major_events": [
-            "The quest to find the Echo Chamber and awaken the Frozen King begins."
-        ]
-    }
-}
-
-# --- AI UPDATER FUNCTION ---
+def load_data_from_file(filepath, variable_name):
+    """Loads a specific dictionary variable from a Python file."""
+    try:
+        if not os.path.exists(filepath): return {}
+        module_name_unique = f"loader_{variable_name}_{os.path.getmtime(filepath)}"
+        spec = importlib.util.spec_from_file_location(module_name_unique, filepath)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return getattr(module, variable_name, {})
+    except Exception as e:
+        st.error(f"Error loading data from {filepath}: {e}"); return {}
 
 def run_ai_update(narrative_log):
-    """Generates the updated Python code for the database."""
-    data_string = f"PLAYER_STATE = {json.dumps(PLAYER_STATE, indent=4)}\n\nLORE_DATA = {json.dumps(LORE_DATA, indent=4)}"
+    """The main AI logic function that now writes directly to files."""
+    st.info("Preparing lore and contacting the Gemini AI...")
     
-    prompt = f"""You are a meticulous historian AI. Your task is to update the Python dictionaries containing the game's data based on a new narrative log.
-NARRATIVE LOG: <log>{narrative_log}</log>
-CURRENT GAME DATA: <code>{data_string}</code>
-INSTRUCTIONS:
-1. Read the new narrative log and the current game data.
-2. Generate the complete, updated Python code for the `PLAYER_STATE` and `LORE_DATA` dictionaries.
-3. Be exhaustive. Update stats, inventory, traits, companion statuses, and add historical events to the correct acts.
-4. Your response should ONLY be the raw Python code for the two dictionaries. Do not include any other text, explanations, or markdown formatting. Start your response with `PLAYER_STATE = {{`"""
-    try:
-        # --- THIS IS THE FINAL, CORRECTED MODEL NAME ---
-        model = genai.GenerativeModel('gemini-2.5-pro')
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return f"# An error occurred: {e}"
+    # Read all game data to provide context to the AI
+    all_content = {}
+    if os.path.exists(PLAYER_STATE_FILE):
+        with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f: all_content['player_state.py'] = f.read()
+    for filename in os.listdir(LORE_FOLDER):
+        if filename.endswith('.py') and '__init__' not in filename:
+            filepath = os.path.join(LORE_FOLDER, filename)
+            with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
+    
+    data_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in all_content.items()])
 
-# --- UI DISPLAY FUNCTIONS ---
-# (Unchanged)
+    prompt = f"""You are a meticulous historian AI. Your task is to update a complete set of game data files based on a new narrative log.
+NARRATIVE LOG: <log>{narrative_log}</log>
+GAME DATA FILES: <code>{data_string}</code>
+INSTRUCTIONS:
+1. Read the new narrative log.
+2. Update `player_state.py` to reflect the player's MOST RECENT status.
+3. Update the historical lore files (`prologue.py`, etc.) with events from that act.
+4. Your response MUST be a single, valid JSON object where keys are the filenames you modified and values are the COMPLETE new file content.
+Return ONLY the raw JSON object."""
+    
+    try:
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        response = model.generate_content(prompt)
+        updated_files = json.loads(response.text.strip().removeprefix("```json").removesuffix("```"))
+    except Exception as e:
+        st.error(f"An error occurred while processing the AI response: {e}")
+        st.subheader("Raw AI Response:")
+        st.code(response.text if 'response' in locals() else "No response from AI.", language="text")
+        return False
+        
+    st.info("AI processing complete. Writing changes to local files...")
+    for key, content in updated_files.items():
+        filename = os.path.basename(key)
+        # Determine the correct folder to write to
+        if filename == "player_state.py":
+            filepath = PLAYER_STATE_FILE
+        else:
+            filepath = os.path.join(LORE_FOLDER, filename)
+        
+        # Write the new content to the file
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
+            st.write(f"✅ Updated `{filename}`.")
+        except Exception as e:
+            st.error(f"Failed to write to `{filename}`: {e}")
+            return False
+    return True
+
+# --- UI DISPLAY & PAGE RENDERING FUNCTIONS (Unchanged) ---
+# ... (All the display and page rendering functions are the same as the last working version)
+
 def display_section(title, data):
     if data:
         st.subheader(title)
         if isinstance(data, list):
             for item in data:
                 if isinstance(item, dict):
-                    with st.expander(f"**{item.get('name', 'Entry')}**"):
+                    with st.expander(f"**{item.get('name', item.get('term', 'Entry'))}**"):
                         for k, v in item.items():
-                            if k != 'name': st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
-                else:
-                    st.markdown(f"- {item}")
-        else:
-            st.markdown(data)
+                            if k.lower() not in ['name', 'term']: st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                else: st.markdown(f"- {item}")
+        else: st.markdown(data)
 
 def display_dict_section(title, data):
     if data:
         st.subheader(title)
         for key, value in data.items(): st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
 
-# --- PAGE DEFINITIONS ---
-# (Unchanged)
 def render_character_sheet():
     st.title("Character Sheet")
-    display_dict_section("🧍 Player Profile", PLAYER_STATE.get("profile"))
+    player_data = load_data_from_file(PLAYER_STATE_FILE, "PLAYER_STATE")
+    if not player_data: st.error("Could not load character sheet. Check player_state.py."); return
+    
+    display_dict_section("🧍 Player Profile", player_data.get("profile"))
     st.subheader("📈 Stats Overview")
     cols = st.columns(3)
     i = 0
-    for key, value in PLAYER_STATE.get("stats", {}).items():
-        cols[i % 3].metric(label=key, value=value); i += 1
-    traits = PLAYER_STATE.get("traits", {})
-    st.subheader("🧬 Traits")
+    for key, value in player_data.get("stats", {}).items(): cols[i % 3].metric(label=key, value=value); i += 1
+    
+    traits = player_data.get("traits", {}); st.subheader("🧬 Traits")
     display_section("Active", traits.get("active"))
     display_section("Echoform", traits.get("echoform"))
     display_section("Fused", traits.get("fused"))
-    inventory = PLAYER_STATE.get("inventory", {})
-    st.subheader("🎒 Inventory")
+    
+    inventory = player_data.get("inventory", {}); st.subheader("🎒 Inventory")
     display_section("Relics", inventory.get("relics"))
     display_section("Key Items", inventory.get("key_items"))
     display_dict_section("Equipment", inventory.get("equipment"))
-    display_section("🧑‍🤝‍🧑 Companions", PLAYER_STATE.get("companions"))
+    
+    display_section("🧑‍🤝‍🧑 Companions", player_data.get("companions"))
 
 def render_lore_browser():
     st.title("📖 Gelmark Lore Browser")
-    lore_acts = list(LORE_DATA.keys())
-    selected_act_title = st.sidebar.radio("View Lore Section:", lore_acts, key="lore_nav")
-    act_data = LORE_DATA.get(selected_act_title, {})
-    if act_data:
-        display_section("📘 Summary", act_data.get("summary"))
-        display_section("🧩 Major Events", act_data.get("major_events"))
-    else:
-        st.warning("No data found for this section.")
+    def custom_sort_key(filename_no_ext):
+        if filename_no_ext == 'prologue': return 0
+        if filename_no_ext.startswith('act'):
+            try: return int(filename_no_ext.replace('act', ''))
+            except ValueError: return 999
+        return 999
+    
+    found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
+    lore_files = sorted(found_files, key=custom_sort_key)
+    pages = {file.replace('_', ' ').title(): file for file in lore_files}
+    
+    if pages:
+        selected_page_title = st.sidebar.radio("View Lore Section:", list(pages.keys()), key="lore_nav")
+        selected_module_name = pages[selected_page_title]
+        section_data = load_data_from_file(os.path.join(LORE_FOLDER, f"{selected_module_name}.py"), f"{selected_module_name}_lore")
+        
+        if section_data:
+            lore_headers = {
+                "summary": "📘 Summary", "major_events": "🧩 Major Events", "companions_bond_status": "🧑‍🤝‍🧑 Companions & Bond Status",
+                "traits_unlocked": "✨ Traits Unlocked", "shrines_visited": "🛕 Shrines Visited", "visions_echo_sequences": "🔮 Visions & Echo Sequences",
+                "lore_codex_expansions": "📖 Lore Entries / Codex Expansions", "timeline_edits": "⏳ Timeline Edits", "key_terms_introduced": "🔑 Key Terms Introduced",
+                "locations_realms_visited": "🗺️ Locations & Realms Visited", "faction_threat_encounters": "👽 Faction or Threat Encounters",
+                "oaths_rituals_performed": "📜 Oaths & Rituals Performed", "artifacts_discovered": "🏺 Artifacts Discovered",
+                "narrative_threads_opened": "❓ Narrative Threads Opened", "narrative_threads_closed": "✅ Narrative Threads Closed"
+            }
+            for key, title in lore_headers.items():
+                display_section(title, section_data.get(key))
 
 def render_play_game_page():
     st.title("🎲 Play the Game")
@@ -190,22 +168,25 @@ st.sidebar.title("Navigation")
 main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
 st.sidebar.markdown("---")
 st.sidebar.title("🛠️ Lore Updater")
-st.sidebar.subheader("Generate Updated Lore")
+st.sidebar.subheader("Paste Narrative Log")
 narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=200)
 
-if st.sidebar.button("Generate Update Code"):
+if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"):
-        st.sidebar.error("GEMINI_API_KEY is not set in your .env file!")
+        st.sidebar.error("GEMINI_API_KEY is not set! Check your .env file.")
     elif not narrative_log_input:
         st.sidebar.warning("Please paste a narrative log.")
     else:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        with st.spinner("The AI is generating your updated lore code..."):
-            updated_code = run_ai_update(narrative_log_input)
+        with st.spinner("The AI is rewriting your world files..."):
+            success = run_ai_update(narrative_log_input)
         
-        st.sidebar.subheader("Updated Code:")
-        st.sidebar.code(updated_code, language="python")
-        st.sidebar.info("Copy the code above and paste it over the 'GAME DATABASE' section in this script to save the changes.")
+        if success:
+            st.success("Lore files updated successfully! The page will now reload.")
+            st.balloons()
+            st.rerun()
+        else:
+            st.error("The lore update failed. See the error message above.")
 
 if main_page == "Character Sheet":
     render_character_sheet()
