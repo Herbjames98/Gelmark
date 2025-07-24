@@ -138,7 +138,25 @@ def render_character_sheet():
     display_section("Relics", inventory.get("relics"))
     display_section("Key Items", inventory.get("key_items"))
     display_dict_section("Equipment", inventory.get("equipment"))
-    display_section("🧑‍🤝‍🧑 Companions", player_data.get("companions"))
+
+    # ✅ Companion merge logic added here
+    def merge_duplicate_companions(companions):
+        merged = {}
+        for comp in companions:
+            name_key = comp['name'].strip().lower().replace(".", "")
+            if name_key not in merged:
+                merged[name_key] = comp
+            else:
+                for k, v in comp.items():
+                    if v and (k not in merged[name_key] or not merged[name_key][k]):
+                        merged[name_key][k] = v
+                merged[name_key]['name'] = "G.R.A.C.E." if name_key == "grace" else comp['name']
+        return list(merged.values())
+
+    companions_raw = player_data.get("companions", [])
+    merged_companions = merge_duplicate_companions(companions_raw)
+    display_section("🧑‍🤝‍🧑 Companions", merged_companions)
+
 
 def render_lore_browser():
     st.title("📖 Gelmark Lore Browser")
