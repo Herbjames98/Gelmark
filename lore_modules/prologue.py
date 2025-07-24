@@ -1,7 +1,4 @@
 # --- File: prologue.py ---
-# --- File: prologue.py ---
-# --- File: prologue.py ---
-# --- File: prologue.py ---
 # In file: my_gm/lore_modules/prologue.py
 
 prologue_lore = {

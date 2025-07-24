@@ -1,7 +1,4 @@
 # --- File: act2.py ---
-# --- File: act2.py ---
-# --- File: act2.py ---
-# --- File: act2.py ---
 # In file: my_gm/lore_modules/act2.py
 
 act2_lore = {
@@ -53,8 +50,7 @@ act2_lore = {
     ],
     "faction_threat_encounters": [
         { "name": "Vikings (Enslaving/Conscripting)", "status": "Initial Captors, then Masters under Pakariin proxy", "event": "Enslavement in Gæl Mines, later re-conscription" },
-        { "name": "Pakariin", "status": "Alien Invaders, Enslaved Vikings", "event": "Arrival, Demand for King, Later Total Submission & Enslavement" },
-        { "name": "Valking Captain", "status": "Antagonist, Final Boss of Act 2", "event": "Foreshadowed as preparing reckoning" }
+        { "name": "Pakariin", "status": "Alien Invaders, Enslaved Vikings", "event": "Arrival, Demand for King, Later Total Submission & Enslavement" }
     ],
     "oaths_rituals_performed": [
         { "name": "Completion of Chasm Trial", "description": "A deadly physical feat demonstrating mastery of core stats, making the protagonist eligible for independence.", "event": "Act 2, Chapter 5"}

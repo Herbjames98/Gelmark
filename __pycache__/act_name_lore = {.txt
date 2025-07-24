@@ -49,3 +49,8 @@ act_name_lore = {
     "narrative_threads_opened": [],
     "narrative_threads_closed": []
 }
+
+
+
+
+(ai model:model = genai.GenerativeModel("gemini-2.5-flash"))

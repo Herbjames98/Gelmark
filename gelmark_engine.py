@@ -61,7 +61,7 @@ Instructions:
 Return ONLY the raw JSON object (no Markdown, no explanations).
 """
     try:
-        model = genai.GenerativeModel("gemini-1.5-pro-latest")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt)
         updated_files = ast.literal_eval(response.text.strip().removeprefix("```json").removesuffix("```"))
     except Exception as e:
