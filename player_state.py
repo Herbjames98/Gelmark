@@ -56,9 +56,8 @@ PLAYER_STATE = {
         }
     },
     "companions": [
-        { "name": "G.R.A.C.E.", "sync": "50%", "status": "50% Power, Full Memory (Translation & Instruction Modes Active)" },
-        { "name": "Thjolda", "sync": "85%", "status": "Romance path ready Act 4+" },
-        { "name": "Grace", "sync": "70%", "status": "Possible Vault Key" },
-        { "name": "Caelik", "sync": "80%", "status": "Loyalty Trait unlocked" }
+        { "name": "G.R.A.C.E.", "sync": "115%", "status": "Deeply bonded, Override Dialogue unlocked." },
+        { "name": "Thjolda", "sync": "100%", "status": "Bond maxed after 'The Blade Before the Call' trial." },
+        { "name": "Caelik", "sync": "100%", "status": "Bond maxed after 'Ash Born Twice' trial." }
     ]
 }
