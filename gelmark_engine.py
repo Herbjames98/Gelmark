@@ -21,67 +21,47 @@ st.set_page_config(page_title="Gelmark Engine", layout="wide")
 
 PLAYER_STATE = {
     "profile": {
-        "name_title": "Askr, Pulse-Bearer of the Fractured Oath",
-        "current_arc_act": "Act 3, Chapter 4: The Sightless Hollow",
-        "origin_class_lineage": "Human, Time-Sent Heir of GelCap, Echo-Kin Hybrid (Threadcaller / Memorykeeper)",
-        "covenant_oath": "Vow to become a sanctuary for the unremembered."
+        "name_title": "Askr, the Valking",
+        "current_arc_act": "Act 3, Chapter 1: Echo Chamber",
+        "origin_class_lineage": "Human, Time-Sent Survivor, Valking Initiate",
+        "covenant_oath": "Vow to awaken the Frozen King."
     },
     "stats": {
-        "Strength": 13,
+        "Strength": 15,
         "Dexterity": 10,
         "Insight": 10,
         "Focus": 12,
         "Charisma": 1,
-        "Resolve": 10,
+        "Resolve": 14,
         "Spirit": 10,
-        "Agility": 10,
+        "Agility": 12,
         "Willpower": 10,
         "Lore": 10
     },
     "traits": {
         "active": [
-            "Oathbraid",
+            "Mines-Forged",
             "Commandless Grace"
         ],
-        "echoform": [
-            "Mirrorburst"
-        ],
-        "fused": [
-            "Twin Flame Anchor",
-            "Scorchbind Core",
-            "Pulse Woven"
-        ]
+        "echoform": [],
+        "fused": []
     },
     "inventory": {
-        "relics": [
-            {
-                "name": "Witness Unchosen",
-                "effect": "Resists recursion threats."
-            }
-        ],
+        "relics": [],
         "key_items": [
-            "Fragmented Keystone"
+            "Makeshift Charger",
+            "Whisper-Etched Rune"
         ],
         "equipment": {
-            "weapon": "Coreborn Hammer (Inert)",
-            "armor": "Memorybound Cloak"
+            "weapon": "Valking's Axe",
+            "armor": "Reinforced Hide Armor"
         }
     },
     "companions": [
         {
             "name": "G.R.A.C.E.",
-            "sync": "115%",
-            "status": "Deeply bonded, Override Dialogue unlocked."
-        },
-        {
-            "name": "Thjolda",
-            "sync": "100%",
-            "status": "Bond maxed after 'The Blade Before the Call' trial."
-        },
-        {
-            "name": "Caelik",
-            "sync": "100%",
-            "status": "Bond maxed after 'Ash Born Twice' trial."
+            "sync": "50%",
+            "status": "Partial reactivation; ancient records accessible."
         }
     ]
 }
@@ -106,24 +86,21 @@ LORE_DATA = {
         ]
     },
     "Act 2": {
-        "summary": "Enslaved by the Vikings, the protagonist endures grueling labor in the G\u00e6l Mines, which serves as a training ground. They grow in power, partially reawaken G.R.A.C.E., and face the arrival of a new alien threat, the Pakariin, before becoming a Valking and setting out to awaken the Frozen King.",
+        "summary": "Forced into slave labor in the G\u00e6l Mines, the protagonist hones their physical abilities through grueling tasks. They craft a makeshift charger to partially awaken G.R.A.C.E., drawing the attention of the Guard Captain. Their training is interrupted by the arrival of the alien Pakariin, who eventually enslave the entire Viking camp. Guided by G.R.A.C.E.'s newly recovered memories of the Pakariin's ancient history, the protagonist learns of the legendary Frozen King. After defeating the brainwashed Valking Captain in a final confrontation, the protagonist earns their freedom and sets out to find the king, unlocking the path to Act 3.",
         "major_events": [
-            "Enslaved and sent to the G\u00e6l Mines.",
-            "Core stats (Strength, Speed, etc.) are trained through mining tasks.",
-            "A makeshift charger partially revives G.R.A.C.E.",
-            "The alien Pakariin arrive and conscript the camp.",
-            "The protagonist joins the Valking order and begins the quest to awaken the Frozen King."
+            "Protagonist is enslaved and sent to the G\u00e6l Mines to perform five core training tasks (Strength, Speed, Defense, Endurance, Focus).",
+            "A 'Makeshift Charger' is crafted, partially reawakening G.R.A.C.E. to a whisper-mode.",
+            "The alien Pakariin arrive, seeking the sealed Viking king.",
+            "After the protagonist passes the 'Chasm Trial', the Pakariin return and conquer the camp, conscripting all survivors.",
+            "G.R.A.C.E. reaches 50% power, revealing memories of the Pakariin's ancient presence and the legend of the Frozen King.",
+            "Protagonist receives a cryptic vision from the Frozen King: 'Your presence is no longer ignored. The Captain watches. He prepares your reckoning.'",
+            "The Guard Captain, now a brainwashed 'Valking Captain', is defeated in a boss battle, ending the Act."
         ]
     },
     "Act 3": {
-        "summary": "Askr's journey through the remnants of the Dominion's influence, exploring shattered vaults and forging deeper bonds. The act culminates in the acquisition of the Temporal Flame Relic and the unfolding of a complex mystery involving Grace\u2019s origins and the true nature of the Echo Keys.",
+        "summary": "Having defeated the Valking Captain, the protagonist is now a free Valking. Guided by G.R.A.C.E.'s recovered data, they begin their search for the Echo Chamber, a place tied to the Frozen King. This act follows the quest to awaken the only power known to have driven off the Pakariin in the past, setting the stage for a confrontation that will decide the fate of both the Viking past and the protagonist's destroyed future.",
         "major_events": [
-            "Dominion Vault Cleared.",
-            "Vault Key 2 (Dominion Echo Anchor) acquired.",
-            "Strength + Speed Echoform Trials completed.",
-            "Flamebound Echo (Thjolda) quest completed.",
-            "Dominion Warden defeated.",
-            "Arcflare triggered."
+            "The quest to find the Echo Chamber and awaken the Frozen King begins."
         ]
     }
 }
