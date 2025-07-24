@@ -135,8 +135,20 @@ def render_character_sheet():
     st.subheader("🎒 Inventory")
     display_section("Relics", inventory.get("relics"))
     display_section("Key Items", inventory.get("key_items"))
-    display_dict_section("Equipment", inventory.get("equipment"))
-
+    equipment = inventory.get("equipment", {})
+    if equipment:
+        st.subheader("🛡️ Equipment")
+    for slot, item in equipment.items():
+        st.markdown(f"**{slot.title()}:**")
+        if isinstance(item, dict):
+            with st.expander(f"🔸 {item.get('name', 'Unnamed')}"):
+                if item.get("description"):
+                    st.markdown(f"*{item['description']}*")
+                for k, v in item.items():
+                    if k not in ["name", "description"]:
+                        st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+        else:
+            st.markdown(f"{item}")
     def merge_duplicate_companions(companions):
         merged = {}
         for comp in companions:
