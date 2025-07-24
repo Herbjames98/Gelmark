@@ -4,6 +4,7 @@
 import streamlit as st
 import os
 import json
+import ast  # ✅ Added for safe AI response parsing
 import google.generativeai as genai
 from dotenv import load_dotenv
 import importlib.util
@@ -30,7 +31,8 @@ def load_data_from_file(filepath, variable_name):
         spec.loader.exec_module(module)
         return getattr(module, variable_name, {})
     except Exception as e:
-        st.error(f"Error loading data from {filepath}: {e}"); return {}
+        st.error(f"Error loading data from {filepath}: {e}")
+        return {}
 
 def run_ai_update(narrative_log):
     """The main AI logic function that now writes directly to files."""
@@ -38,12 +40,14 @@ def run_ai_update(narrative_log):
     
     all_content = {}
     if os.path.exists(PLAYER_STATE_FILE):
-        with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f: all_content['player_state.py'] = f.read()
+        with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f:
+            all_content['player_state.py'] = f.read()
     if os.path.exists(LORE_FOLDER):
         for filename in os.listdir(LORE_FOLDER):
             if filename.endswith('.py') and '__init__' not in filename:
                 filepath = os.path.join(LORE_FOLDER, filename)
-                with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    all_content[filename] = f.read()
     
     data_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in all_content.items()])
 
@@ -56,18 +60,21 @@ INSTRUCTIONS:
 3. Update the historical lore files (`prologue.py`, etc.) with events from that act.
 4. Your response MUST be a single, valid JSON object where keys are the filenames you modified and values are the COMPLETE new file content.
 Return ONLY the raw JSON object."""
-    
+
     try:
-        # --- THIS IS THE FINAL, CORRECTED MODEL NAME ---
         model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt)
-        updated_files = json.loads(response.text.strip().removeprefix("```json").removesuffix("```"))
+        response_text = response.text.strip().removeprefix("```json").removesuffix("```")
+
+        # ✅ Use ast.literal_eval to handle Python-style responses
+        updated_files = ast.literal_eval(response_text)
+
     except Exception as e:
         st.error(f"An error occurred while processing the AI response: {e}")
         st.subheader("Raw AI Response:")
         st.code(response.text if 'response' in locals() else "No response from AI.", language="text")
         return False
-        
+
     st.info("AI processing complete. Writing changes to local files...")
     for key, content in updated_files.items():
         # 💡 Auto-comment invalid Python headers like --- File: xyz.py ---
@@ -78,10 +85,12 @@ Return ONLY the raw JSON object."""
         filename = os.path.basename(key)
         filepath = os.path.join(SCRIPT_DIR, filename) if filename == "player_state.py" else os.path.join(LORE_FOLDER, filename)
         try:
-            with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(content)
             st.write(f"✅ Updated `{filename}`.")
         except Exception as e:
-            st.error(f"Failed to write to `{filename}`: {e}"); return False
+            st.error(f"Failed to write to `{filename}`: {e}")
+            return False
     return True
 
 # --- UI DISPLAY & PAGE RENDERING FUNCTIONS ---
@@ -93,29 +102,39 @@ def display_section(title, data):
                 if isinstance(item, dict):
                     with st.expander(f"**{item.get('name', item.get('term', 'Entry'))}**"):
                         for k, v in item.items():
-                            if k.lower() not in ['name', 'term']: st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
-                else: st.markdown(f"- {item}")
-        else: st.markdown(data)
+                            if k.lower() not in ['name', 'term']:
+                                st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                else:
+                    st.markdown(f"- {item}")
+        else:
+            st.markdown(data)
 
 def display_dict_section(title, data):
     if data:
         st.subheader(title)
-        for key, value in data.items(): st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
+        for key, value in data.items():
+            st.markdown(f"**{key.replace('_', ' ').title()}:** {value}")
 
 def render_character_sheet():
     st.title("Character Sheet")
     player_data = load_data_from_file(PLAYER_STATE_FILE, "PLAYER_STATE")
-    if not player_data: st.error("Could not load character sheet. Check player_state.py."); return
+    if not player_data:
+        st.error("Could not load character sheet. Check player_state.py.")
+        return
     display_dict_section("🧍 Player Profile", player_data.get("profile"))
     st.subheader("📈 Stats Overview")
     cols = st.columns(3)
     i = 0
-    for key, value in player_data.get("stats", {}).items(): cols[i % 3].metric(label=key, value=value); i += 1
-    traits = player_data.get("traits", {}); st.subheader("🧬 Traits")
+    for key, value in player_data.get("stats", {}).items():
+        cols[i % 3].metric(label=key, value=value)
+        i += 1
+    traits = player_data.get("traits", {})
+    st.subheader("🧬 Traits")
     display_section("Active", traits.get("active"))
     display_section("Echoform", traits.get("echoform"))
     display_section("Fused", traits.get("fused"))
-    inventory = player_data.get("inventory", {}); st.subheader("🎒 Inventory")
+    inventory = player_data.get("inventory", {})
+    st.subheader("🎒 Inventory")
     display_section("Relics", inventory.get("relics"))
     display_section("Key Items", inventory.get("key_items"))
     display_dict_section("Equipment", inventory.get("equipment"))
@@ -129,8 +148,10 @@ def render_lore_browser():
             try: return int(filename_no_ext.replace('act', ''))
             except ValueError: return 999
         return 999
-    
-    if not os.path.exists(LORE_FOLDER): st.warning("The 'lore_modules' folder was not found."); return
+
+    if not os.path.exists(LORE_FOLDER):
+        st.warning("The 'lore_modules' folder was not found.")
+        return
     found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
     lore_files = sorted(found_files, key=custom_sort_key)
     pages = {file.replace('_', ' ').title(): file for file in lore_files}
@@ -139,8 +160,9 @@ def render_lore_browser():
         selected_module_name = pages[selected_page_title]
         section_data = load_data_from_file(os.path.join(LORE_FOLDER, f"{selected_module_name}.py"), f"{selected_module_name}_lore")
         if section_data:
-            lore_headers = {"summary": "📘 Summary", "major_events": "🧩 Major Events"} # Add all 16 headers here
-            for key, title in lore_headers.items(): display_section(title, section_data.get(key))
+            lore_headers = {"summary": "📘 Summary", "major_events": "🧩 Major Events"}  # Expand as needed
+            for key, title in lore_headers.items():
+                display_section(title, section_data.get(key))
 
 def render_play_game_page():
     st.title("🎲 Play the Game")
@@ -165,7 +187,8 @@ if st.sidebar.button("Process and Update Lore"):
             success = run_ai_update(narrative_log_input)
         if success:
             st.success("Lore files updated successfully! The page will now reload.")
-            st.balloons(); st.rerun()
+            st.balloons()
+            st.rerun()
         else:
             st.error("The lore update failed. See the error message above.")
 
