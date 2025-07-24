@@ -1,22 +1,46 @@
 # --- File: player_state.py ---
+# --- File: player_state.py ---
 # This file holds the current state of the player for the Character Sheet page.
 
 PLAYER_STATE = {
     "profile": {
-        "name_title": "Viking Conscript (Gæl Mines)",
-        "current_arc_act": "Act 2, Chains of the Forgotten",
-        "origin_class_lineage": "Human, GelCap Guild Security Trainee",
-        "covenant_oath": ""
+        "name_title": "Askr",
+        "current_arc_act": "Act 3, Chapter 4",
+        "origin_class_lineage": "Human, Black male with black beard",
+        "covenant_oath": "",
+        "vault_keys_secured": "2/5",
+        "major_arc": "Legacy Through Echo"
     },
     "stats": {
-        "Strength": 8, "Dexterity": 8, "Insight": 5,
-        "Focus": 7, "Charisma": 3, "Resolve": 9,
-        "Spirit": 5, "Agility": 8, "Willpower": 9, "Lore": 4
+        "Strength": 8,
+        "Speed": 1,
+        "Dexterity": 8,
+        "Insight": 5,
+        "Focus": 7,
+        "Charisma": 3,
+        "Resolve": 9,
+        "Spirit": 5,
+        "Agility": 10, # Updated from 8
+        "Willpower": 9,
+        "Lore": 4,
+        "Defense": 5, # Newly added
+        "Endurance": 10 # Newly added
     },
     "traits": {
-        "active": [],
-        "echoform": [],
-        "fused": []
+        "active": [
+            { "name": "Flamewrought Vow", "status": "Active" },
+            { "name": "Coreborn", "status": "Active" },
+            { "name": "Frozen Moment", "status": "Active" },
+            { "name": "Momentum Strike", "status": "Active" }
+        ],
+        "echoform": [
+            { "name": "Echo Reflex", "status": "Active" },
+            { "name": "Dominion Anchor", "status": "Active" },
+            { "name": "Timeline Veil", "status": "Temporarily Deactivated (1 Chapter)" }
+        ],
+        "fused": [
+            { "name": "Ashcore Verdict", "status": "Epic Echo-Shattered Artifact" }
+        ]
     },
     "inventory": {
         "relics": [],
@@ -29,6 +53,9 @@ PLAYER_STATE = {
         }
     },
     "companions": [
-        { "name": "G.R.A.C.E.", "sync": "50%", "status": "50% Power, Full Memory (Translation & Instruction Modes Active)" }
+        { "name": "G.R.A.C.E.", "sync": "50%", "status": "50% Power, Full Memory (Translation & Instruction Modes Active)" },
+        { "name": "Thjolda", "sync": "85%", "status": "Romance path ready Act 4+" }, # Updated from 75%
+        { "name": "Grace", "sync": "70%", "status": "Possible Vault Key" }, # Updated from 65%
+        { "name": "Caelik", "sync": "80%", "status": "Loyalty Trait unlocked" } # Newly added
     ]
 }
