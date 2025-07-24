@@ -48,14 +48,22 @@ def run_ai_update(narrative_log):
                 with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
 
     data_string = "\n\n".join([f"--- File: {n} ---\n{c}" for n, c in all_content.items()])
-    prompt = f"""You are a meticulous historian AI. Your task is to update a complete set of game data files based on a new narrative log.
-NARRATIVE LOG: <log>{narrative_log}</log>
-GAME DATA FILES: <code>{data_string}</code>
-INSTRUCTIONS:
-1. Update `player_state.py` to reflect the player's MOST RECENT status.
-2. All list items (traits, companions, key items, relics) must be dicts with 'name' and 'description'.
-3. Update lore files (`prologue.py`, etc.) accordingly.
-4. Return a single valid JSON object: {{ filename: full_file_content }}. Only JSON."""
+    prompt = f"""You are a meticulous historian AI tasked with updating structured game data from a narrative log.
+<log>{narrative_log}</log>
+
+GAME FILES: <code>{data_string}</code>
+
+Instructions:
+1. For `player_state.py`, ensure every trait, item, companion, and relic is represented as a dictionary with:
+    - `"name"`: the official label
+    - `"description"`: a vivid, lore-rich explanation of what it is
+    - other optional metadata (e.g., `"status"`, `"origin"`)
+2. Keep all content in valid Python syntax, wrapped in a JSON object: {{ filename: full_file_content }}
+3. Avoid repeating names. Merge duplicate companions (like "Grace" and "G.R.A.C.E.").
+
+Return ONLY the raw JSON object (no Markdown, no explanations).
+"""
+    # --- AI model must be 2.5
     try:
         model = genai.GenerativeModel("gemini-1.5-pro-latest")
         response = model.generate_content(prompt)
