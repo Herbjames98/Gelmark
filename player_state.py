@@ -30,7 +30,6 @@ PLAYER_STATE = {
             { "name": "Flamewrought Vow", "status": "Active", "description": "An upgraded trait from Ashborne Legacy. This powerful active trait is unlocked through a deep connection with Thjolda's past and lineage, allowing Askr to tap into a surge of fiery strength and recursion shielding." },
             { "name": "Frozen Moment", "status": "Active", "description": "A technique to briefly halt the flow of localized recursion, freezing enemies or environmental hazards in time." },
             { "name": "Momentum Strike", "status": "Active", "description": "A powerful attack that gains additional force from Askr's continuous movement or successful strikes." },
-            { "name": "Coreborn", "status": "Active", "description": "A fundamental trait representing Askr's intrinsic connection to recursion energy, forming the base for powerful Echoform fusions." }
         ],
         "echoform": [
             { "name": "Echo Reflex", "status": "Active", "description": "A Tier 2 Focus Echoform passive. This trait grants Askr a bonus dodge or counter once per combat encounter and allows him to 'preview' one major decision per chapter, offering a glimpse into potential outcomes." },
@@ -47,7 +46,11 @@ PLAYER_STATE = {
             { "name": "Makeshift Charger", "description": "A crude gel-powered device for reactivating G.R.A.C.E.", "discovered_in": "Act 2, Chapter 3"}
         ],
         "equipment": {
-            "weapon": "",
+            "weapon": {
+            "name": "Coreborn",
+            "description": "A pulsating weapon forged from fractured echo-matter, resonating with Askr’s inner resolve.",
+            "origin": "Gifted after defeating the Echobound Knight in Act 3"
+        },
             "armor": "Crude Viking Attire (Gel-Lined Helmet)"
         }
     },
