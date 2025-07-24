@@ -91,7 +91,7 @@ Return ONLY the raw JSON object (no Markdown, no explanations).
 
 # --- UI DISPLAY & PAGE RENDERING ---
 
-def display_section(title, data):
+def tion(title, data):
     if data:
         st.subheader(title)
         if isinstance(data, list):
@@ -106,35 +106,25 @@ def display_section(title, data):
         else:
             st.markdown(data)
 
-def display_dict_section(title, data):
+def display_section(title, data):
     if data:
         st.subheader(title)
-        for k, v in data.items():
-            st.markdown(f"**{k.replace('_',' ').title()}:** {v}")
-
-def render_character_sheet():
-    st.title("Character Sheet")
-    player_data = load_data_from_file(PLAYER_STATE_FILE, "PLAYER_STATE")
-    if not player_data:
-        st.error("Could not load character sheet."); return
-
-    display_dict_section("🧍 Player Profile", player_data.get("profile"))
-    st.subheader("📈 Stats Overview")
-    cols = st.columns(3)
-    for i, (k, v) in enumerate(player_data.get("stats", {}).items()):
-        cols[i % 3].metric(label=k, value=v)
-
-    traits = player_data.get("traits", {})
-    st.subheader("🧬 Traits")
-    display_section("Active", traits.get("active"))
-    display_section("Echoform", traits.get("echoform"))
-    display_section("Fused", traits.get("fused"))
-
-    inventory = player_data.get("inventory", {})
-    st.subheader("🎒 Inventory")
-    display_section("Relics", inventory.get("relics"))
-    display_section("Key Items", inventory.get("key_items"))
-    display_dict_section("Equipment", inventory.get("equipment"))
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict):
+                    name = item.get("name", "Unnamed")
+                    desc = item.get("description", "")
+                    status = item.get("status", "")
+                    with st.expander(f"🔹 {name}"):
+                        if desc:
+                            st.markdown(f"*{desc}*")
+                        for k, v in item.items():
+                            if k not in ['name', 'description']:
+                                st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                else:
+                    st.markdown(f"- {item}")
+        else:
+            st.markdown(data)
 
     # ✅ Companion de-duping
     def merge_duplicate_companions(comps):
