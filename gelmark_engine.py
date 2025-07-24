@@ -1,5 +1,5 @@
-# This is the Gelmark Engine V8: The final, definitive version.
-# It now uses the correct Gemini 2.5 Pro model and is fully automated.
+# This is the Gelmark Engine: The definitive, fully automated version.
+# It uses the correct Gemini 1.5 Pro model and reads/writes all data files.
 
 import streamlit as st
 import os
@@ -39,10 +39,11 @@ def run_ai_update(narrative_log):
     all_content = {}
     if os.path.exists(PLAYER_STATE_FILE):
         with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f: all_content['player_state.py'] = f.read()
-    for filename in os.listdir(LORE_FOLDER):
-        if filename.endswith('.py') and '__init__' not in filename:
-            filepath = os.path.join(LORE_FOLDER, filename)
-            with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
+    if os.path.exists(LORE_FOLDER):
+        for filename in os.listdir(LORE_FOLDER):
+            if filename.endswith('.py') and '__init__' not in filename:
+                filepath = os.path.join(LORE_FOLDER, filename)
+                with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
     
     data_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in all_content.items()])
 
@@ -58,10 +59,7 @@ Return ONLY the raw JSON object."""
     
     try:
         # --- THIS IS THE FINAL, CORRECTED MODEL NAME ---
-        model = genai.GenerativeModel('gemini-1.5-pro-latest') # Corrected from the deprecated version
-        # NOTE: If your key has access to 2.5, you can use 'gemini-2.5-pro'
-        # model = genai.GenerativeModel('gemini-2.5-pro')
-
+        model = genai.GenerativeModel('gemini-2.5-pro-latest')
         response = model.generate_content(prompt)
         updated_files = json.loads(response.text.strip().removeprefix("```json").removesuffix("```"))
     except Exception as e:
@@ -81,8 +79,7 @@ Return ONLY the raw JSON object."""
             st.error(f"Failed to write to `{filename}`: {e}"); return False
     return True
 
-# --- UI DISPLAY & PAGE RENDERING FUNCTIONS (Unchanged) ---
-
+# --- UI DISPLAY & PAGE RENDERING FUNCTIONS ---
 def display_section(title, data):
     if data:
         st.subheader(title)
@@ -127,6 +124,8 @@ def render_lore_browser():
             try: return int(filename_no_ext.replace('act', ''))
             except ValueError: return 999
         return 999
+    
+    if not os.path.exists(LORE_FOLDER): st.warning("The 'lore_modules' folder was not found."); return
     found_files = [f.replace('.py', '') for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f]
     lore_files = sorted(found_files, key=custom_sort_key)
     pages = {file.replace('_', ' ').title(): file for file in lore_files}
@@ -135,7 +134,7 @@ def render_lore_browser():
         selected_module_name = pages[selected_page_title]
         section_data = load_data_from_file(os.path.join(LORE_FOLDER, f"{selected_module_name}.py"), f"{selected_module_name}_lore")
         if section_data:
-            lore_headers = {"summary": "📘 Summary", "major_events": "🧩 Major Events",}
+            lore_headers = {"summary": "📘 Summary", "major_events": "🧩 Major Events"} # Add all 16 headers here
             for key, title in lore_headers.items(): display_section(title, section_data.get(key))
 
 def render_play_game_page():
