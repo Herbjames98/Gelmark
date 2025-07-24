@@ -1,4 +1,4 @@
-# This is the Gelmark Engine V2: a single, self-contained application with an integrated AI updater.
+# This is the Gelmark Engine V2, with all file paths corrected to match your folder structure.
 
 import streamlit as st
 import os
@@ -8,8 +8,10 @@ from dotenv import load_dotenv
 # Load the secret key from the .env file at the start
 load_dotenv()
 
-# --- Configuration ---
+# --- Configuration (Paths are now correct) ---
 st.set_page_config(page_title="Gelmark Engine", layout="wide")
+LORE_FOLDER = "lore_modules" # It will look for this folder inside "My gm"
+PLAYER_STATE_FILE = "player_state.py" # It will look for this file inside "My gm"
 
 
 # --- GAME DATABASE (All your lore and stats are stored here directly) ---
@@ -103,22 +105,16 @@ LORE_DATA = {
 
 def run_ai_update(narrative_log):
     """Generates the updated Python code for the database."""
-    # Convert the current data into a string for the AI to read
     data_string = f"PLAYER_STATE = {json.dumps(PLAYER_STATE, indent=4)}\n\nLORE_DATA = {json.dumps(LORE_DATA, indent=4)}"
     
     prompt = f"""You are a meticulous historian AI. Your task is to update the Python dictionaries containing the game's data based on a new narrative log.
-
 NARRATIVE LOG: <log>{narrative_log}</log>
-
 CURRENT GAME DATA: <code>{data_string}</code>
-
 INSTRUCTIONS:
 1. Read the new narrative log and the current game data.
 2. Generate the complete, updated Python code for the `PLAYER_STATE` and `LORE_DATA` dictionaries.
 3. Be exhaustive. Update stats, inventory, traits, companion statuses, and add historical events to the correct acts.
-4. Your response should ONLY be the raw Python code for the two dictionaries. Do not include any other text, explanations, or markdown formatting. Start your response with `PLAYER_STATE = {{`
-
-"""
+4. Your response should ONLY be the raw Python code for the two dictionaries. Do not include any other text, explanations, or markdown formatting. Start your response with `PLAYER_STATE = {{`"""
     try:
         model = genai.GenerativeModel('gemini-1.5-pro-latest')
         response = model.generate_content(prompt)
@@ -129,7 +125,6 @@ INSTRUCTIONS:
 # --- UI DISPLAY FUNCTIONS ---
 
 def display_section(title, data):
-    # (Functions are unchanged)
     if data:
         st.subheader(title)
         if isinstance(data, list):
@@ -189,8 +184,6 @@ def render_play_game_page():
 st.sidebar.title("Navigation")
 main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
 st.sidebar.markdown("---")
-
-# --- THIS IS THE NEW LORE UPDATER ---
 st.sidebar.title("🛠️ Lore Updater")
 st.sidebar.subheader("Generate Updated Lore")
 narrative_log_input = st.sidebar.text_area("Paste your new story information here:", height=200)
@@ -208,8 +201,6 @@ if st.sidebar.button("Generate Update Code"):
         st.sidebar.subheader("Updated Code:")
         st.sidebar.code(updated_code, language="python")
         st.sidebar.info("Copy the code above and paste it into the 'GAME DATABASE' section of the gelmark_engine.py script to save the changes.")
-# --- END OF NEW LORE UPDATER ---
-
 
 if main_page == "Character Sheet":
     render_character_sheet()
