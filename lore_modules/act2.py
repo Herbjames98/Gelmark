@@ -1,4 +1,6 @@
 # --- File: act2.py ---
+# --- File: act2.py ---
+# --- File: act2.py ---
 # In file: my_gm/lore_modules/act2.py
 
 act2_lore = {
@@ -9,8 +11,8 @@ act2_lore = {
         "Chapter 3: Sparks from the Cold: Protagonist crafts Makeshift Charger, G.R.A.C.E. partially awakens for short instructions, Guard Captain shows interest, rumors circulate about protagonist's growth.",
         "Chapter 4: Before the Fire Falls: Protagonist nears formal Viking military acceptance, Pakariin arrive demanding to meet Viking leader (sealed king), Pakariin leave for king's keepers taking guards, new training opportunities open.",
         "Chapter 5: Submission: Protagonist completes Chasm Trial (ultimate stat feat) becoming eligible for independence, Pakariin return, destroy key Viking defenders with tech, enslave entire camp, protagonist conscripted into forced labor/training.",
-        "Chapter 7: The Whisper of Kings: G.R.A.C.E. reaches 50% Power and reactivates with full memory, informs protagonist of Pakariin's past presence linked to future destruction, Elders mention Frozen King, protagonist sets out to find and awaken king, protagonist receives vision/whisper from sealed king.",
-        "Chapter 6 (Reordered): The Hunt of the Valking: Boss fight with the Valking Captain, concluding Act 2."
+        "Chapter 7: The Whisper of Kings: G.R.A.C.E. reaches 50% Power and reactivates with full memory, informs protagonist of Pakariin's past presence linked to future destruction, Elders mention Frozen King, protagonist sets out to find and awaken king, protagonist receives vision/whisper from sealed king ('Your presence is no longer ignored. The Captain watches. He prepares your reckoning.').",
+        "Chapter 6 (Reordered): The Hunt of the Valking: Boss fight with the Valking Captain, concluding Act 2, defeat unlocks Act 3, Echo Chamber, full G.R.A.C.E., rebirth."
     ],
     "companions_bond_status": [
         { "name": "G.R.A.C.E.", "status": "Translation Module Active (Glitching)", "event": "Arrival & Initial Enslavement (Chapter 1)" },
