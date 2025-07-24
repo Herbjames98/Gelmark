@@ -15,7 +15,7 @@ PLAYER_STATE = {
     },
     "stats": {
         "Strength": 8,
-        "Speed": 10, # Updated from 1
+        "Speed": 1,
         "Dexterity": 8,
         "Insight": 5,
         "Focus": 7,
