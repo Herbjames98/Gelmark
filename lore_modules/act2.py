@@ -1,6 +1,7 @@
 # --- File: act2.py ---
 # --- File: act2.py ---
 # --- File: act2.py ---
+# --- File: act2.py ---
 # In file: my_gm/lore_modules/act2.py
 
 act2_lore = {

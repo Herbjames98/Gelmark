@@ -2,12 +2,13 @@
 # --- File: player_state.py ---
 # --- File: player_state.py ---
 # --- File: player_state.py ---
+# --- File: player_state.py ---
 # This file holds the current state of the player for the Character Sheet page.
 
 PLAYER_STATE = {
     "profile": {
         "name_title": "Askr",
-        "current_arc_act": "Act 2, Chapter 7",
+        "current_arc_act": "Act 3, Chapter 4",
         "origin_class_lineage": "Human, Black male with black beard",
         "covenant_oath": "",
         "vault_keys_secured": "2/5",
@@ -15,7 +16,7 @@ PLAYER_STATE = {
     },
     "stats": {
         "Strength": 8,
-        "Speed": 1,
+        "Speed": 10,
         "Dexterity": 8,
         "Insight": 5,
         "Focus": 7,
@@ -25,14 +26,15 @@ PLAYER_STATE = {
         "Agility": 10,
         "Willpower": 9,
         "Lore": 4,
-        "Defense": 5,
+        "Defense": 7,
         "Endurance": 10
     },
     "traits": {
         "active": [
             { "name": "Flamewrought Vow", "status": "Active" },
             { "name": "Frozen Moment", "status": "Active" },
-            { "name": "Momentum Strike", "status": "Active" }
+            { "name": "Momentum Strike", "status": "Active" },
+            { "name": "Coreborn", "status": "Active" }
         ],
         "echoform": [
             { "name": "Echo Reflex", "status": "Active" },
