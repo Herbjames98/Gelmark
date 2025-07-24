@@ -1,0 +1,51 @@
+act_name_lore = {
+    "summary": "",
+    "major_events": [],
+    # ... and so on
+}```
+
+This is the simplest, cleanest, and most reliable way to store your data. It is a "data-only" file.
+
+### How It Works with Your `gelmark_engine.py`
+
+Your main application script (`gelmark_engine.py`) is the "engine" that does all the work. It contains the intelligent `load_data_from_file` function that is specifically designed to read these simple template files.
+
+Here's the process:
+1.  **You create a new file**, like `act4.py`, using the simple template. You rename the variable to `act4_lore = { ... }`.
+2.  **Your `gelmark_engine.py` script starts.**
+3.  The `render_lore_browser` function in your engine script automatically scans the `lore_modules` folder and finds your new `act4.py` file.
+4.  It then uses the `load_data_from_file` function to **intelligently import** your `act4.py` file and specifically extract the `act4_lore` dictionary from it.
+
+**In short: Yes, the simple template I provided is exactly what your powerful engine script is designed to work with.**
+
+### The Definitive, Reusable Template
+
+To be absolutely clear, here is the blank template again. You can have full confidence that this is the correct and final version to use for all your future act files.
+
+**Instructions:**
+1.  Inside your `my_gm/lore_modules/` folder, create a new file (e.g., `act4.py`).
+2.  Copy and paste the entire code block below into the new file.
+3.  **Change the first line** to match the name of your file (e.g., `act4_lore = {`).
+
+```python
+# This is the blank template for a new lore act.
+# IMPORTANT: Rename the variable 'act_name_lore' to match the file.
+# For example, in 'act4.py', this should be 'act4_lore'.
+
+act_name_lore = {
+    "summary": "",
+    "major_events": [],
+    "companions_bond_status": [],
+    "traits_unlocked": [],
+    "shrines_visited": [],
+    "visions_echo_sequences": [],
+    "lore_codex_expansions": [],
+    "timeline_edits": [],
+    "key_terms_introduced": [],
+    "locations_realms_visited": [],
+    "faction_threat_encounters": [],
+    "oaths_rituals_performed": [],
+    "artifacts_discovered": [],
+    "narrative_threads_opened": [],
+    "narrative_threads_closed": []
+}
