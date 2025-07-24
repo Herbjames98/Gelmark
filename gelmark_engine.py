@@ -5,7 +5,7 @@
 import streamlit as st
 import os
 import json
-import ast  # ✅ Safe AI response parsing
+import ast
 import google.generativeai as genai
 from dotenv import load_dotenv
 import importlib.util
@@ -21,7 +21,6 @@ LORE_FOLDER = os.path.join(SCRIPT_DIR, "lore_modules")
 PLAYER_STATE_FILE = os.path.join(SCRIPT_DIR, "player_state.py")
 
 # --- CORE DATA & AI FUNCTIONS ---
-
 def load_data_from_file(filepath, variable_name):
     try:
         if not os.path.exists(filepath): return {}
@@ -37,17 +36,15 @@ def load_data_from_file(filepath, variable_name):
 def run_ai_update(narrative_log):
     st.info("Preparing lore and contacting the Gemini AI...")
     all_content = {}
-    # Load player state and lore files
-    for name, path in (("player_state.py", PLAYER_STATE_FILE),):
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f: all_content[name] = f.read()
+    if os.path.exists(PLAYER_STATE_FILE):
+        with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f: all_content["player_state.py"] = f.read()
     if os.path.exists(LORE_FOLDER):
         for filename in os.listdir(LORE_FOLDER):
             if filename.endswith('.py') and '__init__' not in filename:
                 filepath = os.path.join(LORE_FOLDER, filename)
                 with open(filepath, 'r', encoding='utf-8') as f: all_content[filename] = f.read()
 
-    data_string = "\n\n".join([f"--- File: {n} ---\n{c}" for n, c in all_content.items()])
+    data_string = "\n\n".join([f"--- File: {name} ---\n{content}" for name, content in all_content.items()])
     prompt = f"""You are a meticulous historian AI tasked with updating structured game data from a narrative log.
 <log>{narrative_log}</log>
 
@@ -55,15 +52,14 @@ GAME FILES: <code>{data_string}</code>
 
 Instructions:
 1. For `player_state.py`, ensure every trait, item, companion, and relic is represented as a dictionary with:
-    - `"name"`: the official label
-    - `"description"`: a vivid, lore-rich explanation of what it is
-    - other optional metadata (e.g., `"status"`, `"origin"`)
+    - "name": the official label
+    - "description": a vivid, lore-rich explanation of what it is
+    - optional metadata like "status"
 2. Keep all content in valid Python syntax, wrapped in a JSON object: {{ filename: full_file_content }}
-3. Avoid repeating names. Merge duplicate companions (like "Grace" and "G.R.A.C.E.").
+3. Avoid repeating names. Merge duplicate companions like "Grace" and "G.R.A.C.E."
 
 Return ONLY the raw JSON object (no Markdown, no explanations).
 """
-    # --- AI model must be 2.5
     try:
         model = genai.GenerativeModel("gemini-1.5-pro-latest")
         response = model.generate_content(prompt)
@@ -89,23 +85,7 @@ Return ONLY the raw JSON object (no Markdown, no explanations).
             return False
     return True
 
-# --- UI DISPLAY & PAGE RENDERING ---
-
-def tion(title, data):
-    if data:
-        st.subheader(title)
-        if isinstance(data, list):
-            for item in data:
-                if isinstance(item, dict):
-                    with st.expander(f"**{item.get('name', 'Entry')}**"):
-                        for k, v in item.items():
-                            if k.lower() != 'name':
-                                st.markdown(f"**{k.replace('_',' ').title()}:** {v}")
-                else:
-                    st.markdown(f"- {item}")
-        else:
-            st.markdown(data)
-
+# --- UI FUNCTIONS ---
 def display_section(title, data):
     if data:
         st.subheader(title)
@@ -114,22 +94,52 @@ def display_section(title, data):
                 if isinstance(item, dict):
                     name = item.get("name", "Unnamed")
                     desc = item.get("description", "")
-                    status = item.get("status", "")
                     with st.expander(f"🔹 {name}"):
                         if desc:
                             st.markdown(f"*{desc}*")
                         for k, v in item.items():
                             if k not in ['name', 'description']:
-                                st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                                st.markdown(f"**{k.replace('_',' ').title()}:** {v}")
                 else:
                     st.markdown(f"- {item}")
         else:
             st.markdown(data)
 
-    # ✅ Companion de-duping
-    def merge_duplicate_companions(comps):
+def display_dict_section(title, data):
+    if data:
+        st.subheader(title)
+        for k, v in data.items():
+            st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+
+def render_character_sheet():
+    st.title("Character Sheet")
+    player_data = load_data_from_file(PLAYER_STATE_FILE, "PLAYER_STATE")
+    if not player_data:
+        st.error("Could not load character sheet.")
+        return
+
+    display_dict_section("🧍 Player Profile", player_data.get("profile"))
+    st.subheader("📈 Stats Overview")
+    stats = player_data.get("stats", {})
+    cols = st.columns(3)
+    for i, (k, v) in enumerate(stats.items()):
+        cols[i % 3].metric(label=k, value=v)
+
+    traits = player_data.get("traits", {})
+    st.subheader("🧬 Traits")
+    display_section("Active", traits.get("active"))
+    display_section("Echoform", traits.get("echoform"))
+    display_section("Fused", traits.get("fused"))
+
+    inventory = player_data.get("inventory", {})
+    st.subheader("🎒 Inventory")
+    display_section("Relics", inventory.get("relics"))
+    display_section("Key Items", inventory.get("key_items"))
+    display_dict_section("Equipment", inventory.get("equipment"))
+
+    def merge_duplicate_companions(companions):
         merged = {}
-        for comp in comps:
+        for comp in companions:
             key = comp['name'].strip().lower().replace(".", "")
             if key in merged:
                 for k, v in comp.items():
@@ -140,14 +150,13 @@ def display_section(title, data):
                 merged[key] = comp
         return list(merged.values())
 
-    raw = player_data.get("companions", [])
-    display_section("🧑‍🤝‍🧑 Companions", merge_duplicate_companions(raw))
+    raw_companions = player_data.get("companions", [])
+    display_section("🧑‍🤝‍🧑 Companions", merge_duplicate_companions(raw_companions))
 
 def render_lore_browser():
     st.title("📖 Gelmark Lore Browser")
     def sort_key(n): return 0 if n == 'prologue' else int(n.replace('act','')) if n.startswith('act') else 999
     if not os.path.exists(LORE_FOLDER): st.warning("Missing lore_modules folder."); return
-
     files = sorted([f[:-3] for f in os.listdir(LORE_FOLDER) if f.endswith('.py') and '__init__' not in f], key=sort_key)
     pages = {n.title(): n for n in files}
     sel = st.sidebar.radio("View Lore Section:", list(pages.keys()), key="lore_nav")
@@ -160,12 +169,13 @@ def render_play_game_page():
     st.title("🎲 Play the Game")
     st.info("Under construction.")
 
-# --- MAIN LAYOUT ---
+# --- MAIN UI ---
 st.sidebar.title("Navigation")
 main = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
 st.sidebar.markdown("---")
 st.sidebar.subheader("🛠 Lore Updater")
 narrative = st.sidebar.text_area("Paste narrative log here:", height=200)
+
 if st.sidebar.button("Process and Update Lore"):
     if not os.getenv("GEMINI_API_KEY"):
         st.sidebar.error("GEMINI_API_KEY missing in .env")
