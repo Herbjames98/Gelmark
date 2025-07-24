@@ -27,18 +27,41 @@ PLAYER_STATE = {
         "covenant_oath": "Vow to become a sanctuary for the unremembered."
     },
     "stats": {
-        "Strength": 13, "Dexterity": 10, "Insight": 10,
-        "Focus": 12, "Charisma": 1, "Resolve": 10,
-        "Spirit": 10, "Agility": 10, "Willpower": 10, "Lore": 10
+        "Strength": 13,
+        "Dexterity": 10,
+        "Insight": 10,
+        "Focus": 12,
+        "Charisma": 1,
+        "Resolve": 10,
+        "Spirit": 10,
+        "Agility": 10,
+        "Willpower": 10,
+        "Lore": 10
     },
     "traits": {
-        "active": ["Oathbraid", "Commandless Grace"],
-        "echoform": ["Mirrorburst"],
-        "fused": ["Twin Flame Anchor", "Scorchbind Core", "Pulse Woven"]
+        "active": [
+            "Oathbraid",
+            "Commandless Grace"
+        ],
+        "echoform": [
+            "Mirrorburst"
+        ],
+        "fused": [
+            "Twin Flame Anchor",
+            "Scorchbind Core",
+            "Pulse Woven"
+        ]
     },
     "inventory": {
-        "relics": [{"name": "Witness Unchosen", "effect": "Resists recursion threats."}],
-        "key_items": ["Fragmented Keystone"],
+        "relics": [
+            {
+                "name": "Witness Unchosen",
+                "effect": "Resists recursion threats."
+            }
+        ],
+        "key_items": [
+            "Fragmented Keystone"
+        ],
         "equipment": {
             "weapon": "Coreborn Hammer (Inert)",
             "armor": "Memorybound Cloak"
@@ -65,34 +88,35 @@ PLAYER_STATE = {
 
 LORE_DATA = {
     "Prologue": {
-        "summary": "A low-ranking GelCap Guild security trainee, secretly the illegitimate child of the CEO, survives a devastating explosion. Guided by his AI, G.R.A.C.E., he discovers a time-traveling Gel Capsule and is propelled into the ancient past.",
+        "summary": "A low-ranking security trainee for the GelCap Guild (GG), secretly the illegitimate child of the CEO planted as a 'bloodline fallback', lives a monotonous life shadowed by their personal AI, G.R.A.C.E. A massive explosion destroys their facility, leaving them the sole survivor. Following 'GG' logos through the ruins, they discover a damaged time-travel pod ('GG Hype-'), which activates and hurls them into the past.",
         "major_events": [
-            "The protagonist is established as a 'bloodline fallback' for the GelCap CEO.",
-            "A facility-wide explosion kills everyone except the protagonist.",
-            "A time-traveling Gel Capsule is discovered and activated."
-        ],
+            "Protagonist is established as an undervalued GelCap security trainee, secretly the CEO's illegitimate child.",
+            "A massive explosion occurs during a lesson with G.R.A.C.E., leaving the protagonist unconscious in the ruined facility.",
+            "Waking up as the sole survivor, the protagonist follows GG logos to a hidden, fire-scarred chamber.",
+            "The protagonist discovers a 'shrink-class' transport pod that, when activated, becomes a Gel Capsule and initiates time travel."
+        ]
     },
     "Act 1": {
-        "summary": "Stranded in a Viking Age, the protagonist must adapt to survive. G.R.A.C.E. sacrifices most of her functionality to enable language translation, and the protagonist steps into the origin of the GelCap Guild itself.",
+        "summary": "The protagonist awakens in the Viking Age. They discover that the local warriors are unknowing ancestors of the GelCap Guild, using a primitive form of the corporation's signature purple gel in their helmets. To help the protagonist survive and blend in, G.R.A.C.E. sacrifices her core functions to provide a language translation module, going dormant as the protagonist approaches the Viking camp.",
         "major_events": [
-            "The protagonist lands in a cold, forested Viking Age.",
-            "Observes warriors using a primitive form of GelCap material in their helmets.",
-            "G.R.A.C.E. shuts down all systems but speech translation.",
-            "The protagonist, disguised, walks toward the Viking camp."
-        ],
+            "The protagonist crash-lands in a forest clearing during the Viking Age.",
+            "Observes Viking warriors wearing helmets padded with a purple gel G.R.A.C.E. identifies as a primitive form of GelCap substance.",
+            "G.R.A.C.E. procures a helmet and clothes, then sacrifices all systems except for language translation to allow communication.",
+            "With G.R.A.C.E. dormant but providing translation, the disguised protagonist walks toward the Viking settlement."
+        ]
     },
     "Act 2": {
-        "summary": "Enslaved by the Vikings, the protagonist endures grueling labor in the Gæl Mines, which serves as a training ground. They grow in power, partially reawaken G.R.A.C.E., and face the arrival of a new alien threat, the Pakariin, before becoming a Valking and setting out to awaken the Frozen King.",
+        "summary": "Enslaved by the Vikings, the protagonist endures grueling labor in the G\u00e6l Mines, which serves as a training ground. They grow in power, partially reawaken G.R.A.C.E., and face the arrival of a new alien threat, the Pakariin, before becoming a Valking and setting out to awaken the Frozen King.",
         "major_events": [
-            "Enslaved and sent to the Gæl Mines.",
+            "Enslaved and sent to the G\u00e6l Mines.",
             "Core stats (Strength, Speed, etc.) are trained through mining tasks.",
             "A makeshift charger partially revives G.R.A.C.E.",
             "The alien Pakariin arrive and conscript the camp.",
             "The protagonist joins the Valking order and begins the quest to awaken the Frozen King."
-        ],
+        ]
     },
     "Act 3": {
-        "summary": "Askr's journey through the remnants of the Dominion's influence, exploring shattered vaults and forging deeper bonds. The act culminates in the acquisition of the Temporal Flame Relic and the unfolding of a complex mystery involving Grace’s origins and the true nature of the Echo Keys.",
+        "summary": "Askr's journey through the remnants of the Dominion's influence, exploring shattered vaults and forging deeper bonds. The act culminates in the acquisition of the Temporal Flame Relic and the unfolding of a complex mystery involving Grace\u2019s origins and the true nature of the Echo Keys.",
         "major_events": [
             "Dominion Vault Cleared.",
             "Vault Key 2 (Dominion Echo Anchor) acquired.",
