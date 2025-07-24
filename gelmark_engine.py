@@ -70,6 +70,11 @@ Return ONLY the raw JSON object."""
         
     st.info("AI processing complete. Writing changes to local files...")
     for key, content in updated_files.items():
+        # 💡 Auto-comment invalid Python headers like --- File: xyz.py ---
+        content = "\n".join(
+            [f"# {line}" if line.strip().startswith("--- File: ") else line for line in content.splitlines()]
+        )
+
         filename = os.path.basename(key)
         filepath = os.path.join(SCRIPT_DIR, filename) if filename == "player_state.py" else os.path.join(LORE_FOLDER, filename)
         try:
