@@ -2,5 +2,13 @@
   {
     "timestamp": "2025-07-25 13:42",
     "summary": "Askr reached the Mirage Threshold Shrine, gained Focus Tier 2, and unlocked Echo Reflex."
+  },
+  {
+    "timestamp": "2025-07-25 09:35",
+    "summary": "```\nA full system reset has been performed for the new 'Gelmark' story. The player state and lore files for the prologue and Act 1 have been populated with initial data reflecting the protagonist's journey from a futuristic corporate facility to the Viking Age. G.R.A.C.E. is now established as the sole companion, currently in a sacrificial, translation-only state."
+  },
+  {
+    "timestamp": "2025-07-25 09:50",
+    "summary": "Memory: The player's state is fully updated to reflect the end of Act 1, Chapter 2, including the Lingual Symbiosis trait, Viking-era equipment, and G.R.A.C.E.'s sacrificial status. The Act 1 lore file is confirmed to be complete with all major events, new lore, and narrative threads opened by the time jump to the Viking Age."
   }
 ]

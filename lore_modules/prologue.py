@@ -2,34 +2,37 @@
 # In file: my_gm/lore_modules/prologue.py
 
 prologue_lore = {
-    "summary": "The protagonist, a low-ranking and overlooked security trainee within the GelCap Guild, lives a monotonous life constantly lectured by their AI assistant, G.R.A.C.E. Their routine is shattered by a massive explosion at the facility. Waking up alone in the apocalyptic ruins, they discover the pervasive 'GG' logo, which seems to guide them to a hidden, half-melted pod. This pod, marked 'GG Hype-' and pulsing with purple light similar to G.R.A.C.E., shrinks into a Gel Capsule upon activation, triggering an uncontrolled time jump.",
+    "summary": "The protagonist, an unremarkable security trainee in the monolithic GelCap Guild, leads a life of monotonous patrols under the constant supervision of their AI, G.R.A.C.E. This routine is violently shattered when a cataclysmic explosion engulfs the facility. The protagonist awakens to a silent, fire-ravaged ruin, discovering that the ever-present 'GG' corporate logo now feels like a trail of warning signs. This path leads them to a hidden, fire-scarred pod. G.R.A.C.E. reboots, glitchy and speaking in cryptic directives, before the pod activates, shrinking into a Gel Capsule and hurtling the protagonist through time.",
     "major_events": [
-        "Routine Patrols & Rejection (GelCap Guild Facility)",
-        "Inciting Incident: Facility Explosion",
-        "Waking in Apocalyptic Ruins",
-        "Discovery of Pervasive 'GG' Logo",
-        "Finding the Hidden Gel Capsule Pod",
-        "G.R.A.C.E. Partial Reboot (Glitchy)",
-        "Gel Capsule Activation & Uncontrolled Time Travel"
+        "Daily Routine & Rejection (GelCap Guild Facility)",
+        "The Cataclysmic Explosion",
+        "Awakening in the Silent Aftermath",
+        "Following the 'GG' Logo Trail",
+        "Discovery of the Hidden 'GG Hype-' Pod",
+        "G.R.A.C.E. Reboots with Cryptic Messages",
+        "Pod Shrinks into a Gel Capsule",
+        "Uncontrolled Time Jump Initiated"
     ],
     "companions_bond_status": [
-        { "name": "G.R.A.C.E.", "status": "Functional, then Glitchy/Rebooting", "event": "Introduced as AI assistant" }
+        { "name": "G.R.A.C.E.", "status": "Operational (AI Assistant)", "event": "Introduced as constant companion" },
+        { "name": "G.R.A.C.E.", "status": "Vague & Glitchy", "event": "Reboots after explosion, before time jump" }
     ],
     "traits_unlocked": [],
     "shrines_visited": [],
     "visions_echo_sequences": [
-        { "title": "Temporal Displacement", "description": "'Time bends. Reality breaks.' A chaotic visual and auditory experience during the uncontrolled time jump.", "effect": "Uncontrolled time travel" }
+        { "title": "Temporal Fracture", "description": "'Time bends. Reality breaks.' A disorienting and violent sensory overload as the protagonist is consumed by light and sound, thrown uncontrollably through centuries.", "effect": "Transported to a different era." }
     ],
     "lore_codex_expansions": [
-        { "title": "GelCap Guild (GG)", "content": "A massive future tech empire. Its logo 'GG' marks restricted or classified zones. The protagonist is a low-ranking security trainee within its ranks.", "discovered_in": "Prologue" },
-        { "title": "G.R.A.C.E.", "content": "Gelcap Robot Assistant for Cognitive Enhancement, a floating disk-shaped AI assistant with a soft purple glow, constantly accompanying the protagonist.", "discovered_in": "Prologue" },
-        { "title": "Gel Capsule", "content": "Compact future tech used for storage and transport of items or people. The hidden pod discovered by the protagonist is a 'Shrink-class transport' Gel Capsule.", "discovered_in": "Prologue" }
+        { "title": "GelCap Guild (GG)", "content": "A sprawling, futuristic tech empire that dominates society. Its 'GG' logo is ubiquitous, often used to seal off classified or high-security areas.", "discovered_in": "Prologue" },
+        { "title": "G.R.A.C.E.", "content": "Gelcap Robot Assistant for Cognitive Enhancement. A standard-issue companion AI for GG employees, taking the form of a floating, purple-glowing disk designed to monitor and optimize performance.", "discovered_in": "Prologue" },
+        { "title": "Gel Capsule", "content": "A form of advanced future technology used by the GelCap Guild to shrink and transport items, equipment, or even people in a compact, stable form. The hidden pod is revealed to be a 'Shrink-class transport' capsule.", "discovered_in": "Prologue" }
     ],
     "timeline_edits": [],
     "key_terms_introduced": [
         "GelCap Guild (GG)",
         "G.R.A.C.E.",
-        "Gel Capsule"
+        "Gel Capsule",
+        "GG Hype-"
     ],
     "locations_realms_visited": [
         "GelCap Guild Facility (Future, Destroyed)"
@@ -37,13 +40,13 @@ prologue_lore = {
     "faction_threat_encounters": [],
     "oaths_rituals_performed": [],
     "artifacts_discovered": [
-        { "name": "Hidden Gel Capsule Pod", "description": "A half-melted pod, marked 'GG Hype-', pulsing with purple light, found in a deeply buried chamber. Functions as a time-travel transport.", "location": "GelCap Guild Facility" }
+        { "name": "Hidden Hyper-Pod", "description": "A strange, half-melted pod found in a fire-scarred, buried chamber. The text 'GG Hype-' is barely legible on its side. It pulses with a faint purple light identical to G.R.A.C.E.'s glow and is a form of time-traveling Gel Capsule.", "location": "GelCap Guild Facility" }
     ],
     "narrative_threads_opened": [
-        "The true nature of the protagonist's identity and their hidden legacy.",
-        "The cause of the massive explosion and the destruction of the GelCap Guild facility.",
-        "The purpose and origin of the Gel Capsule technology.",
-        "The implications of uncontrolled time travel and landing in the ancient past."
+        "The protagonist's true identity and secret connection to the GelCap Guild's CEO.",
+        "The origin and purpose of the devastating explosion.",
+        "The mystery of the 'GG Hype-' pod and its connection to G.R.A.C.E.",
+        "The consequences of being stranded in an unknown time period."
     ],
     "narrative_threads_closed": []
 }
