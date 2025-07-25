@@ -8,15 +8,14 @@ import importlib.util
 
 # --- Setup ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DOTENV_PATH = os.path.join(SCRIPT_DIR, '.env')
-load_dotenv(dotenv_path=DOTENV_PATH)
+load_dotenv(os.path.join(SCRIPT_DIR, ".env"))
 
 # --- Paths ---
 LORE_FOLDER = os.path.join(SCRIPT_DIR, "my_gm", "lore_modules")
 PLAYER_STATE_FILE = os.path.join(SCRIPT_DIR, "my_gm", "player_state.py")
 MEMORY_FILE = os.path.join(SCRIPT_DIR, "my_gm", "memory_bank.json")
 
-# --- Util Functions ---
+# --- Utility Functions ---
 def load_module_from_file(filepath):
     try:
         if not os.path.exists(filepath): return None
@@ -26,224 +25,173 @@ def load_module_from_file(filepath):
         spec.loader.exec_module(module)
         return module
     except Exception as e:
-        st.error(f"Error loading data from {filepath}: {e}")
+        st.error(f"Error loading `{filepath}`: {e}")
         return None
 
 def load_memory_log():
-    if os.path.exists(MEMORY_FILE):
-        try:
-            with open(MEMORY_FILE, 'r', encoding='utf-8') as f:
+    try:
+        if os.path.exists(MEMORY_FILE):
+            with open(MEMORY_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
-            return []
+    except Exception:
+        pass
     return []
 
-def save_memory_log(memory_log):
+def save_memory_log(log):
     try:
-        with open(MEMORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump(memory_log, f, indent=2)
+        with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=2)
     except Exception as e:
-        st.error(f"Failed to save memory: {e}")
+        st.error(f"Error saving memory log: {e}")
 
-# --- AI Update Flow ---
+# --- AI Engine ---
 def run_ai_update(narrative_log):
-    st.info("Contacting the Gemini AI and updating memory...")
+    st.info("🧠 Processing with Gemini 2.5...")
 
-    # 1. Load all game files
-    all_content = {}
+    memory_log = load_memory_log()
+    past_memories = "\n".join(f"[{m['timestamp']}] {m['summary']}" for m in memory_log[-5:])
+
+    file_snapshots = {}
     if os.path.exists(PLAYER_STATE_FILE):
         with open(PLAYER_STATE_FILE, 'r', encoding='utf-8') as f:
-            all_content["player_state.py"] = f.read()
+            file_snapshots["player_state.py"] = f.read()
     if os.path.exists(LORE_FOLDER):
-        for filename in os.listdir(LORE_FOLDER):
-            if filename.endswith('.py') and '__init__' not in filename:
-                path = os.path.join(LORE_FOLDER, filename)
-                with open(path, 'r', encoding='utf-8') as f:
-                    all_content[filename] = f.read()
+        for fname in os.listdir(LORE_FOLDER):
+            if fname.endswith(".py") and "__init__" not in fname:
+                with open(os.path.join(LORE_FOLDER, fname), "r", encoding="utf-8") as f:
+                    file_snapshots[fname] = f.read()
 
-    data_string = "\n\n".join([f"--- File: {n} ---\n{c}" for n, c in all_content.items()])
-
-    # 2. Load prior memory context
-    memory_log = load_memory_log()
-    past_memories = "\n".join(f"[{m['timestamp']}]: {m['summary']}" for m in memory_log[-5:])
-
-    # 3. AI Prompt with memory context
     prompt = f"""
-You are a lore historian AI inside a roleplaying engine.
+You are a Gemini 2.5 historian AI maintaining structured game files.
 
-<current_narrative>
+<narrative_log>
 {narrative_log}
-</current_narrative>
+</narrative_log>
 
-<past_memory>
+<past_memories>
 {past_memories}
-</past_memory>
+</past_memories>
 
-<files>
-{data_string}
-</files>
+<game_files>
+{''.join([f'--- {fn} ---\n{content}\n\n' for fn, content in file_snapshots.items()])}
+</game_files>
 
-Instructions:
-1. Update `player_state.py` and all lore files based on the log.
-2. Merge duplicates like "Grace" and "G.R.A.C.E."
-3. Output as JSON in this format: {{ "filename.py": "full_code_as_string" }}
-4. Add vivid descriptions and narrative metadata where needed.
-5. Do not wrap the response in Markdown.
+Your job:
+1. Update any traits, companions, inventory, or events.
+2. Merge "Grace" and "G.R.A.C.E." entries.
+3. Provide valid updated Python file(s) in this format: {{ "filename.py": "FULL FILE CONTENT" }}.
+4. After the JSON, give a short memory summary (2–3 lines) of this update.
 
-After updates, also summarize the log into 2-3 sentences (to be stored in memory).
+Respond only in raw JSON + memory summary. No Markdown formatting.
 """
 
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")  # adjust if needed
+        model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt)
-        text = response.text.strip().removeprefix("```json").removesuffix("```")
-        updated_files = json.loads(text)
+        full_text = response.text.strip().removeprefix("```json").removesuffix("```")
+
+        split_point = full_text.rfind("}") + 1
+        file_json = full_text[:split_point]
+        summary_text = full_text[split_point:].strip()
+
+        updated_files = json.loads(file_json)
+
     except Exception as e:
-        st.error(f"AI error: {e}")
-        st.code(response.text if 'response' in locals() else "No response from AI.")
+        st.error(f"Gemini failed: {e}")
+        st.code(response.text if 'response' in locals() else "No response.")
         return False
 
-    # 4. Write updated files
-    for key, content in updated_files.items():
-        fn = os.path.basename(key)
-        dst = os.path.join(SCRIPT_DIR, "my_gm", fn) if fn == "player_state.py" else os.path.join(LORE_FOLDER, fn)
+    for fname, code in updated_files.items():
+        dst = os.path.join(SCRIPT_DIR, "my_gm", fname) if fname == "player_state.py" else os.path.join(LORE_FOLDER, fname)
         try:
-            with open(dst, 'w', encoding='utf-8') as f: f.write(content)
-            st.write(f"✅ Updated `{fn}`.")
+            with open(dst, "w", encoding="utf-8") as f:
+                f.write(code)
+            st.success(f"✅ Updated `{fname}`.")
         except Exception as e:
-            st.error(f"Write failed for `{fn}`: {e}")
-            return False
+            st.error(f"❌ Failed to write `{fname}`: {e}")
 
-    # 5. Store memory summary
-    try:
+    if summary_text:
         memory_log.append({
             "timestamp": time.strftime('%Y-%m-%d %H:%M'),
-            "summary": narrative_log[:300].replace('\n', ' ') + "..."
+            "summary": summary_text
         })
         save_memory_log(memory_log)
-    except Exception as e:
-        st.warning(f"Couldn't save summary to memory: {e}")
 
     return True
 
-# --- Display Utilities ---
+# --- Display Functions ---
 def display_section(title, data):
-    if data:
-        st.subheader(title)
-        if isinstance(data, list):
-            for item in data:
-                if isinstance(item, dict):
-                    name = item.get("name", "Unnamed")
-                    desc = item.get("description", "")
-                    with st.expander(f"🔹 {name}"):
-                        if desc:
-                            st.markdown(f"*{desc}*")
-                        for k, v in item.items():
-                            if k not in ['name', 'description']:
-                                st.markdown(f"**{k.replace('_',' ').title()}:** {v}")
-                else:
-                    st.markdown(f"- {item}")
-        else:
-            st.markdown(data)
-
-def display_dict_section(title, data):
-    if data:
-        st.subheader(title)
+    if not data: return
+    st.subheader(title)
+    if isinstance(data, list):
+        for item in data:
+            with st.expander(f"🔹 {item.get('name', 'Unnamed')}"):
+                st.markdown(f"*{item.get('description', '')}*")
+                for k, v in item.items():
+                    if k not in ['name', 'description']:
+                        st.markdown(f"**{k.title()}:** {v}")
+    elif isinstance(data, dict):
         for k, v in data.items():
-            st.markdown(f"**{k.replace('_',' ').title()}:** {v}")
+            st.markdown(f"**{k.title()}:** {v}")
 
-# --- Pages ---
 def render_character_sheet():
-    st.title("Character Sheet")
-    player_module = load_module_from_file(PLAYER_STATE_FILE)
-    if not player_module:
+    st.title("📜 Character Sheet")
+    state = load_module_from_file(PLAYER_STATE_FILE)
+    if not state:
         st.error("Could not load character sheet. Check if `player_state.py` is valid.")
         return
 
-    display_dict_section("🧍 Player Profile", getattr(player_module, "player_profile", {}))
-    st.subheader("📈 Stats Overview")
-    stats = getattr(player_module, "stats_overview", {})
-    cols = st.columns(3)
-    for i, (k, v) in enumerate(stats.items()):
-        cols[i % 3].metric(label=k, value=v)
-
-    traits = getattr(player_module, "traits", {})
-    st.subheader("🧬 Traits")
-    display_section("Active Traits", traits.get("active_traits"))
-    display_section("Echoform Traits", traits.get("echoform_traits"))
-    display_section("Hybrid/Fusion Traits", traits.get("hybrid_fusion_traits"))
-
-    inventory = getattr(player_module, "inventory", {})
-    st.subheader("🎒 Inventory")
-    display_section("Artifacts / Relics", inventory.get("artifacts_relics"))
-    display_section("Key Items", inventory.get("key_items"))
-
-    equipment = inventory.get("equipment", {})
-    if equipment:
-        st.subheader("🛡️ Equipment")
-        for slot, item in equipment.items():
-            st.markdown(f"**{slot.title()}:**")
-            st.markdown(f"🔸 **{item.get('name', 'Unnamed')}**: *{item.get('description', 'No description.')}*")
-
-    def merge_duplicate_companions(companions):
-        merged = {}
-        if not isinstance(companions, list): return []
-        for comp in companions:
-            key = comp.get("name", "").lower().replace(".", "")
-            if key in merged:
-                merged[key].update({k: v for k, v in comp.items() if v})
-            else:
-                merged[key] = comp
-        return list(merged.values())
-
-    display_section("🧑‍🤝‍🧑 Companions", merge_duplicate_companions(getattr(player_module, "companions", [])))
+    display_section("🧍 Profile", getattr(state, "player_profile", {}))
+    display_section("📊 Stats", getattr(state, "stats_overview", {}))
+    traits = getattr(state, "traits", {})
+    display_section("✨ Active Traits", traits.get("active_traits"))
+    display_section("🔮 Echoform Traits", traits.get("echoform_traits"))
+    display_section("🧬 Hybrid/Fusion Traits", traits.get("hybrid_fusion_traits"))
+    inv = getattr(state, "inventory", {})
+    display_section("🎒 Artifacts", inv.get("artifacts_relics"))
+    display_section("🔑 Key Items", inv.get("key_items"))
+    display_section("🛡️ Equipment", inv.get("equipment"))
+    display_section("🧑‍🤝‍🧑 Companions", getattr(state, "companions", []))
 
 def render_lore_browser():
     st.title("📖 Gelmark Lore Browser")
     if not os.path.exists(LORE_FOLDER): return st.warning("Missing lore folder.")
-
-    def sort_key(n): return 0 if n == 'prologue' else int(n.replace('act','')) if n.startswith('act') else 999
-    files = sorted([f[:-3] for f in os.listdir(LORE_FOLDER) if f.endswith('.py')], key=sort_key)
-    pages = {n.replace('_', ' ').title(): n for n in files}
-
-    if not pages: return st.info("No lore found.")
-    sel = st.sidebar.radio("View Lore Section:", list(pages.keys()))
-    module = load_module_from_file(os.path.join(LORE_FOLDER, pages[sel] + ".py"))
+    lore_files = sorted(f[:-3] for f in os.listdir(LORE_FOLDER) if f.endswith(".py"))
+    if not lore_files: return st.info("No lore files found.")
+    selected = st.sidebar.radio("Select Lore Section:", lore_files)
+    module = load_module_from_file(os.path.join(LORE_FOLDER, selected + ".py"))
     if module:
-        data = getattr(module, f"{pages[sel]}_lore", {})
-        for key, title in {
-            "summary": "📘 Summary", "major_events": "🧩 Major Events"
-        }.items():
-            display_section(title, data.get(key))
+        display_section("📘 Summary", getattr(module, f"{selected}_lore", {}).get("summary"))
+        display_section("🧩 Major Events", getattr(module, f"{selected}_lore", {}).get("major_events"))
 
 def render_play_game_page():
     st.title("🎲 Play the Game")
-    st.info("Under construction.")
+    st.info("Gameplay not yet implemented.")
 
-# --- Main App ---
+# --- UI ---
 st.sidebar.title("Navigation")
-main = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
-st.sidebar.markdown("---")
+main_page = st.sidebar.radio("Go to:", ["Character Sheet", "Lore Browser", "Play the Game"])
 st.sidebar.subheader("🛠 Lore Updater")
-narrative = st.sidebar.text_area("Paste narrative log here:", height=200)
+log_input = st.sidebar.text_area("Paste narrative log here:", height=200)
 
-if st.sidebar.button("Process and Update Lore"):
+if st.sidebar.button("Update Lore"):
     if not os.getenv("GEMINI_API_KEY"):
-        st.sidebar.error("GEMINI_API_KEY missing in .env")
-    elif not narrative:
-        st.sidebar.error("Paste narrative log first.")
+        st.sidebar.error("Missing `GEMINI_API_KEY` in .env.")
+    elif not log_input.strip():
+        st.sidebar.error("Please enter narrative text.")
     else:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        with st.spinner("Updating world files…"):
-            if run_ai_update(narrative):
-                st.success("Lore updated successfully!")
+        with st.spinner("Processing lore..."):
+            if run_ai_update(log_input):
+                st.success("✅ Lore updated.")
                 st.balloons(); st.rerun()
             else:
-                st.error("Update failed. See error logs.")
+                st.error("❌ Update failed.")
 
-if main == "Character Sheet":
+# Render page
+if main_page == "Character Sheet":
     render_character_sheet()
-elif main == "Lore Browser":
+elif main_page == "Lore Browser":
     render_lore_browser()
 else:
     render_play_game_page()
