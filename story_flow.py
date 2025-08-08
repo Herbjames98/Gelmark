@@ -72,5 +72,15 @@ SCENES = {
                 "next": "act1_camp_gate"
             }
         ]
+    
+    ,
+    "act1_camp_initial_quota": {
+        "title": "Initial Quota Briefing",
+        "text": "A foreman eyes you: someone has to hit the day’s ore numbers. Work earns trust, and strength.",
+        "choices": [
+            {"id": "to_mines", "label": "Report to the mines", "effects": {}, "next": "act1_mines_intro"},
+            {"id": "back_camp", "label": "Return to the camp", "effects": {}, "next": "act1_camp_inner"}
+        ]
+    }
     }
 }
