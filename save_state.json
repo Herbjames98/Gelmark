@@ -1,23 +1,23 @@
 {
   "position": {
     "act": 1,
-    "chapter": 2,
-    "scene": "act1_camp_gate_terms"
+    "chapter": 0,
+    "scene": "prologue_start"
   },
   "stats": {
-    "Strength": 15,
+    "Strength": 5,
     "Speed": 5,
     "Dexterity": 5,
-    "Insight": 12,
+    "Insight": 5,
     "Focus": 5,
-    "Charisma": 6,
+    "Charisma": 5,
     "Resolve": 5,
     "Spirit": 5,
     "Agility": 5,
     "Willpower": 5,
     "Lore": 5,
     "Defense": 5,
-    "Endurance": 15,
+    "Endurance": 5,
     "Total Stat Points": 65
   },
   "traits": {
@@ -59,52 +59,7 @@
     "vault_keys": [],
     "trait_tokens_drafts": []
   },
-  "flags": {
-    "mining_quota_started": true,
-    "met_gate_guard": true
-  },
-  "relationships": {
-    "G.R.A.C.E.": 1
-  },
-  "scene_cache": {
-    "act1_camp_gate_terms": {
-      "id": "act1_camp_gate_terms",
-      "title": "Eirik's Terms",
-      "text": "The gate guard, a burly figure named Eirik, grunts, his gaze sweeping over your disguised form. \"You've proven you're no threat, stranger, but the chieftain won't suffer idlers within our walls. Our mines are always in need of strong backs, and the quarry needs rock split. Prove your worth.\" He points a calloused finger towards a path winding into the nearby hills. \"Or, if you fancy yourself clever, there's always the Elder's riddles. They say he needs fresh ears for his tales.\" A faint hum from G.R.A.C.E., barely perceptible, translates his words, reminding you of her silent sacrifice.",
-      "choices": [
-        {
-          "id": "_ead_towards_the_mines_a",
-          "label": "Head towards the mines and quarry.",
-          "repeatable": false,
-          "effects": {
-            "stats": {
-              "Endurance": 1
-            },
-            "flags": {
-              "mining_path_chosen": true
-            },
-            "relationships": {},
-            "traits_add": []
-          },
-          "next": null
-        },
-        {
-          "id": "_eek_out_the_lder_and_hi",
-          "label": "Seek out the Elder and his riddles.",
-          "repeatable": false,
-          "effects": {
-            "stats": {
-              "Insight": 1
-            },
-            "flags": {
-              "elder_path_chosen": true
-            },
-            "relationships": {},
-            "traits_add": []
-          },
-          "next": null
-        }
-      ]
-    }
-  }
+  "flags": {},
+  "relationships": {},
+  "scene_cache": {}
 }

@@ -246,6 +246,7 @@ def render_lore_browser():
 
 
 
+
 def render_play_game_page():
     st.title("🎲 Play the Game")
     from save_io import load_state, save_state, reset_state
@@ -263,90 +264,66 @@ def render_play_game_page():
     st.sidebar.subheader("🧠 Story Mode")
     use_ai = st.sidebar.toggle("Use AI-Generated Scenes", value=True)
 
-    if st.sidebar.button("🧹 Reset Save (Fresh Start)"):
+    if st.sidebar.button("🧹 Reset Save (Start at Prologue)"):
         live = reset_state(state_mod)
         save_state(live)
-        st.success("Save reset. Starting fresh at Act 1.")
+        st.success("Save reset. Starting fresh at the Prologue.")
         st.rerun()
 
     pos = live.get("position", {})
-    scene_id = pos.get("scene", "act1_camp_gate")
+    scene_id = pos.get("scene", "prologue_start")
 
     # Merge authored scenes with any cached AI scenes
     ai_scenes = live.get("scene_cache", {})
     merged = dict(SCENES)
     merged.update(ai_scenes)
 
-    # Handle missing scene id
-    if scene_id not in merged:
-        if use_ai:
-            try:
-                # Gather lore snapshots and memory tail
-                lore_snaps = {}
-                if os.path.exists(LORE_FOLDER):
-                    for fname in os.listdir(LORE_FOLDER):
-                        if fname.endswith(".py") and "__init__" not in fname:
-                            mod = load_module_from_file(os.path.join(LORE_FOLDER, fname))
-                            if mod:
-                                key = fname[:-3]
-                                lore = getattr(mod, f"{key}_lore", {})
-                                lore_snaps[key] = str(lore.get("summary",""))
-                mem = load_memory_log()
-                tail = "\n".join(f"[{m['timestamp']}] {m['summary']}" for m in mem[-5:])
+    # Generate missing scenes if AI mode is on
+    if scene_id not in merged and use_ai:
+        try:
+            lore_snaps = {}
+            if os.path.exists(LORE_FOLDER):
+                for fname in os.listdir(LORE_FOLDER):
+                    if fname.endswith(".py") and "__init__" not in fname:
+                        mod = load_module_from_file(os.path.join(LORE_FOLDER, fname))
+                        if mod:
+                            key = fname[:-3]
+                            lore = getattr(mod, f"{key}_lore", {})
+                            lore_snaps[key] = str(lore.get("summary",""))
+            mem = load_memory_log()
+            tail = "\n".join(f"[{m['timestamp']}] {m['summary']}" for m in mem[-5:])
 
-                from ai_story import generate_scene
-                gen_scene = generate_scene(live, lore_snaps, tail)
-                live.setdefault("scene_cache", {})[gen_scene["id"]] = gen_scene
-                scene_id = gen_scene["id"]
-                live.setdefault("position", {})["scene"] = scene_id
-                save_state(live)
-            except Exception as e:
-                st.warning(f"AI scene generation failed: {e}")
-                # Fallback to safe authored starting scene
-                scene_id = "act1_camp_gate"
-                live.setdefault("position", {})["scene"] = scene_id
-                save_state(live)
+            from ai_story import generate_scene
+            gen_scene = generate_scene(live, lore_snaps, tail)
+            live.setdefault("scene_cache", {})[gen_scene["id"]] = gen_scene
+            scene_id = gen_scene["id"]
+            live.setdefault("position", {})["scene"] = scene_id
+            save_state(live)
+        except Exception as e:
+            st.warning(f"AI scene generation failed: {e}. Falling back to prologue_start.")
+            scene_id = "prologue_start"
+            live.setdefault("position", {})["scene"] = scene_id
+            save_state(live)
 
-    scene = merged.get(scene_id)
+    scene = merged.get(scene_id, SCENES.get("prologue_start"))
     if not scene:
-        # Final guard: always show a valid scene
-        scene = SCENES.get("act1_camp_gate")
-        live.setdefault("position", {})["scene"] = "act1_camp_gate"
-        save_state(live)
+        st.error("No valid scene found."); return
 
     st.header(scene.get("title", scene_id).replace("_", " "))
     st.write(scene.get("text", ""))
 
-    # Buttons for choices
+    # Render choices
     for choice in scene.get("choices", []):
         if st.button(choice.get("label","Continue"), key=f"choice_{choice.get('id','x')}"):
             apply_effects(live, choice.get("effects", {}))
             next_id = choice.get("next")
             if not next_id and use_ai:
-                # derive a next id inside same act
                 act = live.get("position", {}).get("act", 1)
                 base = scene_id if scene_id.startswith(f"act{act}_") else f"act{act}_auto"
                 next_id = base + "_next"
-            if not next_id:
-                next_id = "act1_camp_gate"
-            live.setdefault("position", {})["scene"] = next_id
+            live.setdefault("position", {})["scene"] = next_id or "prologue_start"
             save_state(live)
             st.rerun()
-
-    # Dev helpers
-    if use_ai:
-        cols = st.columns(2)
-        with cols[0]:
-            if st.button("🔄 Regenerate Scene"):
-                # Force a new path to avoid overwrite
-                live["position"]["scene"] = scene_id + "_alt"
-                save_state(live); st.rerun()
-        with cols[1]:
-            if st.button("💾 Save Scene to ai_scenes.json"):
-                out_path = os.path.join(os.path.dirname(__file__), "ai_scenes.json")
-                with open(out_path, "w", encoding="utf-8") as f:
-                    json.dump(live.get("scene_cache", {}), f, indent=2)
-                st.success(f"Saved to {out_path}")
 
 
 # --- Main UI (No Changes) ---

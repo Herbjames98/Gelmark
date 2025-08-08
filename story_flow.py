@@ -84,3 +84,19 @@ SCENES = {
     }
     }
 }
+
+# --- Minimal authored prologue scene to guarantee a valid start ---
+SCENES = globals().get("SCENES", {})
+SCENES.update({
+    "prologue_start": {
+        "title": "Awakening in the Ruins",
+        "text": (
+            "Alarms fade to embers and silence. The GelCap facility lies cracked and smoking. "
+            "G.R.A.C.E. flickers, a halo of purple static, urging you to move."
+        ),
+        "choices": [
+            {"id": "follow_gg", "label": "Follow the GG logos into the dark corridor", "effects": {"stats": {"Insight": 1}}, "next": "act1_camp_gate"},
+            {"id": "scavenge", "label": "Scavenge for anything useful", "effects": {"stats": {"Dexterity": 1}}, "next": "act1_camp_gate"}
+        ]
+    }
+})
