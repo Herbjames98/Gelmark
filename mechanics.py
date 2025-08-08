@@ -1,142 +1,102 @@
+# mechanics.py
+from copy import deepcopy
 
-# mechanics.py — applies effects to the live save-state dict
-
-from typing import Dict, Any
-
-STAT_CAP = 50
-
-def _bump(d: Dict[str, int], key: str, delta: int) -> None:
-    d[key] = int(d.get(key, 0)) + int(delta)
-
-def _cap_stats(stats: Dict[str, int]) -> None:
-    for k, v in list(stats.items()):
-        try:
-            stats[k] = max(0, min(STAT_CAP, int(v)))
-        except Exception:
-            stats[k] = 0
-
-def apply_effects(state: Dict[str, Any], effects: Dict[str, Any]) -> None:
-    if not effects: return
-    # Ensure top-level structures
-    state.setdefault("stats", {})
-    state.setdefault("flags", {})
-    state.setdefault("relationships", {})
-    state.setdefault("traits", {"active_traits": [], "echoform_traits": [], "hybrid_fusion_traits": []})
-    state.setdefault("inventory", {"gold": 0, "key_items": [], "artifacts_relics": [], "equipment": {}, "trait_tokens_drafts": []})
-
-    # 1) Stats
-    for k, v in (effects.get("stats") or {}).items():
-        _bump(state["stats"], k, int(v))
-    _cap_stats(state["stats"])
-
-    # 2) Flags
-    for k, v in (effects.get("flags") or {}).items():
-        state["flags"][k] = v
-
-    # 3) Relationships
-    for k, v in (effects.get("relationships") or {}).items():
-        _bump(state["relationships"], k, int(v))
-
-    # 4) Traits add/remove
-    for t in (effects.get("traits_add") or []):
-        # accept string or dict
-        if isinstance(t, str):
-            if t not in [x.get("name", x) if isinstance(x, dict) else x for x in state["traits"].get("active_traits", [])]:
-                state["traits"]["active_traits"].append({"name": t, "description": ""})
-        elif isinstance(t, dict):
-            # ensure name present
-            name = t.get("name") or t.get("title") or "Unnamed Trait"
-            t = dict({"name": name, "description": t.get("description", "")}, **{k:v for k,v in t.items() if k not in ["title"]})
-            # dedupe by name
-            if all((isinstance(x, dict) and x.get("name") != name) for x in state["traits"]["active_traits"]):
-                state["traits"]["active_traits"].append(t)
-
-    for t in (effects.get("traits_remove") or []):
-        name = t["name"] if isinstance(t, dict) else str(t)
-        state["traits"]["active_traits"] = [x for x in state["traits"]["active_traits"] if (x.get("name") if isinstance(x, dict) else x) != name]
-
-    # 5) Inventory ops
-    inv = state["inventory"]
-    # Gold
-    if "gold" in effects:
-        inv["gold"] = int(inv.get("gold", 0)) + int(effects.get("gold", 0))
-        if inv["gold"] < 0: inv["gold"] = 0
-    # Add/remove key items
-    for item in (effects.get("key_items_add") or []):
-        if item not in inv.setdefault("key_items", []):
-            inv["key_items"].append(item)
-    for item in (effects.get("key_items_remove") or []):
-        inv.setdefault("key_items", [])
-        inv["key_items"] = [x for x in inv["key_items"] if x != item]
-    # Artifacts / relics
-    for item in (effects.get("artifacts_add") or []):
-        if item not in inv.setdefault("artifacts_relics", []):
-            inv["artifacts_relics"].append(item)
-    for item in (effects.get("artifacts_remove") or []):
-        inv.setdefault("artifacts_relics", [])
-        inv["artifacts_relics"] = [x for x in inv["artifacts_relics"] if x != item]
-    # Equipment (simple slots)
-    for slot, val in (effects.get("equip") or {}).items():
-        inv.setdefault("equipment", {})
-        inv["equipment"][slot] = val
-    for slot in (effects.get("unequip") or []):
-        inv.setdefault("equipment", {})
-        inv["equipment"][slot] = None
-
-    # 6) Companions
-    if effects.get("companions_add"):
-        state.setdefault("companions", [])
-        for c in effects["companions_add"]:
-            if isinstance(c, dict):
-                names = [x.get("name","") for x in state["companions"] if isinstance(x, dict)]
-                if c.get("name") not in names:
-                    state["companions"].append(c)
-            else:
-                state["companions"].append({"name": str(c), "status": "Ally"})
-
-    if effects.get("companions_remove"):
-        state.setdefault("companions", [])
-        rem = set([c.get("name", c) if isinstance(c, dict) else str(c) for c in effects["companions_remove"]])
-        state["companions"] = [x for x in state["companions"] if (x.get("name","") not in rem)]
-
-
-# --- Leveling system (based on total stat sum) ---
-LEVEL_TIERS = [
-    (0,   "Novice of the Gel"),
-    (20,  "Initiate"),
-    (40,  "Wayfarer"),
-    (60,  "Echo‑Touched"),
-    (80,  "Gelbound"),
-    (100, "Chronicle Bearer")
+# ---------- Level math ----------
+TIERS = [
+    ("Novice of the Gel", 0, 24),
+    ("Initiate of Threads", 25, 49),
+    ("Echo-Touched", 50, 79),
+    ("Shardwalker", 80, 119),
+    ("Vaultbound", 120, None),
 ]
 
-def compute_level(stats: Dict[str, int]):
-    # Only count numeric, core stats; ignore summary keys like 'Total Stat Points'
-    total = 0
-    if stats:
-        for k, v in stats.items():
-            if isinstance(v, (int, float)) and str(k).lower() != 'total stat points':
-                total += int(v)
-    title = LEVEL_TIERS[0][1]
-    current_floor = 0
-    next_cap = None
-    for cap, name in LEVEL_TIERS:
-        if total >= cap:
-            current_floor, title = cap, name
-        else:
-            next_cap = cap
+def compute_level(stats: dict):
+    if not isinstance(stats, dict):
+        stats = {}
+    total = sum(int(v) for v in stats.values() if isinstance(v, (int, float)))
+    title, floor, cap = TIERS[0][0], 0, TIERS[0][2]
+    for t, lo, hi in TIERS:
+        if hi is None:
+            if total >= lo:
+                title, floor, cap = t, lo, None
+        elif lo <= total <= hi:
+            title, floor, cap = t, lo, hi + 1
             break
-    return {"total": total, "title": title, "current_floor": current_floor, "next_cap": next_cap}
+    return {"title": title, "total": total, "current_floor": floor, "next_cap": cap}
 
-def apply_level_rewards(state: Dict[str, Any]) -> None:
-    lvl = compute_level(state.get("stats", {}))
-    state.setdefault("flags", {})
-    state.setdefault("inventory", {}).setdefault("trait_tokens_drafts", [])
-    # If title changed, award a token and set flag so it doesn't repeat
-    if state["flags"].get("level_title") != lvl["title"]:
-        state["flags"]["level_title"] = lvl["title"]
-        # reward: 1 trait token draft
-        state["inventory"]["trait_tokens_drafts"].append({"title": f"{lvl['title']} Token"})
+# ---------- Effects helper ----------
+def _ensure(live: dict, path: list, default):
+    cur = live
+    for key in path[:-1]:
+        if key not in cur or not isinstance(cur[key], dict):
+            cur[key] = {}
+        cur = cur[key]
+    cur.setdefault(path[-1], default)
+    return cur
 
-    # 7) Level rewards
-    apply_level_rewards(state)
+def _add_item(lst, item):
+    if isinstance(lst, list):
+        if item not in lst:
+            lst.append(item)
+
+def _remove_item(lst, item):
+    if isinstance(lst, list):
+        try:
+            lst.remove(item)
+        except ValueError:
+            pass
+
+def apply_effects(live: dict, effects: dict):
+    if not effects or not isinstance(effects, dict):
+        return
+    before = deepcopy(live)
+
+    if "stats" in effects:
+        stats = live.setdefault("stats", {})
+        for k, dv in effects["stats"].items():
+            stats[k] = int(stats.get(k, 0)) + int(dv)
+
+    inv = live.setdefault("inventory", {})
+    if "gold" in effects:
+        inv["gold"] = int(inv.get("gold", 0)) + int(effects["gold"])
+        if inv["gold"] < 0:
+            inv["gold"] = 0
+
+    key_items = inv.setdefault("key_items", [])
+    for it in effects.get("gain_items", []) or []:
+        _add_item(key_items, it)
+    for it in effects.get("lose_items", []) or []:
+        _remove_item(key_items, it)
+
+    traits = live.setdefault("traits", {})
+    active = traits.setdefault("active_traits", [])
+    remove_names = set(effects.get("traits_remove", []) or [])
+    if remove_names:
+        active[:] = [t for t in active if (t.get("name") if isinstance(t, dict) else str(t)) not in remove_names]
+    for t in effects.get("traits_add", []) or []:
+        tname = t.get("name") if isinstance(t, dict) else str(t)
+        if all((x.get("name") if isinstance(x, dict) else str(x)) != tname for x in active):
+            active.append(t)
+
+    if "equipment" in effects:
+        eq = inv.setdefault("equipment", {})
+        for slot, val in (effects.get("equipment") or {}).items():
+            eq[slot] = val
+
+    if "relationships" in effects:
+        rel = live.setdefault("relationships", {})
+        for k, dv in effects["relationships"].items():
+            rel[k] = int(rel.get(k, 0)) + int(dv)
+
+    if "flags" in effects:
+        fl = live.setdefault("flags", {})
+        fl.update({k: v for k, v in effects["flags"].items()})
+
+    pos = live.setdefault("position", {})
+    if "act_jump" in effects:
+        pos["act"] = int(effects["act_jump"])
+    if "scene_id" in effects:
+        pos["scene"] = str(effects["scene_id"])
+
+    live["scene_counter"] = int(live.get("scene_counter", 0))
+    return before, live

@@ -1,164 +1,121 @@
 
-# ai_story.py (clean, robust)
-import os
-import re
-import json
-from typing import Dict, Any, Optional
+# ai_story.py — richer scene generator (drop-in)
+import os, json, re, uuid, time
 import google.generativeai as genai
 
-# ---------- Helpers ----------
+MODEL_NAME = os.getenv("GELMARK_SCENE_MODEL", "gemini-2.5-flash")
+TEMPERATURE = float(os.getenv("GELMARK_SCENE_TEMP", "0.9"))
+TOP_P = float(os.getenv("GELMARK_SCENE_TOP_P", "0.95"))
 
-def _scene_id_from_position(pos: Dict[str, Any]) -> str:
-    act = pos.get("act", 1) or 1
-    base = pos.get("scene", f"act{act}_auto")
-    base = str(base)
-    if not base.startswith(f"act{act}_") and not base.startswith("prologue_"):
-        base = f"act{act}_" + base
-    return base
+STYLE_GUIDE = """
+Write like a cinematic, grounded GM who shows instead of tells.
+Use tight 2nd-person POV ("you") with occasional interior thoughts.
+Keep sentences varied; mix short punchy prose with a few longer lines.
+Always use concrete sensory detail (sound, smell, texture, temperature, light).
+Let tiny actions do the work (hands, breath, footing, objects).
+Include at least two pieces of diegetic dialogue or thoughts if natural—short and characterful.
+Avoid filler like "you feel like", "suddenly", "very", "the air is thick with".
+Avoid purple prose and cliché; pick one vivid metaphor max per scene.
+Maintain continuity strictly: never contradict inventory, traits, flags, or prior scene.
+Tone: moody, myth-tech, restrained awe; not jokey.
+Paragraph target: 6–12 compact paragraphs (400–900 words), no bullet lists.
+"""
 
-def _coerce_choice(c: Dict[str, Any]) -> Dict[str, Any]:
-    label = str(c.get("label", "Continue"))
-    effects = c.get("effects") or {}
-    out = {
-        "id": re.sub(r"[^a-z0-9_]+", "_", label.lower())[:24] or "choice",
-        "label": label,
-        "repeatable": bool(c.get("repeatable", False)),
-        "effects": {
-            "stats": effects.get("stats") or {},
-            "flags": effects.get("flags") or {},
-            "relationships": effects.get("relationships") or {},
-            "traits_add": effects.get("traits_add") or []
-        },
-        "next": None
-    }
-    # Cast numeric deltas to ints
-    for k, v in list(out["effects"]["stats"].items()):
-        try:
-            out["effects"]["stats"][k] = int(v)
-        except Exception:
-            out["effects"]["stats"][k] = 0
-    for k, v in list(out["effects"]["relationships"].items()):
-        try:
-            out["effects"]["relationships"][k] = int(v)
-        except Exception:
-            out["effects"]["relationships"][k] = 0
-    return out
+CHOICE_RULES = """
+Produce exactly FOUR grounded choices that flow from the scene.
+Each choice should push a different play style: bold, cautious, clever, empathetic (or social).
+Each choice should include a compact label (<=60 chars) and a one-line intent subtitle.
+If the engine passed an 'effects' hint, attach a small JSON effects block: { "stats": {...}, "gold": int, "traits_add": [], "flags_set": {...} }.
+Use only keys you need. Do not invent new stats or trait systems.
+Do not end with "continue" or "next".
+"""
 
-def _validate_scene(scene: Dict[str, Any]) -> Dict[str, Any]:
-    sid = str(scene.get("id", "act_auto_scene"))
-    title = str(scene.get("title", sid.replace("_", " ").title()))
-    text = str(scene.get("text", ""))
-    raw_choices = scene.get("choices") or []
-    choices = [_coerce_choice(c) for c in raw_choices]
+TEMPLATE = """
+You are the scene generator for an interactive fiction game, The Gelmark.
+Follow the STYLE_GUIDE and CHOICE_RULES.
 
-    # Guarantee exactly 4 choices
-    while len(choices) < 4:
-        choices.append(_coerce_choice({"label": f"Option {len(choices)+1}", "effects": {}}))
-    if len(choices) > 4:
-        choices = choices[:4]
+<CANON_LORE>
+{lore}
+</CANON_LORE>
 
-    return {"id": sid, "title": title, "text": text, "choices": choices}
+<MEMORY_LOG>
+{mem}
+</MEMORY_LOG>
 
-def _build_prompt(state: Dict[str, Any], lore_snippets: str, memory_tail: str, prev: Optional[Dict[str, Any]]) -> str:
-    position = state.get("position", {})
-    stats = state.get("stats", {})
-    flags = state.get("flags", {})
-    relationships = state.get("relationships", {})
-    traits = state.get("traits", {})
+<CURRENT_STATE>
+JSON describing the player state.
+{state_json}
+</CURRENT_STATE>
 
-    prompt = (
-        "You are an interactive fiction generator for the Gelmark Engine. "
-        "Return STRICT JSON with keys: id, title, text, choices[]. "
-        "Return EXACTLY 4 choices. Each choice needs: label (2-6 words), "
-        "effects {stats, flags, relationships, traits_add}. "
-        "Do NOT include any 'next' fields, markdown, code fences, or commentary. "
-        "Honor rules: stats cap 50; repeatable training ok; no death; failures branch narratively; "
-        "traits auto-slot; bosses scale by total stats every 5 points (mention only if relevant).\n"
-        "<position>" + json.dumps(position) + "</position>\n"
-        "<stats>" + json.dumps(stats) + "</stats>\n"
-        "<flags>" + json.dumps(flags) + "</flags>\n"
-        "<relationships>" + json.dumps(relationships) + "</relationships>\n"
-        "<traits>" + json.dumps(traits) + "</traits>\n"
-        "<lore>\n" + lore_snippets + "\n</lore>\n"
-        "<memory>\n" + memory_tail + "\n</memory>\n"
-    )
+<PREVIOUS_SCENE>
+{prev_summary}
+</PREVIOUS_SCENE>
+
+Write the next scene that logically follows. Respect act/chapter pacing if provided
+(e.g., prologue -> Act 1 mining; later acts expand). Do NOT reset the story.
+
+Return ONLY a JSON object with keys:
+id, title, text, choices.
+- id: string id that looks like "act{act}_step_{counter}_{slug}"
+- title: 3–7 word evocative title
+- text: the full scene prose (no markdown lists; newlines ok)
+- choices: array of 4 objects: { "id": "a|b|c|d", "label": "...", "subtitle": "...", "effects": {...} }
+
+Use single-line strings (no triple quotes) and escape newlines with \n.
+"""
+
+def _safe_slug(s):
+    s = re.sub(r"[^a-zA-Z0-9]+", "-", s).strip("-").lower()
+    return s[:18] or "scene"
+
+def generate_scene(live_state: dict, lore_snaps: dict, mem_tail: str, prev: dict=None):
+    # Configure model (caller should have set genai.configure(api_key=...))
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    model = genai.GenerativeModel(MODEL_NAME, generation_config={
+        "temperature": TEMPERATURE,
+        "top_p": TOP_P,
+    })
+
+    act = int(((live_state.get("position") or {}).get("act") or 0))
+    counter = int(live_state.get("scene_counter", 0)) + 1
+    base_id = f"act{act}_step_{counter}_{uuid.uuid4().hex[:6]}"
+    prev_summary = ""
     if prev:
-        prompt += "<previous_scene>" + json.dumps(prev, ensure_ascii=False) + "</previous_scene>\n"
-        prompt += ("Continue directly from <previous_scene>. Reference what the player just did. "
-                   "Keep location continuity unless a choice clearly moves the scene. ")
-    prompt += ("Keep the main text concise (120-220 words). "
-               "If the current act is 0, start scene id with 'prologue_'; else use 'actN_' where N is the act.")
-    return prompt
+        prev_summary = f"PrevTitle: {prev.get('prev_title','')}\nPrevChoice: {prev.get('choice_label','')}\nPrevText: {prev.get('prev_text','')[:900]}"
 
-def _call_gemini(prompt: str) -> str:
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing GEMINI_API_KEY")
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    prompt = TEMPLATE.format(
+        lore=json.dumps(lore_snaps, ensure_ascii=False),
+        mem=mem_tail or "",
+        state_json=json.dumps(live_state, ensure_ascii=False),
+        prev_summary=prev_summary
+    ) + "\nSTYLE_GUIDE:\n" + STYLE_GUIDE + "\nCHOICE_RULES:\n" + CHOICE_RULES
+
     resp = model.generate_content(prompt)
-    text = (resp.text or "").strip()
-    return text
+    raw = resp.text.strip() if hasattr(resp, "text") else ""
+    # Extract JSON object
+    m = re.search(r"\{[\s\S]*\}\s*$", raw)
+    if not m:
+        raise RuntimeError("Model did not return JSON")
+    data = json.loads(m.group(0))
 
-def _extract_candidate(text: str) -> str:
-    m = re.search(r"```json\s*([\s\S]+?)\s*```", text)
-    if m:
-        return m.group(1).strip()
-    m = re.search(r"```[\w]*\s*([\s\S]+?)\s*```", text)
-    if m:
-        return m.group(1).strip()
-    start = text.find("{"); end = text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        return text[start:end+1]
-    return text.strip()
+    # Basic validation & normalization
+    if not isinstance(data, dict): raise RuntimeError("Invalid scene JSON")
+    sid = data.get("id") or base_id
+    stitle = (data.get("title") or "A New Turn").strip()
+    stext = (data.get("text") or "").strip()
+    choices = data.get("choices") or []
+    if len(choices) != 4:
+        raise RuntimeError("Expected 4 choices")
+    fixed = []
+    for i, ch in enumerate(choices):
+        cid = ch.get("id") or "abcd"[i]
+        label = (ch.get("label") or "Decide").strip()[:60]
+        subtitle = (ch.get("subtitle") or "").strip()
+        effects = ch.get("effects") or {}
+        fixed.append({"id": cid, "label": label, "subtitle": subtitle, "effects": effects})
 
-def _json_cleanup(s: str) -> str:
-    # Remove comments
-    s = re.sub(r"//.*?$|/\*.*?\*/", "", s, flags=re.M | re.S)
-    # Normalize quotes
-    s = s.replace("“", '"').replace("”", '"').replace("’", "'")
-    # Convert single-quoted to double if no double quotes present
-    if "'" in s and s.count('"') == 0:
-        s = re.sub(r"'([^']*)'", lambda m: '"' + m.group(1).replace('"', '\"') + '"', s)
-    # True/False/None -> json
-    s = re.sub(r"\bTrue\b", "true", s)
-    s = re.sub(r"\bFalse\b", "false", s)
-    s = re.sub(r"\bNone\b", "null", s)
-    # Remove leading + from numbers
-    s = re.sub(r":\s*\+(\d+)", r": \1", s)
-    # Trailing commas
-    s = re.sub(r",\s*([}\]])", r"\1", s)
-    return s
+    # Fallback title slug if needed
+    slug = _safe_slug(stitle)
+    sid = sid if sid.startswith("act") else f"act{act}_step_{counter}_{slug}"
 
-def _safe_parse(text: str) -> Dict[str, Any]:
-    cand = _extract_candidate(text)
-    try:
-        return json.loads(cand)
-    except Exception:
-        pass
-    cleaned = _json_cleanup(cand)
-    try:
-        return json.loads(cleaned)
-    except Exception:
-        # Final fallback scene
-        return {
-            "id": "prologue_emergency_path",
-            "title": "Gather Yourself",
-            "text": "You breathe in the smoke and think clearly. Four paths present themselves, each a different way to move forward.",
-            "choices": [
-                {"label": "Scout the corridor", "effects": {"stats": {"Insight": 1}}},
-                {"label": "Salvage fallen gear", "effects": {"stats": {"Dexterity": 1}}},
-                {"label": "Call to G.R.A.C.E.", "effects": {"relationships": {"G.R.A.C.E.": 1}}},
-                {"label": "Push through rubble", "effects": {"stats": {"Strength": 1, "Endurance": 1}}}
-            ]
-        }
-
-# ---------- Public API ----------
-
-def generate_scene(state: Dict[str, Any], lore_snap: Dict[str, str], memory_tail: str, prev: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    lore_concat = "\n\n".join([f"--- {k} ---\n{v}" for k, v in lore_snap.items() if v])
-    prompt = _build_prompt(state, lore_concat, memory_tail, prev)
-    raw = _call_gemini(prompt)
-    data = _safe_parse(raw)
-    return _validate_scene(data)
-
+    return {"id": sid, "title": stitle, "text": stext, "choices": fixed}

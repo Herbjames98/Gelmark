@@ -1,85 +1,48 @@
-# save_io.py — prologue-safe seeding + hard reset support
-import json, os, copy, shutil
+# save_io.py
+import os, json
 
-SCRIPT_DIR = os.path.dirname(__file__)
-SAVE_FILE = os.path.join(SCRIPT_DIR, "save_state.json")
-AI_SCENES_FILE = os.path.join(SCRIPT_DIR, "ai_scenes.json")
-NARRATIVE_LOG_FILE = os.path.join(SCRIPT_DIR, "narrative_log.txt")
-MEMORY_BANK_FILE = os.path.join(SCRIPT_DIR, "memory_bank.json")
+ROOT = os.path.dirname(os.path.abspath(__file__))
+SAVE_FILE = os.path.join(ROOT, "save_state.json")
+LORE_DIR = os.path.join(ROOT, "lore_modules")
+MEMORY_FILE = os.path.join(ROOT, "memory_bank.json")
 
-# Lore dirs
-LORE_DIR = os.path.join(SCRIPT_DIR, "lore_modules")
-BASELINE_LORE_DIR = os.path.join(SCRIPT_DIR, "lore_modules_baseline")  # keep pristine copies here
+def _fresh_state(defaults_mod) -> dict:
+    profile = getattr(defaults_mod, "player_profile", {})
+    inv = getattr(defaults_mod, "inventory", {})
+    traits = getattr(defaults_mod, "traits", {})
+    return {
+        "profile": profile,
+        "stats": {},
+        "inventory": inv,
+        "traits": traits,
+        "relationships": {},
+        "flags": {},
+        "position": {"act": 0, "scene": "prologue_start"},
+        "scene_counter": 0,
+        "scene_cache": {},
+        "scene_history": [],
+        "story_log": [],
+    }
 
-# Minimal, clean prologue defaults (NO Viking gear, NO companions)
-DEFAULTS = {
-    "position": {"act": 0, "chapter": 1, "scene": "prologue_start"},
-    "stats": {},
-    "traits": {"active_traits": [], "echoform_traits": [], "hybrid_fusion_traits": []},
-    "companions": [],
-    "inventory": {
-        "gold": 0,
-        "key_items": [],
-        "artifacts_relics": [],
-        "equipment": {"weapon": None, "armor": None, "offhand": None, "accessory_1": None, "accessory_2": None},
-        "trait_tokens_drafts": []
-    },
-    "flags": {},
-    "relationships": {},
-    "scene_cache": {},
-    "story_log": [],
-    "scene_history": [],
-    "scene_counter": 0
-}
+def load_state(defaults_mod) -> dict:
+    if os.path.exists(SAVE_FILE):
+        try:
+            with open(SAVE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return _fresh_state(defaults_mod)
 
-def _prologue_seed(fallback_state_module):
-    """Seed a fresh game for the prologue.
-    We copy *only* stats from player_state.py. Inventory/traits/companions stay clean.
-    """
-    seeded = copy.deepcopy(DEFAULTS)
-    # Import baseline stats from player_state.py if present
-    try:
-        seeded["stats"] = dict(getattr(fallback_state_module, "stats_overview", {}))
-    except Exception:
-        pass
-    return seeded
-
-def load_state(fallback_state_module, reset=False):
-    if not reset and os.path.exists(SAVE_FILE):
-        with open(SAVE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    # Fresh start (prologue)
-    seeded = _prologue_seed(fallback_state_module)
-    save_state(seeded)
-    return seeded
-
-def save_state(state):
+def save_state(live: dict) -> None:
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2)
+        json.dump(live, f, indent=2)
 
-def _restore_lore_from_baseline():
-    """Overwrite lore_modules with pristine copies from lore_modules_baseline, if available."""
-    if os.path.isdir(BASELINE_LORE_DIR):
-        if os.path.isdir(LORE_DIR):
-            # remove current lore dir completely, then restore
-            shutil.rmtree(LORE_DIR, ignore_errors=True)
-        shutil.copytree(BASELINE_LORE_DIR, LORE_DIR)
-
-def reset_state(fallback_state_module, hard=False):
-    # Remove save + aux files
-    for p in [SAVE_FILE, AI_SCENES_FILE, NARRATIVE_LOG_FILE]:
-        try:
-            if os.path.exists(p):
-                os.remove(p)
-        except Exception:
-            pass
-    # Also wipe memory bank on any reset (or only on hard? choose hard-only if you prefer)
-    if hard and os.path.exists(MEMORY_BANK_FILE):
-        try:
-            os.remove(MEMORY_BANK_FILE)
-        except Exception:
-            pass
-    # Restore lore if requested
+def reset_state(defaults_mod, hard: bool = False) -> dict:
+    if os.path.exists(SAVE_FILE):
+        try: os.remove(SAVE_FILE)
+        except Exception: pass
     if hard:
-        _restore_lore_from_baseline()
-    return load_state(fallback_state_module, reset=True)
+        if os.path.exists(MEMORY_FILE):
+            try: os.remove(MEMORY_FILE)
+            except Exception: pass
+    return _fresh_state(defaults_mod)

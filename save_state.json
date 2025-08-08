@@ -1,48 +1,102 @@
 {
-  "position": {
-    "act": 0,
-    "chapter": 1,
-    "scene": "prologue_start"
+  "profile": {
+    "Name": "Security Trainee",
+    "Current Arc/Act": "Act 1, Chapter 2",
+    "Origin / Class / Lineage": "Human, GelCap Guild Employee (Low-Rank Security)",
+    "Covenant Oath": null,
+    "Vault Keys Secured": null,
+    "Major Arc": "The Gelmark Legacy",
+    "Arc Rank": 1,
+    "Reputation": 0,
+    "Class Alignment": "Survivor"
   },
-  "stats": {
-    "Strength": 5,
-    "Speed": 5,
-    "Dexterity": 5,
-    "Insight": 5,
-    "Focus": 5,
-    "Charisma": 5,
-    "Resolve": 5,
-    "Spirit": 5,
-    "Agility": 5,
-    "Willpower": 5,
-    "Lore": 5,
-    "Defense": 5,
-    "Endurance": 5,
-    "Total Stat Points": 65
+  "stats": {},
+  "inventory": {
+    "gold": 0,
+    "artifacts_relics": [],
+    "key_items": [],
+    "equipment": {
+      "weapon": null,
+      "armor": {
+        "name": "Crude Viking Clothes",
+        "description": "Simple, rough-spun clothes and furs scavenged by G.R.A.C.E. to provide a basic disguise and protection from the cold."
+      },
+      "offhand": null,
+      "accessory_1": {
+        "name": "Gel-Lined Viking Helmet",
+        "description": "A crudely made iron helmet, padded with a strange, shock-absorbent purple gel. It feels strangely familiar."
+      },
+      "accessory_2": null
+    },
+    "vault_keys": [],
+    "trait_tokens_drafts": []
   },
   "traits": {
-    "active_traits": [],
+    "active_traits": [
+      {
+        "name": "Lingual Symbiosis (G.R.A.C.E.)",
+        "description": "G.R.A.C.E. has shut down all non-essential functions to act as a living translator. You can understand and be understood by the local populace, but her processing power and assistance are gone.",
+        "status": "Active"
+      }
+    ],
     "echoform_traits": [],
     "hybrid_fusion_traits": []
   },
-  "companions": [],
-  "inventory": {
-    "gold": 0,
-    "key_items": [],
-    "artifacts_relics": [],
-    "equipment": {
-      "weapon": null,
-      "armor": null,
-      "offhand": null,
-      "accessory_1": null,
-      "accessory_2": null
-    },
-    "trait_tokens_drafts": []
-  },
-  "flags": {},
   "relationships": {},
+  "flags": {},
+  "position": {
+    "act": 0,
+    "scene": "prologue_start"
+  },
+  "scene_counter": 0,
   "scene_cache": {},
-  "story_log": [],
-  "scene_history": [],
-  "scene_counter": 0
+  "scene_history": [
+    {
+      "prev_scene_id": "prologue_start",
+      "prev_title": "Awakening in the Ruins",
+      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
+      "choice_label": "Scavenge for anything useful",
+      "effects": {
+        "inventory": {
+          "gold": 1,
+          "key_items_add": [
+            "Melted ID Tag"
+          ]
+        }
+      },
+      "timestamp": 1754693154.3130147
+    },
+    {
+      "prev_scene_id": "prologue_start",
+      "prev_title": "Awakening in the Ruins",
+      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
+      "choice_label": "Follow the GG logos into the dark corridor",
+      "effects": {},
+      "timestamp": 1754693160.9325209
+    },
+    {
+      "prev_scene_id": "prologue_start",
+      "prev_title": "Awakening in the Ruins",
+      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
+      "choice_label": "Scavenge for anything useful",
+      "effects": {
+        "inventory": {
+          "gold": 1,
+          "key_items_add": [
+            "Melted ID Tag"
+          ]
+        }
+      },
+      "timestamp": 1754693165.241848
+    },
+    {
+      "prev_scene_id": "prologue_start",
+      "prev_title": "Awakening in the Ruins",
+      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
+      "choice_label": "Follow the GG logos into the dark corridor",
+      "effects": {},
+      "timestamp": 1754693166.138169
+    }
+  ],
+  "story_log": []
 }
