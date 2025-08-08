@@ -1,7 +1,7 @@
 {
   "position": {
-    "act": 1,
-    "chapter": 0,
+    "act": 0,
+    "chapter": 1,
     "scene": "prologue_start"
   },
   "stats": {
@@ -21,45 +21,28 @@
     "Total Stat Points": 65
   },
   "traits": {
-    "active_traits": [
-      {
-        "name": "Lingual Symbiosis (G.R.A.C.E.)",
-        "description": "G.R.A.C.E. has shut down all non-essential functions to act as a living translator. You can understand and be understood by the local populace, but her processing power and assistance are gone.",
-        "status": "Active"
-      }
-    ],
+    "active_traits": [],
     "echoform_traits": [],
     "hybrid_fusion_traits": []
   },
-  "companions": [
-    {
-      "name": "G.R.A.C.E.",
-      "sync": "Minimal",
-      "status": "Translation Module Active (Main Systems Shut Down)",
-      "description": "Gelcap Robot Assistant for Cognitive Enhancement. A floating, disk-shaped bot that once glowed with soft purple light. She has sacrificed her core functions to provide a translation link, leaving her inert and silent except for the language you now understand."
-    }
-  ],
+  "companions": [],
   "inventory": {
     "gold": 0,
-    "artifacts_relics": [],
     "key_items": [],
+    "artifacts_relics": [],
     "equipment": {
       "weapon": null,
-      "armor": {
-        "name": "Crude Viking Clothes",
-        "description": "Simple, rough-spun clothes and furs scavenged by G.R.A.C.E. to provide a basic disguise and protection from the cold."
-      },
+      "armor": null,
       "offhand": null,
-      "accessory_1": {
-        "name": "Gel-Lined Viking Helmet",
-        "description": "A crudely made iron helmet, padded with a strange, shock-absorbent purple gel. It feels strangely familiar."
-      },
+      "accessory_1": null,
       "accessory_2": null
     },
-    "vault_keys": [],
     "trait_tokens_drafts": []
   },
   "flags": {},
   "relationships": {},
-  "scene_cache": {}
+  "scene_cache": {},
+  "story_log": [],
+  "scene_history": [],
+  "scene_counter": 0
 }
