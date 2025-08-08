@@ -1,0 +1,110 @@
+{
+  "position": {
+    "act": 1,
+    "chapter": 2,
+    "scene": "act1_camp_gate_terms"
+  },
+  "stats": {
+    "Strength": 15,
+    "Speed": 5,
+    "Dexterity": 5,
+    "Insight": 12,
+    "Focus": 5,
+    "Charisma": 6,
+    "Resolve": 5,
+    "Spirit": 5,
+    "Agility": 5,
+    "Willpower": 5,
+    "Lore": 5,
+    "Defense": 5,
+    "Endurance": 15,
+    "Total Stat Points": 65
+  },
+  "traits": {
+    "active_traits": [
+      {
+        "name": "Lingual Symbiosis (G.R.A.C.E.)",
+        "description": "G.R.A.C.E. has shut down all non-essential functions to act as a living translator. You can understand and be understood by the local populace, but her processing power and assistance are gone.",
+        "status": "Active"
+      }
+    ],
+    "echoform_traits": [],
+    "hybrid_fusion_traits": []
+  },
+  "companions": [
+    {
+      "name": "G.R.A.C.E.",
+      "sync": "Minimal",
+      "status": "Translation Module Active (Main Systems Shut Down)",
+      "description": "Gelcap Robot Assistant for Cognitive Enhancement. A floating, disk-shaped bot that once glowed with soft purple light. She has sacrificed her core functions to provide a translation link, leaving her inert and silent except for the language you now understand."
+    }
+  ],
+  "inventory": {
+    "gold": 0,
+    "artifacts_relics": [],
+    "key_items": [],
+    "equipment": {
+      "weapon": null,
+      "armor": {
+        "name": "Crude Viking Clothes",
+        "description": "Simple, rough-spun clothes and furs scavenged by G.R.A.C.E. to provide a basic disguise and protection from the cold."
+      },
+      "offhand": null,
+      "accessory_1": {
+        "name": "Gel-Lined Viking Helmet",
+        "description": "A crudely made iron helmet, padded with a strange, shock-absorbent purple gel. It feels strangely familiar."
+      },
+      "accessory_2": null
+    },
+    "vault_keys": [],
+    "trait_tokens_drafts": []
+  },
+  "flags": {
+    "mining_quota_started": true,
+    "met_gate_guard": true
+  },
+  "relationships": {
+    "G.R.A.C.E.": 1
+  },
+  "scene_cache": {
+    "act1_camp_gate_terms": {
+      "id": "act1_camp_gate_terms",
+      "title": "Eirik's Terms",
+      "text": "The gate guard, a burly figure named Eirik, grunts, his gaze sweeping over your disguised form. \"You've proven you're no threat, stranger, but the chieftain won't suffer idlers within our walls. Our mines are always in need of strong backs, and the quarry needs rock split. Prove your worth.\" He points a calloused finger towards a path winding into the nearby hills. \"Or, if you fancy yourself clever, there's always the Elder's riddles. They say he needs fresh ears for his tales.\" A faint hum from G.R.A.C.E., barely perceptible, translates his words, reminding you of her silent sacrifice.",
+      "choices": [
+        {
+          "id": "_ead_towards_the_mines_a",
+          "label": "Head towards the mines and quarry.",
+          "repeatable": false,
+          "effects": {
+            "stats": {
+              "Endurance": 1
+            },
+            "flags": {
+              "mining_path_chosen": true
+            },
+            "relationships": {},
+            "traits_add": []
+          },
+          "next": null
+        },
+        {
+          "id": "_eek_out_the_lder_and_hi",
+          "label": "Seek out the Elder and his riddles.",
+          "repeatable": false,
+          "effects": {
+            "stats": {
+              "Insight": 1
+            },
+            "flags": {
+              "elder_path_chosen": true
+            },
+            "relationships": {},
+            "traits_add": []
+          },
+          "next": null
+        }
+      ]
+    }
+  }
+}
