@@ -50,53 +50,6 @@
   },
   "scene_counter": 0,
   "scene_cache": {},
-  "scene_history": [
-    {
-      "prev_scene_id": "prologue_start",
-      "prev_title": "Awakening in the Ruins",
-      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
-      "choice_label": "Scavenge for anything useful",
-      "effects": {
-        "inventory": {
-          "gold": 1,
-          "key_items_add": [
-            "Melted ID Tag"
-          ]
-        }
-      },
-      "timestamp": 1754693154.3130147
-    },
-    {
-      "prev_scene_id": "prologue_start",
-      "prev_title": "Awakening in the Ruins",
-      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
-      "choice_label": "Follow the GG logos into the dark corridor",
-      "effects": {},
-      "timestamp": 1754693160.9325209
-    },
-    {
-      "prev_scene_id": "prologue_start",
-      "prev_title": "Awakening in the Ruins",
-      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
-      "choice_label": "Scavenge for anything useful",
-      "effects": {
-        "inventory": {
-          "gold": 1,
-          "key_items_add": [
-            "Melted ID Tag"
-          ]
-        }
-      },
-      "timestamp": 1754693165.241848
-    },
-    {
-      "prev_scene_id": "prologue_start",
-      "prev_title": "Awakening in the Ruins",
-      "prev_text": "Alarms gutter to embers. The GelCap facility is a ribcage of steel\u2014smoking, half-collapsed. G.R.A.C.E. flickers at your shoulder, a soft halo of purple static. The only sign of order is the 'GG' logos stenciled along the walls, pointing into a dark corridor.",
-      "choice_label": "Follow the GG logos into the dark corridor",
-      "effects": {},
-      "timestamp": 1754693166.138169
-    }
-  ],
+  "scene_history": [],
   "story_log": []
 }
