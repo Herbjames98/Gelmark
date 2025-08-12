@@ -2,7 +2,7 @@
 import os, json, re, uuid
 import google.generativeai as genai
 
-MODEL_NAME = os.getenv("GELMARK_SCENE_MODEL", "gemini-2.5-flash")
+MODEL_NAME = os.getenv("GELMARK_SCENE_MODEL", "gemini-1.5-flash")
 TEMPERATURE = float(os.getenv("GELMARK_SCENE_TEMP", "0.9"))
 TOP_P = float(os.getenv("GELMARK_SCENE_TOP_P", "0.95"))
 
@@ -88,9 +88,20 @@ def _pad_to_four(choices):
         })
     return fixed[:4]
 
+def _ensure_valid_state(live_state: dict) -> dict:
+    """Ensures the live_state dictionary has the minimum required keys to prevent KeyErrors."""
+    if not isinstance(live_state, dict):
+        live_state = {}
+    pos = live_state.setdefault("position", {})
+    pos.setdefault("act", 0)
+    pos.setdefault("scene", "prologue_start")
+    live_state.setdefault("scene_counter", 0)
+    return live_state
+
 def _fallback_scene(live_state, counter):
     # Deterministic emergency scene if model fails
-    act = int(((live_state.get("position") or {}).get("act") or 0))
+    live_state = _ensure_valid_state(live_state)
+    act = live_state["position"]["act"]
     title = "Breath in the Ozone"
     text = (
         "Static crawls over your forearms as the corridor lights stutter. You steady yourself against the warm bulkhead; "
@@ -113,7 +124,10 @@ def generate_scene(live_state: dict, lore_snaps: dict, mem_tail: str, prev: dict
     api_key = os.getenv("GEMINI_API_KEY")
     if api_key:
         genai.configure(api_key=api_key)
-    act = int(((live_state.get("position") or {}).get("act") or 0))
+
+    # FIXED: Ensure state is valid before proceeding to prevent KeyErrors
+    live_state = _ensure_valid_state(live_state)
+    act = live_state["position"]["act"]
     counter = int(live_state.get("scene_counter", 0)) + 1
 
     prev_summary = ""
